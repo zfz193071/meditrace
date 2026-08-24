@@ -1,0 +1,21 @@
+{
+  "name": "meditrace",
+  "version": "0.1.0",
+  "description": "医疗 AI 诊断溯源系统",
+  "scripts": {
+    "dev:contracts": "cd src/contracts && npm run node",
+    "deploy:contracts": "cd src/contracts && npm run deploy:localhost",
+    "dev:backend": "cd src/backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "dev:frontend": "cd src/frontend && npm run dev",
+    "dev": "npm run dev:contracts & npm run deploy:contracts & npm run dev:backend & npm run dev:frontend"
+  },
+  "keywords": [
+    "medical",
+    "ai",
+    "blockchain",
+    "web3",
+    "diagnosis"
+  ],
+  "author": "",
+  "license": "MIT"
+}
