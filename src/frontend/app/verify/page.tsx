@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { formatDate, copyToClipboard } from "../../lib/utils";
 
 interface ChainRecord {
   dataHash: string;
@@ -48,15 +49,6 @@ export default function VerifyPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleString("zh-CN");
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert("已复制到剪贴板");
   };
 
   return (

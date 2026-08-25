@@ -25,6 +25,9 @@ from blockchain_client import get_blockchain_client
 # 导入 IPFS 服务
 from ipfs_service import get_ipfs_client, generate_report
 
+# 导入数据模型
+from models import DiagnosisMetadata, DiagnosisResult
+
 app = FastAPI(
     title="MediTrace API",
     description="医疗 AI 诊断溯源系统后端 API",
@@ -93,9 +96,12 @@ async def diagnose(input: SymptomInput):
     集成 DeepSeek API + 医学知识库 RAG + 区块链溯源
     """
     try:
-        # 生成数据哈希
-        data_string = f"{input.symptoms}:{input.userId}"
-        data_hash = hashlib.sha256(data_string.encode()).hexdigest()
+        # 创建元数据对象（解决 Data Clumps 问题）
+        metadata = DiagnosisMetadata(
+            user_id=input.userId,
+            symptoms=input.symptoms,
+            model_version="deepseek-chat-v1-medkb-2024q1"
+        )
         
         # 调用 DeepSeek API 获取真实诊断
         deepseek_client = get_deepseek_client()
@@ -108,13 +114,10 @@ async def diagnose(input: SymptomInput):
         if not suggestions:
             raise HTTPException(status_code=500, detail="AI 诊断失败：未返回建议")
         
-        # 模型版本
-        model_version = "deepseek-chat-v1-medkb-2024q1"
-        
         # 生成诊断 ID
-        diagnosis_id = data_hash[:16]
+        diagnosis_id = metadata.generate_diagnosis_id()
         
-        # 生成 PDF 报告并上传 IPFS
+        # 生成报告并上传 IPFS
         ipfs_cid = ""
         try:
             report_bytes = generate_report(
@@ -137,38 +140,54 @@ async def diagnose(input: SymptomInput):
         except Exception as e:
             print(f"⚠️ 报告生成/上传异常：{e}")
         
+        # 更新元数据中的 IPFS CID
+        metadata.ipfs_cid = ipfs_cid
+        
         # 尝试上链 (异步，不阻塞主流程)
         chain_tx_hash = None
+        chain_status = "pending"
         try:
             blockchain = get_blockchain_client()
             if blockchain:
                 # 将患者地址转换为 Web3 格式
                 patient_addr = input.userId if input.userId.startswith("0x") else f"0x{input.userId}"
+                metadata.patient_address = patient_addr
+                
+                # 使用元数据对象的方法获取上链参数
+                data_hash, model_version, ipfs_cid_param, patient_addr = metadata.to_chain_params()
                 
                 chain_result = await blockchain.record_diagnosis(
                     data_hash=f"0x{data_hash}",
                     model_version=model_version,
-                    ipfs_cid=ipfs_cid or "",
+                    ipfs_cid=ipfs_cid_param or "",
                     patient_address=patient_addr
                 )
                 
                 if chain_result.get("success"):
                     chain_tx_hash = chain_result.get("txHash")
+                    chain_status = "confirmed"
                     print(f"✓ 诊断已上链：{chain_tx_hash}")
                 else:
                     print(f"⚠️ 上链失败：{chain_result.get('error')}")
+                    chain_status = "failed"
                     
         except Exception as e:
             print(f"⚠️ 上链异常：{e}")
+            chain_status = "failed"
             # 上链失败不影响诊断流程
         
-        return {
-            "diagnosisId": diagnosis_id,
-            "suggestions": suggestions,
-            "disclaimer": disclaimer,
-            "ipfsCid": ipfs_cid,
-            "chainTxHash": chain_tx_hash
-        }
+        # 使用结果对象封装返回数据
+        diag_result = DiagnosisResult(
+            diagnosis_id=diagnosis_id,
+            suggestions=suggestions,
+            disclaimer=disclaimer,
+            metadata=metadata,
+            ipfs_cid=ipfs_cid,
+            chain_tx_hash=chain_tx_hash,
+            chain_status=chain_status
+        )
+        
+        return diag_result.to_api_response()
         
     except HTTPException:
         raise
@@ -182,20 +201,35 @@ async def get_history(userId: str):
     """
     获取用户的诊断历史记录
     
-    MVP 版本：返回 mock 数据
-    TODO: 从数据库/区块链查询
+    从区块链查询用户的诊断记录 ID，然后获取详细信息
     """
-    # TODO: 实现真实查询
-    return {
-        "records": [
-            {
-                "diagnosisId": "abc12345",
-                "timestamp": 1704067200,
-                "diseaseTypes": ["上呼吸道感染"],
-                "chainStatus": "confirmed"
-            }
-        ]
-    }
+    blockchain = get_blockchain_client()
+    if not blockchain:
+        raise HTTPException(status_code=500, detail="区块链服务不可用")
+    
+    try:
+        # 使用 userId 作为患者地址查询记录
+        # 注意：实际生产中应该使用真正的钱包地址
+        diagnosis_ids = blockchain.get_patient_records(userId)
+        
+        records = []
+        for diag_id in diagnosis_ids:
+            # 获取每条记录的详细信息
+            record = blockchain.verify_diagnosis(str(diag_id))
+            if record:
+                records.append({
+                    "diagnosisId": str(diag_id),
+                    "timestamp": record.get("timestamp", 0),
+                    "diseaseTypes": [],  # 疾病类型需要从诊断数据中解析
+                    "chainStatus": "confirmed" if record else "pending"
+                })
+        
+        return {"records": records}
+        
+    except Exception as e:
+        # 区块链查询失败时返回空列表，不影响用户体验
+        print(f"⚠️ 历史记录查询失败：{e}")
+        return {"records": []}
 
 
 # 链上验证
@@ -204,19 +238,37 @@ async def verify_diagnosis(diagnosisId: str):
     """
     验证诊断记录的链上状态
     
-    MVP 版本：返回 mock 数据
-    TODO: 查询智能合约
+    查询智能合约获取真实记录
     """
-    # TODO: 实现真实验证
-    return {
-        "isValid": True,
-        "chainRecord": {
-            "dataHash": "sha256_hash_here",
-            "modelVersion": "deepseek-v2.5-medkb-2024q1",
-            "timestamp": 1704067200
-        },
-        "ipfsCid": "QmTest123456789"
-    }
+    blockchain = get_blockchain_client()
+    if not blockchain:
+        raise HTTPException(status_code=500, detail="区块链服务不可用")
+    
+    try:
+        # 查询智能合约
+        record = blockchain.verify_diagnosis(diagnosisId)
+        
+        if record:
+            return {
+                "isValid": True,
+                "chainRecord": {
+                    "dataHash": record.get("dataHash", ""),
+                    "modelVersion": record.get("modelVersion", ""),
+                    "timestamp": record.get("timestamp", 0)
+                },
+                "ipfsCid": record.get("ipfsCid", "")
+            }
+        else:
+            # 记录不存在
+            return {
+                "isValid": False,
+                "chainRecord": None,
+                "ipfsCid": ""
+            }
+            
+    except Exception as e:
+        print(f"⚠️ 链上验证失败：{e}")
+        raise HTTPException(status_code=500, detail=f"验证失败：{str(e)}")
 
 
 if __name__ == "__main__":
