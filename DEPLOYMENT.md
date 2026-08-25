@@ -102,13 +102,73 @@ services:
 
 ### 智能合约部署到 Sepolia 测试网
 
-```bash
-# 设置环境变量
-export SEPOLIA_RPC_URL="https://rpc.sepolia.org"
-export PRIVATE_KEY="your_private_key"
+#### 1. 准备 MetaMask 钱包
 
-# 部署
-npx hardhat run scripts/deploy.ts --network sepolia
+```bash
+# 1. 安装 MetaMask 插件
+# 2. 添加 Sepolia 测试网
+#    网络名称：Sepolia Testnet
+#    RPC 地址：https://rpc.sepolia.org
+#    链 ID：11155111
+#    代币符号：ETH
+#    区块浏览器：https://sepolia.etherscan.io
+
+# 3. 从 faucet 获取 Sepolia ETH (免费)
+#    Google Cloud: https://cloud.google.com/application/web3/faucet/ethereum/sepolia
+#    Alchemy: https://alchemy.com/faucets/ethereum-sepolia
+#    ⚠️ 不需要花钱购买测试币!
+```
+
+#### 2. 配置环境变量
+
+```bash
+cd src/contracts
+
+# 编辑 .env 文件
+cat > .env << EOF
+SEPOLIA_RPC_URL=https://rpc.sepolia.org
+SEPOLIA_PRIVATE_KEY=your_private_key_here  # 从 MetaMask 导出
+ETHERSCAN_API_KEY=your_etherscan_api_key   # 用于验证合约
+EOF
+
+# ⚠️ 安全警告：私钥不要提交到 Git!
+```
+
+#### 3. 部署合约
+
+```bash
+# 使用新的部署脚本
+npx hardhat run scripts/deploy-sepolia.ts --network sepolia
+```
+
+**输出示例:**
+```
+🚀 开始部署到 Sepolia 测试网...
+📝 使用账户：0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+💰 账户余额：0.5 Sepolia ETH
+
+🔨 正在部署 DiagnosisRecord 合约...
+✅ 合约部署成功!
+📍 合约地址：0x1234567890abcdef...
+
+📋 下一步:
+1. 在 Etherscan 验证合约
+2. 更新后端配置
+```
+
+#### 4. 在 Etherscan 验证合约
+
+```bash
+# 验证合约 (可选，但推荐)
+npx hardhat verify --network sepolia DEPLOYED_CONTRACT_ADDRESS
+```
+
+#### 5. 更新后端配置
+
+在 Render 或本地 .env 中添加:
+```
+USE_SEPOLIA=true
+CONTRACT_ADDRESS_SEPOLIA=0x1234567890abcdef...
 ```
 
 ## 环境变量说明

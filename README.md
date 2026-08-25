@@ -3,9 +3,9 @@
 > 一个结合大模型与 Web3 技术的医疗诊断辅助系统，通过区块链记录每次 AI 诊断的数据来源和模型版本，满足医疗合规审计需求。
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Status](https://img.shields.io/badge/status-in%20progress-orange)
+![Status](https://img.shields.io/badge/status-MVP%20Complete-brightgreen)
 ![Tech Stack](https://img.shields.io/badge/tech-Next.js%20%7C%20FastAPI%20%7C%20Solidity%20%7C%20DeepSeek%20API-green)
-![Phase](https://img.shields.io/badge/phase-Phase%201%20Scaffold-yellow)
+![Phase](https://img.shields.io/badge/phase-Phase%202%20Complete-brightgreen)
 
 ---
 
@@ -17,6 +17,7 @@ meditrace/
 ├── SPEC.md                # 详细规格说明
 ├── CONTEXT.md             # 领域模型
 ├── DEPLOYMENT.md          # 部署指南
+├── DEMO_SCRIPT.md         # 演示脚本 ⭐新增
 ├── TODO.md                # 开发任务清单
 ├── docs/
 │   └── adr/
@@ -27,19 +28,25 @@ meditrace/
 │   ├── frontend/          # Next.js 前端
 │   │   ├── app/
 │   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx
-│   │   │   └── globals.css
+│   │   │   ├── page.tsx           # 诊断主页
+│   │   │   ├── history/page.tsx   # 历史记录页 ⭐新增
+│   │   │   └── verify/page.tsx    # 链上验证页 ⭐新增
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── tailwind.config.js
 │   ├── backend/
-│   │   ├── main.py        # FastAPI 主应用
+│   │   ├── main.py           # FastAPI 主应用
+│   │   ├── deepseek_client.py # DeepSeek 集成 ⭐新增
+│   │   ├── blockchain_client.py # 区块链客户端 ⭐新增
+│   │   ├── ipfs_service.py    # IPFS 服务 ⭐新增
+│   │   ├── test_deepseek.py   # 测试脚本 ⭐新增
 │   │   └── requirements.txt
 │   └── contracts/
 │       ├── contracts/
 │       │   └── DiagnosisRecord.sol
 │       ├── scripts/
-│       │   └── deploy.ts
+│       │   ├── deploy.ts
+│       │   └── deploy-sepolia.ts # Sepolia 部署 ⭐新增
 │       ├── test/
 │       │   └── DiagnosisRecord.test.ts
 │       └── hardhat.config.ts

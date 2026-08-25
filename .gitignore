@@ -2,6 +2,7 @@
 node_modules/
 .pnp
 .pnp.js
+.pnpm-store/
 
 # Testing
 coverage/
@@ -51,6 +52,9 @@ env/
 # Hardhat
 artifacts/
 cache/
+
+# Contract Deployments
+src/contracts/deployment.json
 
 # IPFS
 .ipfs/

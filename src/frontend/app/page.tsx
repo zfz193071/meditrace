@@ -110,8 +110,32 @@ export default function Home() {
           </section>
         )}
 
+        {/* 导航链接 */}
+        <section className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <a
+            href="/history"
+            className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow"
+          >
+            <div className="text-4xl mb-4">📋</div>
+            <h3 className="font-semibold mb-2">历史记录</h3>
+            <p className="text-sm text-gray-600">
+              查看您的诊断历史记录
+            </p>
+          </a>
+          <a
+            href="/verify"
+            className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow"
+          >
+            <div className="text-4xl mb-4">🔍</div>
+            <h3 className="font-semibold mb-2">链上验证</h3>
+            <p className="text-sm text-gray-600">
+              验证诊断记录的真实性
+            </p>
+          </a>
+        </section>
+
         {/* 功能说明 */}
-        <section className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-6 text-center">
             <div className="text-4xl mb-4">🤖</div>
             <h3 className="font-semibold mb-2">AI 诊断</h3>
@@ -127,10 +151,10 @@ export default function Home() {
             </p>
           </div>
           <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-4xl mb-4">🔍</div>
-            <h3 className="font-semibold mb-2">可验证</h3>
+            <div className="text-4xl mb-4">🔒</div>
+            <h3 className="font-semibold mb-2">隐私保护</h3>
             <p className="text-sm text-gray-600">
-              任何人都可验证诊断记录真实性
+              链上仅存哈希，保护患者隐私
             </p>
           </div>
         </section>
