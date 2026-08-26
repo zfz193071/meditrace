@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 import asyncio
 
 # 加载环境变量
-load_dotenv()
+load_dotenv(override=True)
 
 # 导入 DeepSeek 客户端
 from deepseek_client import get_deepseek_client
@@ -28,19 +28,27 @@ from ipfs_service import get_ipfs_client, generate_report
 # 导入数据模型
 from models import DiagnosisMetadata, DiagnosisResult
 
+# CORS 配置 - 必须在 FastAPI app 创建后立即添加，且在所有其他中间件之前
 app = FastAPI(
     title="MediTrace API",
     description="医疗 AI 诊断溯源系统后端 API",
     version="0.1.0"
 )
 
-# CORS 配置
+# 添加 CORS 中间件 - 允许前端访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 
@@ -77,7 +85,7 @@ class HistoryResponse(BaseModel):
 
 class VerificationResponse(BaseModel):
     isValid: bool
-    chainRecord: dict
+    chainRecord: Optional[dict]
     ipfsCid: str
 
 
@@ -149,8 +157,15 @@ async def diagnose(input: SymptomInput):
         try:
             blockchain = get_blockchain_client()
             if blockchain:
-                # 将患者地址转换为 Web3 格式
-                patient_addr = input.userId if input.userId.startswith("0x") else f"0x{input.userId}"
+                # 获取账户地址作为患者地址 (用于测试)
+                # 实际生产中应该使用真正的用户钱包地址
+                account = blockchain.get_account()
+                if account:
+                    patient_addr = account.address
+                else:
+                    # 如果没有配置私钥，使用 userId 生成的伪地址 (仅用于测试查询)
+                    patient_addr = input.userId if input.userId.startswith("0x") else f"0x{input.userId}"
+                
                 metadata.patient_address = patient_addr
                 
                 # 使用元数据对象的方法获取上链参数
@@ -213,12 +228,15 @@ async def get_history(userId: str):
         diagnosis_ids = blockchain.get_patient_records(userId)
         
         records = []
-        for diag_id in diagnosis_ids:
+        for diag_id_bytes in diagnosis_ids:
+            # 将 bytes 转换为 hex 字符串
+            diag_id_hex = '0x' + diag_id_bytes.hex()
+            
             # 获取每条记录的详细信息
-            record = blockchain.verify_diagnosis(str(diag_id))
+            record = blockchain.verify_diagnosis(diag_id_bytes)
             if record:
                 records.append({
-                    "diagnosisId": str(diag_id),
+                    "diagnosisId": diag_id_hex,
                     "timestamp": record.get("timestamp", 0),
                     "diseaseTypes": [],  # 疾病类型需要从诊断数据中解析
                     "chainStatus": "confirmed" if record else "pending"
@@ -249,10 +267,15 @@ async def verify_diagnosis(diagnosisId: str):
         record = blockchain.verify_diagnosis(diagnosisId)
         
         if record:
+            # 将 bytes 类型的 dataHash 转换为 hex 字符串
+            data_hash = record.get("dataHash", b"")
+            if isinstance(data_hash, bytes):
+                data_hash = "0x" + data_hash.hex()
+            
             return {
                 "isValid": True,
                 "chainRecord": {
-                    "dataHash": record.get("dataHash", ""),
+                    "dataHash": data_hash,
                     "modelVersion": record.get("modelVersion", ""),
                     "timestamp": record.get("timestamp", 0)
                 },

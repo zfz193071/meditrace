@@ -61,6 +61,7 @@ class DiagnosisResult:
             "modelVersion": self.metadata.model_version,
             "dataHash": self.metadata.generate_data_hash(),
             "ipfsCid": self.ipfs_cid,
+            "chainTxHash": self.chain_tx_hash if self.chain_tx_hash else None,
             "chainStatus": self.chain_status,
             "timestamp": int(datetime.now().timestamp())
         }

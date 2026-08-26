@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from web3 import Web3
 from web3.exceptions import ContractLogicError, TimeExhausted
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 class BlockchainClient:
@@ -47,7 +47,7 @@ class BlockchainClient:
         """加载智能合约"""
         try:
             # 读取合约 ABI
-            abi_path = "../contracts/artifacts/DiagnosisRecord.json"
+            abi_path = "../contracts/artifacts/contracts/DiagnosisRecord.sol/DiagnosisRecord.json"
             import json
             
             with open(abi_path, 'r') as f:
@@ -65,7 +65,8 @@ class BlockchainClient:
     def get_account(self):
         """获取当前账户地址"""
         if self.private_key:
-            account = self.w3.eth.from_account(self.private_key)
+            # 使用新的 API: Account.from_key
+            account = self.w3.eth.account.from_key(self.private_key)
             return account
         return None
     
@@ -111,33 +112,44 @@ class BlockchainClient:
                     "txHash": None
                 }
             
-            # 构建交易
-            nonce = self.w3.eth.get_transaction_count(account)
+            account_addr = account.address
+            
+            # 将 data_hash 从 hex 字符串转换为 bytes32
+            if data_hash.startswith('0x'):
+                data_hash_bytes = bytes.fromhex(data_hash[2:])
+            else:
+                data_hash_bytes = bytes.fromhex(data_hash)
+            
+            # 构建交易参数
+            nonce = self.w3.eth.get_transaction_count(account_addr)
             gas_price = self.get_gas_price()
             
             # 估算 Gas
             gas_estimate = self.contract.functions.recordDiagnosis(
-                data_hash,
+                data_hash_bytes,
                 model_version,
                 ipfs_cid,
                 patient_address
             ).estimate_gas({
-                'from': account,
-                'nonce': nonce
+                'from': account_addr,
             })
             
-            # 发送交易
-            tx_hash = self.contract.functions.recordDiagnosis(
-                data_hash,
+            # 构建交易
+            tx = self.contract.functions.recordDiagnosis(
+                data_hash_bytes,
                 model_version,
                 ipfs_cid,
                 patient_address
-            ).transact({
-                'from': account,
+            ).build_transaction({
+                'from': account_addr,
                 'nonce': nonce,
-                'gas': int(gas_estimate * 1.2),  # 增加 20% 缓冲
-                'gasPrice': gas_price
+                'gas': int(gas_estimate * 1.2),
+                'gasPrice': gas_price,
             })
+            
+            # 签名并发送交易
+            signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
+            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
             
             # 等待确认
             tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)

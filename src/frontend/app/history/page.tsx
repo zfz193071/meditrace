@@ -15,7 +15,12 @@ export default function HistoryPage() {
   const router = useRouter();
   const [records, setRecords] = useState<HistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState("0xTestUser123456789"); // TODO: 集成钱包连接
+  const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094a6DACb53D02Fa9d0B");
+  
+  // 允许用户修改地址
+  const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserId(e.target.value);
+  };
 
   useEffect(() => {
     fetchHistory();
@@ -53,7 +58,7 @@ export default function HistoryPage() {
 
         {/* 用户信息 */}
         <section className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mb-3">
             <div>
               <p className="text-sm text-gray-500">当前用户</p>
               <p className="font-mono text-sm">{userId}</p>
@@ -64,6 +69,16 @@ export default function HistoryPage() {
             >
               刷新
             </button>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500">切换用户地址:</label>
+            <input
+              type="text"
+              className="w-full mt-1 p-2 border border-gray-300 rounded font-mono text-xs"
+              placeholder="0x..."
+              value={userId}
+              onChange={handleUserIdChange}
+            />
           </div>
         </section>
 

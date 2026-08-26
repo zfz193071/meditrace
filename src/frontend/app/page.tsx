@@ -6,6 +6,8 @@ export default function Home() {
   const [symptoms, setSymptoms] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  // 用户地址 - 生产环境应该从钱包连接或环境变量获取
+  const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094a6DACb53D02Fa9d0B");
 
   const handleDiagnose = async () => {
     if (!symptoms.trim()) return;
@@ -17,7 +19,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           symptoms,
-          userId: "0xTestUser123456789",
+          userId,  // 使用状态中的用户地址
         }),
       });
       const data = await response.json();
@@ -51,6 +53,24 @@ export default function Home() {
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}
           />
+          
+          {/* 用户地址设置 */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              用户地址 (用于区块链记录)
+            </label>
+            <input
+              type="text"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
+              placeholder="0x..."
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              生产环境建议集成 MetaMask 等钱包连接
+            </p>
+          </div>
+          
           <button
             className="mt-4 w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
             onClick={handleDiagnose}
