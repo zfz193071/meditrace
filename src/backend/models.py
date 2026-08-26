@@ -25,7 +25,19 @@ class DiagnosisMetadata:
         return hashlib.sha256(data_string.encode()).hexdigest()
     
     def generate_diagnosis_id(self) -> str:
-        """生成诊断 ID"""
+        """
+        生成诊断 ID (已废弃，改用合约生成的 ID)
+        
+        注意：此方法已废弃，诊断 ID 现在由智能合约生成
+        以确保全局唯一性和不可篡改性。
+        保留此方法仅用于向后兼容。
+        """
+        import warnings
+        warnings.warn(
+            "generate_diagnosis_id() is deprecated. Use the diagnosisId returned by the blockchain contract.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         data_hash = self.generate_data_hash()
         return f"{timestamp}_{data_hash[:16]}"

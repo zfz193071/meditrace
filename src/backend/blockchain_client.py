@@ -97,13 +97,14 @@ class BlockchainClient:
             patient_address: 患者钱包地址
             
         Returns:
-            交易信息
+            交易信息和合约生成的 diagnosisId
         """
         if not self.contract:
             return {
                 "success": False,
                 "error": "合约未配置",
-                "txHash": None
+                "txHash": None,
+                "diagnosisId": None
             }
         
         try:
@@ -112,7 +113,8 @@ class BlockchainClient:
                 return {
                     "success": False,
                     "error": "未配置私钥",
-                    "txHash": None
+                    "txHash": None,
+                    "diagnosisId": None
                 }
             
             account_addr = account.address
@@ -160,12 +162,31 @@ class BlockchainClient:
             # 等待确认
             tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
             
+            # 从事件日志中提取 diagnosisId
+            diagnosis_id = None
+            try:
+                # 解析 DiagnosisRecorded 事件 - 使用 logs 属性直接访问
+                # Web3.py 6.x+ API: 使用 get_logs 或直接访问 receipt 的 logs
+                for log in tx_receipt['logs']:
+                    try:
+                        # 尝试解码日志
+                        decoded_logs = self.contract.events.DiagnosisRecorded().process_log(log)
+                        if decoded_logs:
+                            diagnosis_id = self.w3.to_hex(decoded_logs['args']['diagnosisId'])
+                            break
+                    except:
+                        # 不是我们要的事件，继续
+                        continue
+            except Exception as e:
+                print(f"⚠️ 解析事件日志失败：{e}")
+            
             return {
                 "success": True,
                 "txHash": self.w3.to_hex(tx_hash),
                 "blockNumber": tx_receipt['blockNumber'],
                 "gasUsed": tx_receipt['gasUsed'],
-                "status": "confirmed"
+                "status": "confirmed",
+                "diagnosisId": diagnosis_id
             }
             
         except ContractLogicError as e:
