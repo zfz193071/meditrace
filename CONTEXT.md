@@ -186,3 +186,19 @@ MediTrace **提供**：
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | 1.0.0 | 2024 | 初始版本 |
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues (uses `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage roles. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout. See `docs/agents/domain.md`.

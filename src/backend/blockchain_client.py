@@ -8,6 +8,7 @@ from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from web3 import Web3
 from web3.exceptions import ContractLogicError, TimeExhausted
+from eth_typing import HexStr
 
 # 导入工具函数
 from utils.hex_utils import ensure_bytes32
@@ -163,22 +164,7 @@ class BlockchainClient:
             tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
             
             # 从事件日志中提取 diagnosisId
-            diagnosis_id = None
-            try:
-                # 解析 DiagnosisRecorded 事件 - 使用 logs 属性直接访问
-                # Web3.py 6.x+ API: 使用 get_logs 或直接访问 receipt 的 logs
-                for log in tx_receipt['logs']:
-                    try:
-                        # 尝试解码日志
-                        decoded_logs = self.contract.events.DiagnosisRecorded().process_log(log)
-                        if decoded_logs:
-                            diagnosis_id = self.w3.to_hex(decoded_logs['args']['diagnosisId'])
-                            break
-                    except:
-                        # 不是我们要的事件，继续
-                        continue
-            except Exception as e:
-                print(f"⚠️ 解析事件日志失败：{e}")
+            diagnosis_id = _extract_diagnosis_id_from_receipt(self.contract, self.w3, tx_receipt)
             
             return {
                 "success": True,
@@ -251,6 +237,33 @@ class BlockchainClient:
             return self.contract.functions.getPatientRecords(patient_address).call()
         except:
             return []
+
+
+def _extract_diagnosis_id_from_receipt(contract, w3, tx_receipt) -> Optional[str]:
+    """
+    从交易回执中提取 diagnosisId
+    
+    Args:
+        contract: 智能合约对象
+        w3: Web3 实例
+        tx_receipt: 交易回执
+        
+    Returns:
+        diagnosisId 的十六进制字符串，如果未找到返回 None
+    """
+    try:
+        for log in tx_receipt.get('logs', []):
+            try:
+                # 尝试解码 DiagnosisRecorded 事件
+                decoded_logs = contract.events.DiagnosisRecorded().process_log(log)
+                if decoded_logs:
+                    return w3.to_hex(decoded_logs['args']['diagnosisId'])
+            except (ValueError, IndexError, KeyError):
+                # 不是我们要的事件或解码失败，继续
+                continue
+    except Exception as e:
+        print(f"⚠️ 解析事件日志失败：{e}")
+    return None
 
 
 # 单例模式

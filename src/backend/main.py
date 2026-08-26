@@ -12,6 +12,7 @@ import os
 import json
 from dotenv import load_dotenv
 import asyncio
+from datetime import datetime
 
 # 加载环境变量
 load_dotenv(override=True)
@@ -114,6 +115,95 @@ async def health_check():
     return {"status": "healthy", "version": "0.1.0"}
 
 
+# 辅助函数 (提取重复逻辑)
+async def _chain_diagnosis(metadata: DiagnosisMetadata, input: SymptomInput):
+    """
+    将诊断记录上链
+    
+    Returns:
+        tuple: (chain_tx_hash, chain_status, chain_diagnosis_id)
+    """
+    chain_tx_hash = None
+    chain_status = "pending"
+    chain_diagnosis_id = None
+    
+    try:
+        blockchain = get_blockchain_client()
+        if blockchain:
+            # 获取账户地址作为患者地址 (用于测试)
+            # 实际生产中应该使用真正的用户钱包地址
+            account = blockchain.get_account()
+            if account:
+                patient_addr = account.address
+            else:
+                # 如果没有配置私钥，使用 userId 生成的伪地址 (仅用于测试查询)
+                patient_addr = input.userId if input.userId.startswith("0x") else f"0x{input.userId}"
+            
+            # 更新元数据中的患者地址
+            metadata.patient_address = patient_addr
+            
+            # 使用元数据对象的方法获取上链参数
+            chain_params = metadata.to_chain_params()
+            
+            chain_result = await blockchain.record_diagnosis(
+                data_hash=f"0x{chain_params[0]}",
+                model_version=chain_params[1],
+                ipfs_cid=chain_params[2] or "",
+                patient_address=patient_addr
+            )
+            
+            if chain_result.get("success"):
+                chain_tx_hash = chain_result.get("txHash")
+                chain_diagnosis_id = chain_result.get("diagnosisId")
+                chain_status = "confirmed"
+                print(f"✓ 诊断已上链：{chain_tx_hash}")
+                print(f"✓ 链上诊断 ID: {chain_diagnosis_id}")
+            else:
+                print(f"⚠️ 上链失败：{chain_result.get('error')}")
+                chain_status = "failed"
+                
+    except Exception as e:
+        print(f"⚠️ 上链异常：{e}")
+        chain_status = "failed"
+    
+    return chain_tx_hash, chain_status, chain_diagnosis_id
+
+
+async def _upload_ipfs_report(symptoms: str, suggestions: list, disclaimer: str, chain_diagnosis_id: Optional[str]):
+    """
+    生成诊断报告并上传 IPFS
+    
+    Returns:
+        ipfs_cid: IPFS CID 字符串
+    """
+    ipfs_cid = ""
+    try:
+        # 优先使用链上 diagnosisId，如果没有则使用时间戳临时 ID
+        report_id = chain_diagnosis_id if chain_diagnosis_id else f"temp_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        
+        report_bytes = generate_report(
+            symptoms=symptoms,
+            suggestions=suggestions,
+            disclaimer=disclaimer,
+            diagnosis_id=report_id
+        )
+        
+        ipfs = get_ipfs_client()
+        if ipfs:
+            ipfs_cid = await ipfs.upload_report(report_bytes, f"{report_id}_report.txt")
+            if ipfs_cid:
+                print(f"✓ 报告已上传 IPFS: {ipfs_cid}")
+            else:
+                print("⚠️ IPFS 上传失败，继续流程")
+        else:
+            print("⚠️ IPFS 客户端未初始化，跳过上传")
+            
+    except Exception as e:
+        print(f"⚠️ 报告生成/上传异常：{e}")
+    
+    return ipfs_cid
+
+
 # 诊断 API (集成 DeepSeek + 区块链)
 @app.post("/api/diagnose", response_model=DiagnosisResponse)
 async def diagnose(input: SymptomInput):
@@ -143,77 +233,14 @@ async def diagnose(input: SymptomInput):
         
         # 尝试上链 (异步，不阻塞主流程)
         # 注意：现在先上链，获取合约生成的 diagnosisId
-        chain_tx_hash = None
-        chain_status = "pending"
-        chain_diagnosis_id = None  # 合约生成的诊断 ID
-        
-        try:
-            blockchain = get_blockchain_client()
-            if blockchain:
-                # 获取账户地址作为患者地址 (用于测试)
-                # 实际生产中应该使用真正的用户钱包地址
-                account = blockchain.get_account()
-                if account:
-                    patient_addr = account.address
-                else:
-                    # 如果没有配置私钥，使用 userId 生成的伪地址 (仅用于测试查询)
-                    patient_addr = input.userId if input.userId.startswith("0x") else f"0x{input.userId}"
-                
-                # 更新元数据中的患者地址
-                metadata.patient_address = patient_addr
-                
-                # 使用元数据对象的方法获取上链参数
-                data_hash, model_version, ipfs_cid_param, _ = metadata.to_chain_params()
-                
-                chain_result = await blockchain.record_diagnosis(
-                    data_hash=f"0x{data_hash}",
-                    model_version=model_version,
-                    ipfs_cid=ipfs_cid_param or "",
-                    patient_address=patient_addr  # 直接使用 patient_addr，不要用 to_chain_params 返回的值
-                )
-                
-                if chain_result.get("success"):
-                    chain_tx_hash = chain_result.get("txHash")
-                    chain_diagnosis_id = chain_result.get("diagnosisId")
-                    chain_status = "confirmed"
-                    print(f"✓ 诊断已上链：{chain_tx_hash}")
-                    print(f"✓ 链上诊断 ID: {chain_diagnosis_id}")
-                else:
-                    print(f"⚠️ 上链失败：{chain_result.get('error')}")
-                    chain_status = "failed"
-                    
-        except Exception as e:
-            print(f"⚠️ 上链异常：{e}")
-            chain_status = "failed"
-            # 上链失败不影响诊断流程
+        chain_tx_hash, chain_status, chain_diagnosis_id = await _chain_diagnosis(
+            metadata, input
+        )
         
         # 生成报告并上传 IPFS (使用链上 ID 或临时 ID)
-        ipfs_cid = ""
-        try:
-            # 优先使用链上 diagnosisId，如果没有则使用时间戳临时 ID
-            report_id = chain_diagnosis_id if chain_diagnosis_id else f"temp_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-            
-            report_bytes = generate_report(
-                symptoms=input.symptoms,
-                suggestions=suggestions,
-                disclaimer=disclaimer,
-                diagnosis_id=report_id
-            )
-            
-            ipfs = get_ipfs_client()
-            if ipfs:
-                ipfs_cid = await ipfs.upload_report(report_bytes, f"{report_id}_report.txt")
-                if ipfs_cid:
-                    print(f"✓ 报告已上传 IPFS: {ipfs_cid}")
-                else:
-                    print("⚠️ IPFS 上传失败，继续流程")
-            else:
-                print("⚠️ IPFS 客户端未初始化，跳过上传")
-                
-        except Exception as e:
-            print(f"⚠️ 报告生成/上传异常：{e}")
-        
-        # 更新元数据中的 IPFS CID
+        ipfs_cid = await _upload_ipfs_report(
+            input.symptoms, suggestions, disclaimer, chain_diagnosis_id
+        )
         metadata.ipfs_cid = ipfs_cid
         
         # 使用结果对象封装返回数据

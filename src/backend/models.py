@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import hashlib
 from typing import Optional
 from datetime import datetime
+import warnings
 
 
 @dataclass
@@ -32,7 +33,6 @@ class DiagnosisMetadata:
         以确保全局唯一性和不可篡改性。
         保留此方法仅用于向后兼容。
         """
-        import warnings
         warnings.warn(
             "generate_diagnosis_id() is deprecated. Use the diagnosisId returned by the blockchain contract.",
             DeprecationWarning,
