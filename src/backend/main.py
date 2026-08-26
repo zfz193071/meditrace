@@ -354,6 +354,58 @@ async def verify_diagnosis(diagnosisId: str):
         raise HTTPException(status_code=500, detail=f"验证失败：{str(e)}")
 
 
+# 下载报告
+@app.get("/api/report/{diagnosisId}")
+async def download_report(diagnosisId: str):
+    """
+    下载诊断报告
+    
+    从 IPFS 获取报告文件并返回给前端
+    """
+    try:
+        # 首先从区块链获取记录的 IPFS CID
+        blockchain = get_blockchain_client()
+        if not blockchain:
+            raise HTTPException(status_code=500, detail="区块链服务不可用")
+        
+        record = blockchain.verify_diagnosis(diagnosisId)
+        if not record:
+            raise HTTPException(status_code=404, detail="诊断记录不存在")
+        
+        ipfs_cid = record.get("ipfsCid", "")
+        if not ipfs_cid:
+            raise HTTPException(status_code=404, detail="报告未找到")
+        
+        # 从 IPFS 下载报告
+        ipfs = get_ipfs_client()
+        if not ipfs:
+            raise HTTPException(status_code=500, detail="IPFS 服务不可用")
+        
+        # 从 IPFS 获取报告内容
+        import httpx
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # 使用 IPFS 网关下载
+            gateway_url = f"https://ipfs.io/ipfs/{ipfs_cid}"
+            response = await client.get(gateway_url)
+            response.raise_for_status()
+            
+            # 返回报告文件
+            from fastapi.responses import Response
+            return Response(
+                content=response.content,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f"attachment; filename=diagnosis-report-{diagnosisId}.pdf"
+                }
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"⚠️ 下载报告失败：{e}")
+        raise HTTPException(status_code=500, detail=f"下载报告失败：{str(e)}")
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

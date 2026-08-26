@@ -93,7 +93,10 @@ export default function HistoryPage() {
         `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/history/${userId}`
       );
       const data = await response.json();
-      setRecords(data.records || []);
+      const records = data.records || [];
+      // 按时间戳降序排序，最新的记录显示在最前面
+      records.sort((a, b) => b.timestamp - a.timestamp);
+      setRecords(records);
     } catch (error) {
       console.error("获取历史记录失败:", error);
     } finally {
@@ -253,7 +256,31 @@ export default function HistoryPage() {
                     >
                       <span>🔍</span> 验证记录
                     </button>
-                    <button className="btn-secondary flex items-center gap-2">
+                    <button
+                       onClick={async () => {
+                         try {
+                           const response = await fetch(
+                             `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/report/${record.diagnosisId}`
+                           );
+                           if (!response.ok) {
+                             throw new Error("下载失败");
+                           }
+                           const blob = await response.blob();
+                           const url = window.URL.createObjectURL(blob);
+                           const a = document.createElement("a");
+                           a.href = url;
+                           a.download = `diagnosis-report-${record.diagnosisId}.pdf`;
+                           document.body.appendChild(a);
+                           a.click();
+                           window.URL.revokeObjectURL(url);
+                           document.body.removeChild(a);
+                         } catch (error) {
+                           console.error("下载报告失败:", error);
+                           alert("下载报告失败，请稍后重试");
+                         }
+                       }}
+                       className="btn-secondary flex items-center gap-2"
+                     >
                       <span>📄</span> 下载报告
                     </button>
                   </div>
