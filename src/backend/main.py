@@ -278,12 +278,14 @@ async def get_history(userId: str):
         raise HTTPException(status_code=500, detail="区块链服务不可用")
     
     try:
+        print(f"🔍 查询用户 {userId} 的历史记录...")
         # 使用 userId 作为患者地址查询记录
         # 注意：实际生产中应该使用真正的钱包地址
         diagnosis_ids = blockchain.get_patient_records(userId)
+        print(f"✓ 找到 {len(diagnosis_ids)} 条记录")
         
         records = []
-        for diag_id_bytes in diagnosis_ids:
+        for i, diag_id_bytes in enumerate(diagnosis_ids):
             # 将 bytes 转换为 hex 字符串
             diag_id_hex = to_hex_str(diag_id_bytes)
             
@@ -297,11 +299,14 @@ async def get_history(userId: str):
                     "chainStatus": "confirmed" if record else "pending"
                 })
         
+        print(f"✓ 返回 {len(records)} 条记录")
         return {"records": records}
         
     except Exception as e:
         # 区块链查询失败时返回空列表，不影响用户体验
         print(f"⚠️ 历史记录查询失败：{e}")
+        import traceback
+        traceback.print_exc()
         return {"records": []}
 
 

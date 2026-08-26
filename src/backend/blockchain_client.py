@@ -208,6 +208,10 @@ class BlockchainClient:
             return None
         
         try:
+            # 如果 diagnosis_id 是 hex 字符串，转换为 bytes
+            if isinstance(diagnosis_id, str) and diagnosis_id.startswith("0x"):
+                diagnosis_id = self.w3.to_bytes(hexstr=diagnosis_id)
+            
             record = self.contract.functions.getRecord(diagnosis_id).call()
             
             return {
@@ -217,7 +221,8 @@ class BlockchainClient:
                 "ipfsCid": record[3],
                 "patient": record[4]
             }
-        except:
+        except Exception as e:
+            print(f"⚠️ 验证诊断记录失败：{e}")
             return None
     
     def get_patient_records(self, patient_address: str) -> list:
@@ -234,8 +239,11 @@ class BlockchainClient:
             return []
         
         try:
-            return self.contract.functions.getPatientRecords(patient_address).call()
-        except:
+            # 转换为 EIP-55 校验和格式地址
+            checksum_address = self.w3.to_checksum_address(patient_address)
+            return self.contract.functions.getPatientRecords(checksum_address).call()
+        except Exception as e:
+            print(f"⚠️ 查询患者记录失败：{e}")
             return []
 
 
