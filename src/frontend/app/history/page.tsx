@@ -11,7 +11,9 @@ interface HistoryRecord {
 }
 
 function formatDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleString("zh-CN", {
+  // 后端返回的是秒级时间戳，需要转换为毫秒级
+  const msTimestamp = timestamp * 1000;
+  return new Date(msTimestamp).toLocaleString("zh-CN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -25,19 +27,19 @@ function getStatusBadge(chainStatus: string) {
     case "confirmed":
       return (
         <span className="badge badge-success flex items-center gap-1">
-          <span>✓</span> 已上链
+          <span className="text-xs">✓</span> 已上链
         </span>
       );
     case "pending":
       return (
         <span className="badge badge-warning flex items-center gap-1">
-          <span>⏳</span> 待上链
+          <span className="text-xs">⏳</span> 待上链
         </span>
       );
     case "failed":
       return (
         <span className="badge badge-error flex items-center gap-1">
-          <span>✗</span> 上链失败
+          <span className="text-xs">✗</span> 上链失败
         </span>
       );
     default:
