@@ -8,11 +8,10 @@ interface HistoryRecord {
   timestamp: number;
   diseaseTypes: string[];
   chainStatus: "pending" | "confirmed" | "failed";
-  ipfsCid?: string;  // 可选的 IPFS CID 字段
+  ipfsCid?: string;
 }
 
 function formatDate(timestamp: number): string {
-  // 后端返回的是秒级时间戳，需要转换为毫秒级
   const msTimestamp = timestamp * 1000;
   return new Date(msTimestamp).toLocaleString("zh-CN", {
     year: "numeric",
@@ -54,6 +53,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
   const [addressError, setAddressError] = useState("");
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   
   const validateAddress = (address: string): boolean => {
     if (!address) {
@@ -95,13 +95,53 @@ export default function HistoryPage() {
       );
       const data = await response.json();
       const records = data.records || [];
-      // 按时间戳降序排序，最新的记录显示在最前面
       records.sort((a, b) => b.timestamp - a.timestamp);
       setRecords(records);
     } catch (error) {
       console.error("获取历史记录失败:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadReport = async (diagnosisId: string, ipfsCid?: string) => {
+    if (!ipfsCid) {
+      alert("该诊断记录尚未生成报告，无法下载。");
+      return;
+    }
+    
+    setDownloadingId(diagnosisId);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/report/${diagnosisId}`
+      );
+      if (!response.ok) {
+        let errorMsg = "下载失败";
+        try {
+          const errorData = await response.json();
+          if (errorData?.detail) {
+            errorMsg = errorData.detail;
+          }
+        } catch (e) {
+          // 无法解析错误响应
+        }
+        throw new Error(errorMsg);
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `diagnosis-report-${diagnosisId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("下载报告失败:", error);
+      const errorMessage = error instanceof Error ? error.message : "下载报告失败，请稍后重试";
+      alert(errorMessage);
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -258,48 +298,34 @@ export default function HistoryPage() {
                       <span>🔍</span> 验证记录
                     </button>
                     <button
-                       onClick={async () => {
-                         // 检查是否有 ipfsCid
-                         if (!record.ipfsCid) {
-                           alert("该诊断记录尚未生成报告，无法下载。");
-                           return;
-                         }
-                         try {
-                           const response = await fetch(
-                             `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/report/${record.diagnosisId}`
-                           );
-                           if (!response.ok) {
-                             // 尝试读取错误消息
-                             let errorMsg = "下载失败";
-                             try {
-                               const errorData = await response.json();
-                               if (errorData?.detail) {
-                                 errorMsg = errorData.detail;
-                               }
-                             } catch (e) {
-                               // 无法解析错误响应
-                             }
-                             throw new Error(errorMsg);
-                           }
-                           const blob = await response.blob();
-                           const url = window.URL.createObjectURL(blob);
-                           const a = document.createElement("a");
-                           a.href = url;
-                           a.download = `diagnosis-report-${record.diagnosisId}.pdf`;
-                           document.body.appendChild(a);
-                           a.click();
-                           window.URL.revokeObjectURL(url);
-                           document.body.removeChild(a);
-                         } catch (error) {
-                           console.error("下载报告失败:", error);
-                           const errorMessage = error instanceof Error ? error.message : "下载报告失败，请稍后重试";
-                           alert(errorMessage);
-                         }
-                       }}
-                       className={`btn-secondary flex items-center gap-2 ${!record.ipfsCid ? 'opacity-50 cursor-not-allowed' : ''}`}
-                       disabled={!record.ipfsCid}
-                     >
-                      <span>📄</span> {record.ipfsCid ? '下载报告' : '无报告'}
+                      onClick={() => downloadReport(record.diagnosisId, record.ipfsCid)}
+                      className={`btn-secondary flex items-center gap-2 ${!record.ipfsCid || downloadingId === record.diagnosisId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={!record.ipfsCid || downloadingId === record.diagnosisId}
+                    >
+                      {downloadingId === record.diagnosisId ? (
+                        <>
+                          <svg className="spinner w-5 h-5" viewBox="0 0 24 24">
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          下载中...
+                        </>
+                      ) : (
+                        <span>📄</span>
+                      )}
+                      {!downloadingId && (record.ipfsCid ? '下载报告' : '无报告')}
                     </button>
                   </div>
                 </div>
