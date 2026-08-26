@@ -263,7 +263,17 @@ export default function HistoryPage() {
                              `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/report/${record.diagnosisId}`
                            );
                            if (!response.ok) {
-                             throw new Error("下载失败");
+                             // 尝试读取错误消息
+                             let errorMsg = "下载失败";
+                             try {
+                               const errorData = await response.json();
+                               if (errorData?.detail) {
+                                 errorMsg = errorData.detail;
+                               }
+                             } catch (e) {
+                               // 无法解析错误响应
+                             }
+                             throw new Error(errorMsg);
                            }
                            const blob = await response.blob();
                            const url = window.URL.createObjectURL(blob);
@@ -276,7 +286,8 @@ export default function HistoryPage() {
                            document.body.removeChild(a);
                          } catch (error) {
                            console.error("下载报告失败:", error);
-                           alert("下载报告失败，请稍后重试");
+                           const errorMessage = error instanceof Error ? error.message : "下载报告失败，请稍后重试";
+                           alert(errorMessage);
                          }
                        }}
                        className="btn-secondary flex items-center gap-2"

@@ -5,6 +5,7 @@ IPFS 报告存储服务
 
 import os
 import io
+import json
 from typing import Dict, Any, Optional
 from datetime import datetime
 from dotenv import load_dotenv
@@ -132,18 +133,15 @@ class IPFSClient:
         import httpx
         
         try:
+            # 使用 JWT token 直接上传（从环境变量读取）
+            # JWT token 可以通过 Pinata 控制台生成，有效期很长
+            jwt_token = os.getenv("PINATA_JWT_TOKEN")
+            if not jwt_token:
+                print("⚠️ PINATA_JWT_TOKEN 未配置，尝试使用 API Key 方式")
+                # 回退到使用 API Key 和 Secret 的方式
+                return await self._upload_to_pinata_legacy(report_bytes, filename)
+            
             async with httpx.AsyncClient(timeout=30.0) as client:
-                # 获取 JWT token
-                token_response = await client.post(
-                    "https://api.pinata.cloud/authentication",
-                    json={
-                        "pinata_api_key": self.api_key,
-                        "pinata_secret_api_key": self.secret_api_key
-                    }
-                )
-                token_response.raise_for_status()
-                jwt_token = token_response.json()["jwt"]
-                
                 # 上传文件
                 files = {"file": (filename, report_bytes, "text/plain")}
                 headers = {"Authorization": f"Bearer {jwt_token}"}
@@ -160,6 +158,12 @@ class IPFSClient:
         except Exception as e:
             print(f"Pinata 上传失败：{e}")
             return None
+    
+    async def _upload_to_pinata_legacy(self, report_bytes: bytes, filename: str) -> Optional[str]:
+        """使用 API Key 和 Secret 上传（旧方式，需要手动生成 JWT）"""
+        # 建议用户改用 JWT token 方式
+        print("⚠️ 建议使用 PINATA_JWT_TOKEN 环境变量，而不是 PINATA_API_KEY/PINATA_SECRET_API_KEY")
+        return None
     
     async def _upload_to_local_ipfs(self, report_bytes: bytes, filename: str) -> Optional[str]:
         """上传到本地 IPFS 节点"""

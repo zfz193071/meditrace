@@ -231,17 +231,27 @@ async def diagnose(input: SymptomInput):
         if not suggestions:
             raise HTTPException(status_code=500, detail="AI 诊断失败：未返回建议")
         
+        # 先生成报告并上传 IPFS（需要先有 CID 再上链）
+        # 使用时间戳临时 ID 上传
+        ipfs_cid = await _upload_ipfs_report(
+            input.symptoms, suggestions, disclaimer, None
+        )
+        
+        # IPFS 上传失败时阻止上链
+        if not ipfs_cid:
+            raise HTTPException(
+                status_code=500, 
+                detail="报告上传失败：IPFS 服务不可用，请检查配置（Pinata 密钥或本地 IPFS 节点）"
+            )
+        
+        # 更新元数据中的 IPFS CID
+        metadata.ipfs_cid = ipfs_cid
+        
         # 尝试上链 (异步，不阻塞主流程)
-        # 注意：现在先上链，获取合约生成的 diagnosisId
+        # 此时 metadata 已包含 ipfs_cid，上链时会一起提交
         chain_tx_hash, chain_status, chain_diagnosis_id = await _chain_diagnosis(
             metadata, input
         )
-        
-        # 生成报告并上传 IPFS (使用链上 ID 或临时 ID)
-        ipfs_cid = await _upload_ipfs_report(
-            input.symptoms, suggestions, disclaimer, chain_diagnosis_id
-        )
-        metadata.ipfs_cid = ipfs_cid
         
         # 使用结果对象封装返回数据
         # 优先使用链上 diagnosisId，如果上链失败则使用本地临时 ID
@@ -362,48 +372,78 @@ async def download_report(diagnosisId: str):
     
     从 IPFS 获取报告文件并返回给前端
     """
-    try:
-        # 首先从区块链获取记录的 IPFS CID
-        blockchain = get_blockchain_client()
-        if not blockchain:
-            raise HTTPException(status_code=500, detail="区块链服务不可用")
+    # 首先从区块链获取记录的 IPFS CID
+    blockchain = get_blockchain_client()
+    if not blockchain:
+        raise HTTPException(status_code=500, detail="区块链服务不可用")
+    
+    record = blockchain.verify_diagnosis(diagnosisId)
+    if not record:
+        # 诊断记录不存在于区块链
+        raise HTTPException(status_code=404, detail=f"诊断记录不存在：{diagnosisId}")
+    
+    ipfs_cid = record.get("ipfsCid", "")
+    
+    if not ipfs_cid:
+        # 记录存在但没有 IPFS CID，可能是上链时 IPFS 上传失败
+        raise HTTPException(
+            status_code=404, 
+            detail=f"报告未找到：该诊断记录尚未生成报告 (IPFS CID 为空)。请重新进行诊断以生成报告。"
+        )
+    
+    # 从 IPFS 下载报告
+    import httpx
+    import os
+    
+    # 使用 Pinata API 直接下载（使用 JWT token）
+    jwt_token = os.getenv("PINATA_JWT_TOKEN")
+    
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        # 使用 Pinata API 下载文件
+        headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else {}
         
-        record = blockchain.verify_diagnosis(diagnosisId)
-        if not record:
-            raise HTTPException(status_code=404, detail="诊断记录不存在")
+        # 尝试多个网关，提高成功率
+        gateways = [
+            f"https://{ipfs_cid}.ipfs.pinata.cloud",
+            f"https://ipfs.io/ipfs/{ipfs_cid}",
+            f"https://cloudflare-ipfs.com/ipfs/{ipfs_cid}"
+        ]
         
-        ipfs_cid = record.get("ipfsCid", "")
-        if not ipfs_cid:
-            raise HTTPException(status_code=404, detail="报告未找到")
+        response = None
+        for gateway_url in gateways:
+            try:
+                print(f"尝试下载：{gateway_url}")
+                response = await client.get(gateway_url, headers=headers)
+                if response.status_code == 200:
+                    print(f"✓ 成功从 {gateway_url} 下载报告")
+                    break
+                else:
+                    print(f"⚠️ {gateway_url} 返回 {response.status_code}")
+                    response = None
+            except Exception as e:
+                print(f"⚠️ {gateway_url} 连接失败：{e}")
+                response = None
         
-        # 从 IPFS 下载报告
-        ipfs = get_ipfs_client()
-        if not ipfs:
-            raise HTTPException(status_code=500, detail="IPFS 服务不可用")
-        
-        # 从 IPFS 获取报告内容
-        import httpx
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            # 使用 IPFS 网关下载
-            gateway_url = f"https://ipfs.io/ipfs/{ipfs_cid}"
-            response = await client.get(gateway_url)
-            response.raise_for_status()
-            
-            # 返回报告文件
-            from fastapi.responses import Response
-            return Response(
-                content=response.content,
-                media_type="application/pdf",
-                headers={
-                    "Content-Disposition": f"attachment; filename=diagnosis-report-{diagnosisId}.pdf"
-                }
+        if not response:
+            raise HTTPException(
+                status_code=500, 
+                detail=f"无法下载报告：所有 IPFS 网关均不可用，请稍后重试"
             )
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"⚠️ 下载报告失败：{e}")
-        raise HTTPException(status_code=500, detail=f"下载报告失败：{str(e)}")
+        
+        if response.status_code == 404:
+            raise HTTPException(status_code=404, detail=f"IPFS 报告不存在：{ipfs_cid}")
+        
+        response.raise_for_status()
+        
+        # 返回报告文件
+        from fastapi.responses import Response
+        return Response(
+            content=response.content,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename=diagnosis-report-{diagnosisId}.pdf"
+            }
+        )
 
 
 if __name__ == "__main__":

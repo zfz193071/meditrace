@@ -248,19 +248,19 @@ export default function VerifyPage() {
             </h3>
             <ol className="space-y-3" style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
               <li className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium" style={{ marginRight: '10px' }}>1</span>
+                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium">1</span>
                 <span className="text-indigo-800 text-sm">从诊断结果或历史记录中获取诊断 ID</span>
               </li>
               <li className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium" style={{ marginRight: '10px' }}>2</span>
+                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium">2</span>
                 <span className="text-indigo-800 text-sm">在上方输入框中输入诊断 ID</span>
               </li>
               <li className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium" style={{ marginRight: '10px' }}>3</span>
+                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium">3</span>
                 <span className="text-indigo-800 text-sm">系统会查询区块链并验证数据哈希</span>
               </li>
               <li className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium" style={{ marginRight: '10px' }}>4</span>
+                <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-medium">4</span>
                 <span className="text-indigo-800 text-sm">如果验证通过，显示完整的链上记录</span>
               </li>
             </ol>
