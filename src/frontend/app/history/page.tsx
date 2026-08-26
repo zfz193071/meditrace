@@ -8,6 +8,7 @@ interface HistoryRecord {
   timestamp: number;
   diseaseTypes: string[];
   chainStatus: "pending" | "confirmed" | "failed";
+  ipfsCid?: string;  // 可选的 IPFS CID 字段
 }
 
 function formatDate(timestamp: number): string {
@@ -258,6 +259,11 @@ export default function HistoryPage() {
                     </button>
                     <button
                        onClick={async () => {
+                         // 检查是否有 ipfsCid
+                         if (!record.ipfsCid) {
+                           alert("该诊断记录尚未生成报告，无法下载。");
+                           return;
+                         }
                          try {
                            const response = await fetch(
                              `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/report/${record.diagnosisId}`
@@ -290,9 +296,10 @@ export default function HistoryPage() {
                            alert(errorMessage);
                          }
                        }}
-                       className="btn-secondary flex items-center gap-2"
+                       className={`btn-secondary flex items-center gap-2 ${!record.ipfsCid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                       disabled={!record.ipfsCid}
                      >
-                      <span>📄</span> 下载报告
+                      <span>📄</span> {record.ipfsCid ? '下载报告' : '无报告'}
                     </button>
                   </div>
                 </div>

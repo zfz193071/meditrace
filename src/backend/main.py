@@ -97,6 +97,7 @@ class HistoryRecord(BaseModel):
     timestamp: int
     diseaseTypes: List[str]
     chainStatus: str
+    ipfsCid: Optional[str] = None
 
 
 class HistoryResponse(BaseModel):
@@ -306,7 +307,8 @@ async def get_history(userId: str):
                     "diagnosisId": diag_id_hex,
                     "timestamp": record.get("timestamp", 0),
                     "diseaseTypes": [],  # 疾病类型需要从诊断数据中解析
-                    "chainStatus": "confirmed" if record else "pending"
+                    "chainStatus": "confirmed" if record else "pending",
+                    "ipfsCid": record.get("ipfsCid", "")  # 添加 IPFS CID 字段
                 })
         
         print(f"✓ 返回 {len(records)} 条记录")
@@ -386,9 +388,10 @@ async def download_report(diagnosisId: str):
     
     if not ipfs_cid:
         # 记录存在但没有 IPFS CID，可能是上链时 IPFS 上传失败
+        # 提供更有用的错误信息，包含诊断 ID 供排查
         raise HTTPException(
             status_code=404, 
-            detail=f"报告未找到：该诊断记录尚未生成报告 (IPFS CID 为空)。请重新进行诊断以生成报告。"
+            detail=f"报告未找到：诊断 ID {diagnosisId} 的记录中 IPFS CID 为空。可能的原因：1) 诊断时 IPFS 上传失败 2) 上链时未正确存储 CID。请联系技术支持。"
         )
     
     # 从 IPFS 下载报告
@@ -398,36 +401,78 @@ async def download_report(diagnosisId: str):
     # 使用 Pinata API 直接下载（使用 JWT token）
     jwt_token = os.getenv("PINATA_JWT_TOKEN")
     
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        # 使用 Pinata API 下载文件
-        headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else {}
-        
-        # 尝试多个网关，提高成功率
-        gateways = [
-            f"https://{ipfs_cid}.ipfs.pinata.cloud",
-            f"https://ipfs.io/ipfs/{ipfs_cid}",
-            f"https://cloudflare-ipfs.com/ipfs/{ipfs_cid}"
-        ]
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        # 如果有 JWT token，使用 Pinata 网关（带认证）
+        # 否则使用公共网关
+        if jwt_token:
+            headers = {"Authorization": f"Bearer {jwt_token}"}
+            # 优先使用 Pinata 网关（带认证）
+            gateways = [
+                (f"https://{ipfs_cid}.ipfs.pinata.cloud", headers, 60, "gateway"),
+                (f"https://gateway.pinata.cloud/ipfs/{ipfs_cid}", headers, 60, "gateway"),
+                (f"https://ipfs.io/ipfs/{ipfs_cid}", {}, 60, "gateway"),
+                (f"https://cloudflare-ipfs.com/ipfs/{ipfs_cid}", {}, 60, "gateway")
+            ]
+        else:
+            # 没有 JWT token，只使用公共网关
+            gateways = [
+                (f"https://gateway.pinata.cloud/ipfs/{ipfs_cid}", {}, 60, "gateway"),
+                (f"https://ipfs.io/ipfs/{ipfs_cid}", {}, 60, "gateway"),
+                (f"https://cloudflare-ipfs.com/ipfs/{ipfs_cid}", {}, 60, "gateway"),
+                (f"https://{ipfs_cid}.ipfs.pinata.cloud", {}, 60, "gateway")
+            ]
         
         response = None
-        for gateway_url in gateways:
+        last_error = None
+        for gateway_url, headers, timeout, gateway_type in gateways:
             try:
-                print(f"尝试下载：{gateway_url}")
-                response = await client.get(gateway_url, headers=headers)
-                if response.status_code == 200:
+                print(f"尝试下载 ({gateway_type}): {gateway_url}")
+                resp = await client.get(gateway_url, headers=headers, timeout=timeout)
+                
+                if gateway_type == "api" and resp.status_code == 200:
+                    # Pinata API 返回的是 JSON，需要提取文件内容
+                    data = resp.json()
+                    # 从 API 响应中获取文件内容
+                    if data.get("pinData") and data["pinData"].get("metadata") and data["pinData"]["metadata"].get("ipfsIndex"):
+                        # 有索引文件，需要获取实际文件内容
+                        print("⚠️ Pinata API 返回索引，需要直接下载文件")
+                        # 回退到网关下载
+                        continue
+                    
+                    # 尝试从响应中提取文件内容
+                    file_content = data.get("data") or data.get("Content")
+                    if file_content:
+                        print(f"✓ 从 Pinata API 获取到文件元数据")
+                        # 实际上我们需要文件内容，所以还是用网关
+                        continue
+                
+                if resp.status_code == 200:
                     print(f"✓ 成功从 {gateway_url} 下载报告")
+                    response = resp
                     break
-                else:
-                    print(f"⚠️ {gateway_url} 返回 {response.status_code}")
+                elif resp.status_code in [401, 403]:
+                    print(f"⚠️ {gateway_url} 需要认证，跳过")
                     response = None
-            except Exception as e:
-                print(f"⚠️ {gateway_url} 连接失败：{e}")
+                else:
+                    print(f"⚠️ {gateway_url} 返回 {resp.status_code}")
+                    response = None
+                    last_error = f"HTTP {resp.status_code}"
+            except httpx.TimeoutException:
+                print(f"⚠️ {gateway_url} 超时")
                 response = None
+                last_error = "timeout"
+            except Exception as e:
+                print(f"⚠️ {gateway_url} 连接失败：{type(e).__name__}: {str(e)[:100]}")
+                response = None
+                last_error = f"{type(e).__name__}: {str(e)[:100]}"
         
         if not response:
+            error_detail = f"无法下载报告：所有 IPFS 网关均不可用 (CID: {ipfs_cid})"
+            if last_error:
+                error_detail += f" - 最后错误：{last_error}"
             raise HTTPException(
                 status_code=500, 
-                detail=f"无法下载报告：所有 IPFS 网关均不可用，请稍后重试"
+                detail=error_detail
             )
         
         if response.status_code == 404:

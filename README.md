@@ -156,13 +156,21 @@ npx hardhat node                    # 终端 1: 启动本地节点
 npx hardhat run scripts/deploy.ts --network localhost
 
 # 3. 安装并启动后端
+
+⚠️ **重要：必须使用虚拟环境 (venv)**
+
+```bash
 cd ../../src/backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+python -m venv venv              # 仅首次执行
+source venv/bin/activate         # 激活虚拟环境
+pip install -r requirements.txt  # 安装依赖（含 httpx 等）
 cp .env.example .env
 # 编辑 .env，填入 API Key
-uvicorn main:app --reload
+# 使用 venv 的 Python 启动
+./venv/bin/python3 -m uvicorn main:app --reload
+```
+
+📚 **IPFS 配置：** 详见 [docs/IPFS_SETUP.md](docs/IPFS_SETUP.md)
 
 # 4. 安装并启动前端
 cd ../../src/frontend
