@@ -54,6 +54,7 @@ export default function HistoryPage() {
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
   const [addressError, setAddressError] = useState("");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   
   const validateAddress = (address: string): boolean => {
     if (!address) {
