@@ -28,6 +28,30 @@ from ipfs_service import get_ipfs_client, generate_report
 # 导入数据模型
 from models import DiagnosisMetadata, DiagnosisResult
 
+# 导入工具函数
+from utils.hex_utils import to_hex_str
+
+
+def get_cors_origins() -> list[str]:
+    """
+    从环境变量获取 CORS 允许的来源列表
+    
+    环境变量格式：逗号分隔的 URL 列表
+    例如：CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+    """
+    cors_origins_env = os.getenv("CORS_ORIGINS")
+    if cors_origins_env:
+        return [origin.strip() for origin in cors_origins_env.split(",")]
+    
+    # 默认开发环境配置
+    return [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+    ]
+
+
 # CORS 配置 - 必须在 FastAPI app 创建后立即添加，且在所有其他中间件之前
 app = FastAPI(
     title="MediTrace API",
@@ -38,16 +62,11 @@ app = FastAPI(
 # 添加 CORS 中间件 - 允许前端访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:8000",
-    ],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
+    expose_headers=["X-Diagnosis-ID, X-Chain-Tx-Hash"],
     max_age=3600,
 )
 
@@ -230,7 +249,7 @@ async def get_history(userId: str):
         records = []
         for diag_id_bytes in diagnosis_ids:
             # 将 bytes 转换为 hex 字符串
-            diag_id_hex = '0x' + diag_id_bytes.hex()
+            diag_id_hex = to_hex_str(diag_id_bytes)
             
             # 获取每条记录的详细信息
             record = blockchain.verify_diagnosis(diag_id_bytes)
@@ -270,7 +289,7 @@ async def verify_diagnosis(diagnosisId: str):
             # 将 bytes 类型的 dataHash 转换为 hex 字符串
             data_hash = record.get("dataHash", b"")
             if isinstance(data_hash, bytes):
-                data_hash = "0x" + data_hash.hex()
+                data_hash = to_hex_str(data_hash)
             
             return {
                 "isValid": True,

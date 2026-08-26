@@ -8,6 +8,39 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   // 用户地址 - 生产环境应该从钱包连接或环境变量获取
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094a6DACb53D02Fa9d0B");
+  const [addressError, setAddressError] = useState("");
+  
+  // 验证以太坊地址格式
+  const validateAddress = (address: string): boolean => {
+    if (!address) {
+      setAddressError("");
+      return true;
+    }
+    // 检查是否以 0x 开头
+    if (!address.startsWith("0x")) {
+      setAddressError("地址必须以 0x 开头");
+      return false;
+    }
+    // 检查长度 (以太坊地址为 42 字符: 0x + 40 个十六进制字符)
+    if (address.length !== 42) {
+      setAddressError("地址长度不正确 (应为 42 字符)");
+      return false;
+    }
+    // 检查是否为有效的十六进制
+    const hexPart = address.slice(2);
+    if (!/^[0-9a-fA-F]{40}$/.test(hexPart)) {
+      setAddressError("地址包含无效的十六进制字符");
+      return false;
+    }
+    setAddressError("");
+    return true;
+  };
+  
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setUserId(newValue);
+    validateAddress(newValue);
+  };
 
   const handleDiagnose = async () => {
     if (!symptoms.trim()) return;
@@ -61,11 +94,18 @@ export default function Home() {
             </label>
             <input
               type="text"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:border-transparent font-mono text-sm ${
+                addressError 
+                  ? "border-red-300 focus:ring-red-500" 
+                  : "border-gray-300 focus:ring-green-500"
+              }`}
               placeholder="0x..."
               value={userId}
-              onChange={(e) => setUserId(e.target.value)}
+              onChange={handleAddressChange}
             />
+            {addressError && (
+              <p className="text-xs text-red-600 mt-1">{addressError}</p>
+            )}
             <p className="text-xs text-gray-500 mt-1">
               生产环境建议集成 MetaMask 等钱包连接
             </p>

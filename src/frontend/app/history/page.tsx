@@ -16,10 +16,36 @@ export default function HistoryPage() {
   const [records, setRecords] = useState<HistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094a6DACb53D02Fa9d0B");
+  const [addressError, setAddressError] = useState("");
+  
+  // 验证以太坊地址格式
+  const validateAddress = (address: string): boolean => {
+    if (!address) {
+      setAddressError("");
+      return true;
+    }
+    if (!address.startsWith("0x")) {
+      setAddressError("地址必须以 0x 开头");
+      return false;
+    }
+    if (address.length !== 42) {
+      setAddressError("地址长度不正确 (应为 42 字符)");
+      return false;
+    }
+    const hexPart = address.slice(2);
+    if (!/^[0-9a-fA-F]{40}$/.test(hexPart)) {
+      setAddressError("地址包含无效的十六进制字符");
+      return false;
+    }
+    setAddressError("");
+    return true;
+  };
   
   // 允许用户修改地址
   const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserId(e.target.value);
+    const newValue = e.target.value;
+    setUserId(newValue);
+    validateAddress(newValue);
   };
 
   useEffect(() => {
@@ -74,11 +100,18 @@ export default function HistoryPage() {
             <label className="text-xs text-gray-500">切换用户地址:</label>
             <input
               type="text"
-              className="w-full mt-1 p-2 border border-gray-300 rounded font-mono text-xs"
+              className={`w-full mt-1 p-2 border rounded font-mono text-xs ${
+                addressError 
+                  ? "border-red-300" 
+                  : "border-gray-300"
+              }`}
               placeholder="0x..."
               value={userId}
               onChange={handleUserIdChange}
             />
+            {addressError && (
+              <p className="text-xs text-red-600 mt-1">{addressError}</p>
+            )}
           </div>
         </section>
 

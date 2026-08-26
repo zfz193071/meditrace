@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 from web3 import Web3
 from web3.exceptions import ContractLogicError, TimeExhausted
 
+# 导入工具函数
+from utils.hex_utils import ensure_bytes32
+
 load_dotenv(override=True)
 
 
@@ -114,15 +117,17 @@ class BlockchainClient:
             
             account_addr = account.address
             
-            # 将 data_hash 从 hex 字符串转换为 bytes32
-            if data_hash.startswith('0x'):
-                data_hash_bytes = bytes.fromhex(data_hash[2:])
-            else:
-                data_hash_bytes = bytes.fromhex(data_hash)
+            # 将 data_hash 转换为 bytes32 (使用工具函数)
+            data_hash_bytes = ensure_bytes32(data_hash)
             
             # 构建交易参数
             nonce = self.w3.eth.get_transaction_count(account_addr)
-            gas_price = self.get_gas_price()
+            
+            # 使用 EIP-1559 交易格式 (Sepolia 标准)
+            latest_block = self.w3.eth.get_block('latest')
+            base_fee = latest_block['baseFeePerGas']
+            max_priority_fee = self.w3.eth.max_priority_fee
+            max_fee_per_gas = base_fee * 2 + max_priority_fee
             
             # 估算 Gas
             gas_estimate = self.contract.functions.recordDiagnosis(
@@ -134,7 +139,7 @@ class BlockchainClient:
                 'from': account_addr,
             })
             
-            # 构建交易
+            # 构建交易 (EIP-1559)
             tx = self.contract.functions.recordDiagnosis(
                 data_hash_bytes,
                 model_version,
@@ -144,7 +149,8 @@ class BlockchainClient:
                 'from': account_addr,
                 'nonce': nonce,
                 'gas': int(gas_estimate * 1.2),
-                'gasPrice': gas_price,
+                'maxFeePerGas': max_fee_per_gas,
+                'maxPriorityFeePerGas': max_priority_fee,
             })
             
             # 签名并发送交易
