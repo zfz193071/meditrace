@@ -230,6 +230,7 @@ MediTrace 是一个**医疗 AI 诊断溯源系统**，核心创新点：
       "timestamp": number;
       "diseaseTypes": string[];
       "chainStatus": "pending" | "confirmed" | "failed";
+      "ipfsCid": string;  // IPFS 报告 CID（FR-05 要求）
     }
   ]
 }

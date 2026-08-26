@@ -5,7 +5,7 @@ MediTrace Backend API
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 import hashlib
 import os
@@ -13,6 +13,28 @@ import json
 from dotenv import load_dotenv
 import asyncio
 from datetime import datetime
+
+
+def camel_case_generator(value: str) -> str:
+    """将 snake_case 转换为 camelCase"""
+    parts = value.split('_')
+    return parts[0] + ''.join(word.capitalize() for word in parts[1:])
+
+
+# Pydantic v2 配置基类
+class BaseApiModel(BaseModel):
+    """API 模型基类，自动将字段名转换为 camelCase"""
+    model_config = {
+        'populate_by_name': True,
+    }
+    
+    # Pydantic v2 使用 model_dump 时的别名配置
+    @classmethod
+    def model_dump_json(cls, *args, **kwargs):
+        # 使用别名输出 JSON
+        if 'by_alias' not in kwargs:
+            kwargs['by_alias'] = True
+        return super().model_dump_json(*args, **kwargs)
 
 # 加载环境变量
 load_dotenv(override=True)
@@ -78,36 +100,36 @@ class SymptomInput(BaseModel):
     userId: str
 
 
-class DiagnosisSuggestion(BaseModel):
-    disease: str
-    confidence: float
-    recommendations: List[str]
+class DiagnosisSuggestion(BaseApiModel):
+    disease: str = Field(..., alias="disease")
+    confidence: float = Field(..., alias="confidence")
+    recommendations: List[str] = Field(..., alias="recommendations")
 
 
-class DiagnosisResponse(BaseModel):
-    diagnosisId: str
-    suggestions: List[DiagnosisSuggestion]
-    disclaimer: str
-    ipfsCid: Optional[str] = None
-    chainTxHash: Optional[str] = None
+class DiagnosisResponse(BaseApiModel):
+    diagnosis_id: str = Field(..., alias="diagnosisId")
+    suggestions: List[DiagnosisSuggestion] = Field(..., alias="suggestions")
+    disclaimer: str = Field(..., alias="disclaimer")
+    ipfs_cid: Optional[str] = Field(None, alias="ipfsCid")
+    chain_tx_hash: Optional[str] = Field(None, alias="chainTxHash")
 
 
-class HistoryRecord(BaseModel):
-    diagnosisId: str
-    timestamp: int
-    diseaseTypes: List[str]
-    chainStatus: str
-    ipfsCid: Optional[str] = None
+class HistoryRecord(BaseApiModel):
+    diagnosis_id: str = Field(..., alias="diagnosisId")
+    timestamp: int = Field(..., alias="timestamp")
+    disease_types: List[str] = Field(..., alias="diseaseTypes")
+    chain_status: str = Field(..., alias="chainStatus")
+    ipfs_cid: Optional[str] = Field(None, alias="ipfsCid")
 
 
-class HistoryResponse(BaseModel):
-    records: List[HistoryRecord]
+class HistoryResponse(BaseApiModel):
+    records: List[HistoryRecord] = Field(..., alias="records")
 
 
-class VerificationResponse(BaseModel):
-    isValid: bool
-    chainRecord: Optional[dict]
-    ipfsCid: str
+class VerificationResponse(BaseApiModel):
+    is_valid: bool = Field(..., alias="isValid")
+    chain_record: Optional[dict] = Field(None, alias="chainRecord")
+    ipfs_cid: str = Field(..., alias="ipfsCid")
 
 
 # 健康检查
@@ -304,11 +326,11 @@ async def get_history(userId: str):
             record = blockchain.verify_diagnosis(diag_id_bytes)
             if record:
                 records.append({
-                    "diagnosisId": diag_id_hex,
+                    "diagnosis_id": diag_id_hex,
                     "timestamp": record.get("timestamp", 0),
-                    "diseaseTypes": [],  # 疾病类型需要从诊断数据中解析
-                    "chainStatus": "confirmed" if record else "pending",
-                    "ipfsCid": record.get("ipfsCid", "")  # 添加 IPFS CID 字段
+                    "disease_types": [],  # 疾病类型需要从诊断数据中解析
+                    "chain_status": "confirmed" if record else "pending",
+                    "ipfs_cid": record.get("ipfsCid", "")  # 添加 IPFS CID 字段
                 })
         
         print(f"✓ 返回 {len(records)} 条记录")
@@ -345,20 +367,20 @@ async def verify_diagnosis(diagnosisId: str):
                 data_hash = to_hex_str(data_hash)
             
             return {
-                "isValid": True,
-                "chainRecord": {
-                    "dataHash": data_hash,
-                    "modelVersion": record.get("modelVersion", ""),
+                "is_valid": True,
+                "chain_record": {
+                    "data_hash": data_hash,
+                    "model_version": record.get("modelVersion", ""),
                     "timestamp": record.get("timestamp", 0)
                 },
-                "ipfsCid": record.get("ipfsCid", "")
+                "ipfs_cid": record.get("ipfsCid", "")
             }
         else:
             # 记录不存在
             return {
-                "isValid": False,
-                "chainRecord": None,
-                "ipfsCid": ""
+                "is_valid": False,
+                "chain_record": None,
+                "ipfs_cid": ""
             }
             
     except Exception as e:
