@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 interface ChainRecord {
@@ -32,7 +32,7 @@ function copyToClipboard(text: string) {
   alert("已复制到剪贴板");
 }
 
-export default function VerifyPage() {
+function VerifyPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const diagnosisId = searchParams.get("diagnosisId") || "";
@@ -277,5 +277,13 @@ export default function VerifyPage() {
         </div>
       </footer>
     </main>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
+      <VerifyPageContent />
+    </Suspense>
   );
 }

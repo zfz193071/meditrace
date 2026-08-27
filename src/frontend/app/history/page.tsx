@@ -96,7 +96,7 @@ export default function HistoryPage() {
       );
       const data = await response.json();
       const records = data.records || [];
-      records.sort((a, b) => b.timestamp - a.timestamp);
+      records.sort((a: HistoryRecord, b: HistoryRecord) => b.timestamp - a.timestamp);
       setRecords(records);
     } catch (error) {
       console.error("获取历史记录失败:", error);
