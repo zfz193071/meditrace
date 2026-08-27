@@ -59,6 +59,9 @@ src/contracts/deployment.json
 # IPFS
 .ipfs/
 
+# Private documentation with API keys and secrets
+docs/private/
+
 # Misc
 *.bak
 *.tmp

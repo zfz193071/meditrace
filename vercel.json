@@ -1,0 +1,19 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["hkg1"],
+  "env": {
+    "NEXT_PUBLIC_BACKEND_URL": "https://meditrace-api.onrender.com",
+    "NEXT_PUBLIC_CONTRACT_ADDRESS": "0x860418e7713A346c829Bc539C93c7A2d576897C5",
+    "NEXT_PUBLIC_RPC_URL": "https://ethereum-sepolia-rpc.publicnode.com"
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://meditrace-api.onrender.com/api/:path*"
+    }
+  ]
+}
