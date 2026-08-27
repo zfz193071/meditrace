@@ -372,11 +372,12 @@ async def verify_diagnosis(diagnosisId: str):
             return {
                 "is_valid": True,
                 "chain_record": {
-                    "data_hash": data_hash,
-                    "model_version": record.get("modelVersion", ""),
-                    "timestamp": record.get("timestamp", 0)
+                    "dataHash": data_hash,
+                    "modelVersion": record.get("modelVersion", ""),
+                    "timestamp": record.get("timestamp", 0),
+                    "patient": record.get("patient", "")
                 },
-                "ipfs_cid": record.get("ipfsCid", "")
+                "ipfsCid": record.get("ipfsCid", "")
             }
         else:
             # 记录不存在

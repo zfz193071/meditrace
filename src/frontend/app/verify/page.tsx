@@ -18,7 +18,9 @@ interface VerificationResult {
 }
 
 function formatDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleString("zh-CN", {
+  // 后端返回的是秒级时间戳，需要转换为毫秒级
+  const msTimestamp = timestamp > 1e12 ? timestamp : timestamp * 1000;
+  return new Date(msTimestamp).toLocaleString("zh-CN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
