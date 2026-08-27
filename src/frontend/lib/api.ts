@@ -233,7 +233,7 @@ export async function sendMessage(request: SendMessageRequest): Promise<Conversa
   const response = await fetch(`${BASE_URL}/api/conversations/${request.conversationId}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: request.message }),
+    body: JSON.stringify({ content: request.message }),
   });
   return handleResponse<Conversation>(response);
 }
