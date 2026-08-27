@@ -54,7 +54,7 @@ export default function HistoryPage() {
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
   const [addressError, setAddressError] = useState("");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [globalLoading, setGlobalLoading] = useState(false);
   
   const validateAddress = (address: string): boolean => {
     if (!address) {
@@ -112,6 +112,7 @@ export default function HistoryPage() {
     }
     
     setDownloadingId(diagnosisId);
+    setGlobalLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/report/${diagnosisId}`
@@ -143,11 +144,22 @@ export default function HistoryPage() {
       alert(errorMessage);
     } finally {
       setDownloadingId(null);
+      setGlobalLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen home-bg">
+    <main className="min-h-screen home-bg relative">
+      {/* 全局 loading 遮罩层 */}
+      {globalLoading && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl flex items-center gap-4">
+            <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full spinner"></div>
+            <p className="text-lg font-medium text-gray-700">正在下载报告，请稍候...</p>
+          </div>
+        </div>
+      )}
+      
       {/* 头部横幅 */}
       <section className="gradient-bg text-white header-banner">
         <div className="max-w-6xl mx-auto">
@@ -300,7 +312,13 @@ export default function HistoryPage() {
                     </button>
                     <button
                       onClick={() => downloadReport(record.diagnosisId, record.ipfsCid)}
-                      className={`btn-secondary flex items-center gap-2 ${!record.ipfsCid || downloadingId === record.diagnosisId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`btn-secondary flex items-center gap-2 transition-all duration-200 ${
+                        !record.ipfsCid 
+                          ? 'opacity-50 cursor-not-allowed grayscale' 
+                          : downloadingId === record.diagnosisId 
+                            ? 'opacity-75 cursor-wait' 
+                            : 'hover:opacity-80'
+                      }`}
                       disabled={!record.ipfsCid || downloadingId === record.diagnosisId}
                     >
                       {downloadingId === record.diagnosisId ? (
@@ -324,9 +342,11 @@ export default function HistoryPage() {
                           下载中...
                         </>
                       ) : (
-                        <span>📄</span>
+                        <>
+                          <span>📄</span>
+                          {record.ipfsCid ? '下载报告' : '无报告'}
+                        </>
                       )}
-                      {!downloadingId && (record.ipfsCid ? '下载报告' : '无报告')}
                     </button>
                   </div>
                 </div>
