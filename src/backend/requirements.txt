@@ -7,3 +7,7 @@ aiohttp>=3.9.0
 python-multipart>=0.0.9
 web3>=7.0.0
 ipfshttpclient>=0.8.0a2
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
