@@ -306,8 +306,23 @@ export default function Home() {
 
       {/* 导航卡片 */}
       <section className="py-8 page-container">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="card-modern text-center card-bottom-margin">
+              <a
+                href="/conversations"
+                className="group block"
+              >
+                <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                  <span className="text-4xl">💬</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">多轮对话</h3>
+                <p className="text-gray-600">
+                  进行多轮深度诊断咨询
+                </p>
+              </a>
+            </div>
+            
             <div className="card-modern text-center card-bottom-margin">
               <a
                 href="/history"

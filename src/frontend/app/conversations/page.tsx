@@ -43,10 +43,13 @@ export default function ConversationsPage() {
     setLoading(true);
     try {
       const data = await getConversations(userId);
-      setConversations(data);
+      // 确保 data 是数组
+      const conversationsList = Array.isArray(data) ? data : (data?.conversations || data?.items || []);
+      setConversations(conversationsList);
     } catch (error) {
       console.error("加载对话列表失败:", error);
-      alert("加载对话列表失败，请稍后重试");
+      // API 可能还不存在，设置为空数组
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -203,7 +206,7 @@ export default function ConversationsPage() {
                         </button>
                       </div>
                       <p className="text-sm text-gray-500 truncate">
-                        {conv.messages[conv.messages.length - 1]?.content || "暂无消息"}
+                        {conv.messages?.[conv.messages.length - 1]?.content || "暂无消息"}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
                         {formatDate(conv.updatedAt)}
@@ -223,13 +226,13 @@ export default function ConversationsPage() {
                 <div className="p-4 border-b bg-gray-50">
                   <h2 className="text-xl font-bold">{activeConversation.title}</h2>
                   <p className="text-sm text-gray-500">
-                    {activeConversation.messages.length} 条消息
+                    {activeConversation.messages?.length || 0} 条消息
                   </p>
                 </div>
 
                 {/* 消息列表 */}
                 <div className="flex-1 overflow-y-auto p-6">
-                  {activeConversation.messages.map((msg, idx) => (
+                  {activeConversation.messages?.map((msg, idx) => (
                     <div
                       key={idx}
                       className={`mb-4 flex ${

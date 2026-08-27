@@ -31,14 +31,14 @@ export default function Header({
   return (
     <section className="gradient-bg text-white header-banner">
       <div className="max-w-6xl mx-auto">
-        <div className="header-content py-6">
-          <div className="flex items-center gap-4 mb-4">
+        <div className="header-content py-4">
+          <div className="flex items-center gap-3 mb-3">
             {showBackButton && (
               <button
                 onClick={handleBack}
-                className="back-btn flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                className="back-btn flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 <span className="text-sm font-medium">返回</span>
@@ -46,8 +46,8 @@ export default function Header({
             )}
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{title}</h1>
-          {subtitle && <p className="text-lg opacity-90">{subtitle}</p>}
+          <h1 className="text-2xl md:text-3xl font-bold mb-1.5">{title}</h1>
+          {subtitle && <p className="text-base opacity-90">{subtitle}</p>}
         </div>
       </div>
     </section>
