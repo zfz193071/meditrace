@@ -8,6 +8,7 @@ import {
   createConversation,
   getConversations,
   sendMessage,
+  sendMessageStream,
   deleteConversation,
   downloadBlob,
 } from "../../lib/api";
@@ -95,23 +96,43 @@ export default function ConversationsPage() {
       });
       setNewMessage("");
 
-      // 发送消息到后端
-      const response = await sendMessage({
-        conversationId: activeConversation.id,
-        message: newMessage,
-      });
-
-      // 添加 AI 回复
+      // 创建 AI 消息占位符
+      const aiMessageIndex = updatedMessages.length;
       const aiMessage: Message = {
         role: "assistant",
-        content: response.content,
+        content: "", // 初始为空，流式填充
         timestamp: Date.now(),
       };
-      
+
       setActiveConversation({
         ...activeConversation,
         messages: [...updatedMessages, aiMessage],
       });
+
+      // 流式发送消息
+      await sendMessageStream(
+        {
+          conversationId: activeConversation.id,
+          message: newMessage,
+        },
+        (chunk) => {
+          // 更新 AI 消息内容
+          setActiveConversation((prev) => {
+            if (!prev) return prev;
+            const messages = [...prev.messages];
+            if (messages[aiMessageIndex]) {
+              messages[aiMessageIndex] = {
+                ...messages[aiMessageIndex],
+                content: messages[aiMessageIndex].content + chunk.content,
+              };
+            }
+            return {
+              ...prev,
+              messages,
+            };
+          });
+        }
+      );
     } catch (error) {
       console.error("发送消息失败:", error);
       alert("发送消息失败，请稍后重试");

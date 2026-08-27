@@ -236,7 +236,16 @@ export interface SendMessageResponse {
 }
 
 /**
- * 发送消息到对话
+ * 流式消息 chunk
+ */
+export interface StreamMessageChunk {
+  content: string;
+  complete: boolean;
+  error?: string;
+}
+
+/**
+ * 发送消息到对话（普通请求）
  * @param request 发送消息请求
  * @returns AI 回复消息
  */
@@ -247,6 +256,68 @@ export async function sendMessage(request: SendMessageRequest): Promise<SendMess
     body: JSON.stringify({ content: request.message }),
   });
   return handleResponse<SendMessageResponse>(response);
+}
+
+/**
+ * 发送消息到对话（流式请求）
+ * @param request 发送消息请求
+ * @param onChunk 每个 chunk 的回调
+ * @returns 完整的 AI 回复内容
+ */
+export async function sendMessageStream(
+  request: SendMessageRequest,
+  onChunk: (chunk: StreamMessageChunk) => void
+): Promise<string> {
+  const response = await fetch(`${BASE_URL}/api/conversations/${request.conversationId}/messages/stream`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content: request.message }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`API 请求失败：${response.status}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("无法获取响应流");
+  }
+
+  const decoder = new TextDecoder();
+  let fullContent = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value, { stream: true });
+    const lines = chunk.split("\n");
+
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const data = line.slice(6);
+        if (data === "[DONE]") continue;
+
+        try {
+          const parsed: StreamMessageChunk = JSON.parse(data);
+          fullContent += parsed.content;
+          onChunk(parsed);
+
+          if (parsed.error) {
+            throw new Error(parsed.error);
+          }
+
+          if (parsed.complete) {
+            return fullContent;
+          }
+        } catch (e) {
+          console.error("解析流式数据失败:", e);
+        }
+      }
+    }
+  }
+
+  return fullContent;
 }
 
 /**

@@ -5,8 +5,9 @@ MediTrace Backend API
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, AsyncGenerator
 import hashlib
 import os
 import json
@@ -731,6 +732,81 @@ async def send_message(conversation_id: str, request: MessageRequest):
         "followUpQuestions": follow_up_questions,
         "diagnosisResult": diagnosis_result
     }
+
+
+@app.post("/api/conversations/{conversation_id}/messages/stream")
+async def send_message_stream(conversation_id: str, request: MessageRequest):
+    """发送消息并获取 AI 流式回复（SSE）"""
+    import uuid
+    from context_engine import get_context_engine
+    from deepseek_client import get_deepseek_client
+    
+    # 1. 验证对话存在
+    with get_db() as conn:
+        cursor = conn.execute(
+            "SELECT id FROM conversations WHERE id = ?",
+            (conversation_id,)
+        )
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # 2. 保存用户消息
+    user_message_id = str(uuid.uuid4())
+    with get_db() as conn:
+        conn.execute(
+            """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+               VALUES (?, ?, ?, ?, ?)""",
+            (user_message_id, conversation_id, "user", request.content, json.dumps({}))
+        )
+    
+    # 3. 获取上下文窗口
+    context_engine = get_context_engine()
+    context_messages = context_engine.get_conversation_context(conversation_id)
+    
+    # 4. 创建流式响应
+    async def generate_stream() -> AsyncGenerator[str, None]:
+        try:
+            deepseek_client = get_deepseek_client()
+            full_content = ""
+            
+            # 流式调用 DeepSeek API
+            async for chunk in deepseek_client.diagnose_with_context_stream(
+                conversation_id=conversation_id,
+                user_message=request.content,
+                context_messages=context_messages
+            ):
+                full_content += chunk
+                # 发送 SSE 数据
+                yield f"data: {json.dumps({'content': chunk, 'complete': False})}\n\n"
+            
+            # 保存完整的 AI 消息
+            ai_message_id = str(uuid.uuid4())
+            with get_db() as conn:
+                conn.execute(
+                    """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+                       VALUES (?, ?, ?, ?, ?)""",
+                    (ai_message_id, conversation_id, "assistant", full_content, json.dumps({}))
+                )
+                conn.execute(
+                    "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                    (conversation_id,)
+                )
+            
+            # 发送完成信号
+            yield f"data: {json.dumps({'content': full_content, 'complete': True})}\n\n"
+            yield "data: [DONE]\n\n"
+            
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e), 'complete': True})}\n\n"
+    
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        }
+    )
 
 
 # 初始化数据库
