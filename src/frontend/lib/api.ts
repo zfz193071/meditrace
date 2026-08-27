@@ -225,17 +225,28 @@ export async function getConversation(conversationId: string): Promise<Conversat
 }
 
 /**
+ * 发送消息响应
+ */
+export interface SendMessageResponse {
+  messageId: string;
+  content: string;
+  context: string[];
+  followUpQuestions: string[];
+  diagnosisResult: any;
+}
+
+/**
  * 发送消息到对话
  * @param request 发送消息请求
- * @returns 更新后的对话
+ * @returns AI 回复消息
  */
-export async function sendMessage(request: SendMessageRequest): Promise<Conversation> {
+export async function sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
   const response = await fetch(`${BASE_URL}/api/conversations/${request.conversationId}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ content: request.message }),
   });
-  return handleResponse<Conversation>(response);
+  return handleResponse<SendMessageResponse>(response);
 }
 
 /**

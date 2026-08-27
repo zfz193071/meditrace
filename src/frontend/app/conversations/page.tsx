@@ -81,15 +81,42 @@ export default function ConversationsPage() {
 
     setSending(true);
     try {
-      const updated = await sendMessage({
+      // 先添加用户消息到本地状态（乐观更新）
+      const userMessage: Message = {
+        role: "user",
+        content: newMessage,
+        timestamp: Date.now(),
+      };
+
+      const updatedMessages = [...(activeConversation.messages || []), userMessage];
+      setActiveConversation({
+        ...activeConversation,
+        messages: updatedMessages,
+      });
+      setNewMessage("");
+
+      // 发送消息到后端
+      const response = await sendMessage({
         conversationId: activeConversation.id,
         message: newMessage,
       });
-      setActiveConversation(updated);
-      setNewMessage("");
+
+      // 添加 AI 回复
+      const aiMessage: Message = {
+        role: "assistant",
+        content: response.content,
+        timestamp: Date.now(),
+      };
+      
+      setActiveConversation({
+        ...activeConversation,
+        messages: [...updatedMessages, aiMessage],
+      });
     } catch (error) {
       console.error("发送消息失败:", error);
       alert("发送消息失败，请稍后重试");
+      // 失败时重新加载对话列表
+      loadConversations();
     } finally {
       setSending(false);
     }
