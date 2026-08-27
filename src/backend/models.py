@@ -5,9 +5,11 @@
 
 from dataclasses import dataclass
 import hashlib
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 import warnings
+import uuid
+import sqlite3
 
 
 @dataclass
@@ -76,4 +78,89 @@ class DiagnosisResult:
             "chainTxHash": self.chain_tx_hash if self.chain_tx_hash else None,
             "chainStatus": self.chain_status,
             "timestamp": int(datetime.now().timestamp())
+        }
+
+
+# ============================================================================
+# Conversation Models (for multi-turn dialogue system - SPEC-0005)
+# ============================================================================
+
+class Conversation:
+    """对话 ORM 模型"""
+    
+    def __init__(
+        self,
+        patient_id: str,
+        title: str,
+        id: Optional[str] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ):
+        self.id = id or str(uuid.uuid4())
+        self.patient_id = patient_id
+        self.title = title
+        self.created_at = created_at or datetime.now()
+        self.updated_at = updated_at or datetime.now()
+        self.metadata = metadata or {}
+        self.messages: List['Message'] = []
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """转换为字典格式"""
+        return {
+            "id": self.id,
+            "patientId": self.patient_id,
+            "title": self.title,
+            "createdAt": int(self.created_at.timestamp()),
+            "updatedAt": int(self.updated_at.timestamp()),
+            "messageCount": len(self.messages)
+        }
+    
+    def to_api_response(self) -> Dict[str, Any]:
+        """转换为 API 响应格式"""
+        return {
+            "conversationId": self.id,
+            "patientId": self.patient_id,
+            "title": self.title,
+            "createdAt": int(self.created_at.timestamp())
+        }
+
+
+class Message:
+    """消息 ORM 模型"""
+    
+    def __init__(
+        self,
+        conversation_id: str,
+        role: str,
+        content: str,
+        id: Optional[str] = None,
+        timestamp: Optional[datetime] = None,
+        context_refs: Optional[List[str]] = None
+    ):
+        self.id = id or str(uuid.uuid4())
+        self.conversation_id = conversation_id
+        self.role = role  # 'user' or 'assistant'
+        self.content = content
+        self.timestamp = timestamp or datetime.now()
+        self.context_refs = context_refs or []
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """转换为字典格式"""
+        return {
+            "id": self.id,
+            "conversationId": self.conversation_id,
+            "role": self.role,
+            "content": self.content,
+            "timestamp": int(self.timestamp.timestamp()),
+            "contextRefs": self.context_refs
+        }
+    
+    def to_api_response(self) -> Dict[str, Any]:
+        """转换为 API 响应格式"""
+        return {
+            "messageId": self.id,
+            "role": self.role,
+            "content": self.content,
+            "timestamp": int(self.timestamp.timestamp())
         }

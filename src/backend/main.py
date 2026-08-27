@@ -49,10 +49,13 @@ from blockchain_client import get_blockchain_client
 from ipfs_service import get_ipfs_client, generate_report
 
 # 导入数据模型
-from models import DiagnosisMetadata, DiagnosisResult
+from models import DiagnosisMetadata, DiagnosisResult, Conversation, Message
 
 # 导入工具函数
 from utils.hex_utils import to_hex_str
+
+# 导入数据库
+from database import init_database, get_db
 
 
 def get_cors_origins() -> list[str]:
@@ -511,6 +514,229 @@ async def download_report(diagnosisId: str):
                 "Content-Disposition": f"attachment; filename=diagnosis-report-{diagnosisId}.pdf"
             }
         )
+
+
+# ============================================================================
+# Conversation API (多轮对话系统 - SPEC-0005)
+# ============================================================================
+
+class CreateConversationRequest(BaseModel):
+    patientId: str
+    title: str
+
+
+class MessageRequest(BaseModel):
+    content: str
+    contextWindow: int = 5
+
+
+@app.post("/api/conversations")
+async def create_conversation(request: CreateConversationRequest):
+    """创建新对话"""
+    conversation = Conversation(
+        patient_id=request.patientId,
+        title=request.title
+    )
+    
+    with get_db() as conn:
+        conn.execute(
+            """INSERT INTO conversations (id, patient_id, title, metadata)
+               VALUES (?, ?, ?, ?)""",
+            (conversation.id, conversation.patient_id, conversation.title, json.dumps({}))
+        )
+    
+    return {
+        "conversationId": conversation.id,
+        "patientId": conversation.patient_id,
+        "title": conversation.title,
+        "createdAt": int(conversation.created_at.timestamp())
+    }
+
+
+@app.get("/api/conversations")
+async def get_conversations(patientId: Optional[str] = None, limit: int = 10, offset: int = 0):
+    """获取对话列表"""
+    with get_db() as conn:
+        if patientId:
+            cursor = conn.execute(
+                """SELECT id, title, created_at, updated_at,
+                          (SELECT COUNT(*) FROM messages WHERE conversation_id = conversations.id) as message_count
+                   FROM conversations
+                   WHERE patient_id = ?
+                   ORDER BY updated_at DESC
+                   LIMIT ? OFFSET ?""",
+                (patientId, limit, offset)
+            )
+        else:
+            cursor = conn.execute(
+                """SELECT id, title, created_at, updated_at,
+                          (SELECT COUNT(*) FROM messages WHERE conversation_id = conversations.id) as message_count
+                   FROM conversations
+                   ORDER BY updated_at DESC
+                   LIMIT ? OFFSET ?""",
+                (limit, offset)
+            )
+        
+        rows = cursor.fetchall()
+        
+        count_cursor = conn.execute(
+            "SELECT COUNT(*) FROM conversations" + (" WHERE patient_id = ?" if patientId else ""),
+            (patientId,) if patientId else ()
+        )
+        total = count_cursor.fetchone()[0]
+    
+    conversations = []
+    for row in rows:
+        conversations.append({
+            "id": row["id"],
+            "title": row["title"],
+            "createdAt": int(row["created_at"].timestamp()) if hasattr(row["created_at"], 'timestamp') else row["created_at"],
+            "updatedAt": int(row["updated_at"].timestamp()) if hasattr(row["updated_at"], 'timestamp') else row["updated_at"],
+            "messageCount": row["message_count"]
+        })
+    
+    return {"conversations": conversations, "total": total}
+
+
+@app.get("/api/conversations/{conversation_id}")
+async def get_conversation(conversation_id: str):
+    """获取单个对话详情"""
+    with get_db() as conn:
+        cursor = conn.execute(
+            """SELECT * FROM conversations WHERE id = ?""",
+            (conversation_id,)
+        )
+        row = cursor.fetchone()
+        
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        
+        messages_cursor = conn.execute(
+            """SELECT * FROM messages WHERE conversation_id = ? ORDER BY timestamp ASC""",
+            (conversation_id,)
+        )
+        messages = messages_cursor.fetchall()
+    
+    conversation_data = {
+        "id": row["id"],
+        "patientId": row["patient_id"],
+        "title": row["title"],
+        "createdAt": int(row["created_at"].timestamp()) if hasattr(row["created_at"], 'timestamp') else row["created_at"],
+        "updatedAt": int(row["updated_at"].timestamp()) if hasattr(row["updated_at"], 'timestamp') else row["updated_at"],
+        "metadata": json.loads(row["metadata"]) if row["metadata"] else {},
+        "messages": [
+            {
+                "id": m["id"],
+                "role": m["role"],
+                "content": m["content"],
+                "timestamp": int(m["timestamp"].timestamp()) if hasattr(m["timestamp"], 'timestamp') else m["timestamp"],
+                "contextRefs": json.loads(m["context_refs"]) if m["context_refs"] else []
+            }
+            for m in messages
+        ]
+    }
+    
+    return conversation_data
+
+
+@app.delete("/api/conversations/{conversation_id}")
+async def delete_conversation(conversation_id: str):
+    """删除对话"""
+    with get_db() as conn:
+        cursor = conn.execute(
+            "SELECT id FROM conversations WHERE id = ?",
+            (conversation_id,)
+        )
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        
+        conn.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
+    
+    return {"success": True, "message": "Conversation deleted"}
+
+
+@app.post("/api/conversations/{conversation_id}/messages")
+async def send_message(conversation_id: str, request: MessageRequest):
+    """发送消息并获取 AI 回复"""
+    import uuid
+    from context_engine import get_context_engine
+    
+    # 1. 验证对话存在
+    with get_db() as conn:
+        cursor = conn.execute(
+            "SELECT id FROM conversations WHERE id = ?",
+            (conversation_id,)
+        )
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # 2. 保存用户消息
+    user_message_id = str(uuid.uuid4())
+    with get_db() as conn:
+        conn.execute(
+            """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+               VALUES (?, ?, ?, ?, ?)""",
+            (user_message_id, conversation_id, "user", request.content, json.dumps({}))
+        )
+    
+    # 3. 获取上下文窗口
+    context_engine = get_context_engine()
+    context_messages = context_engine.get_conversation_context(conversation_id)
+    
+    # 4. 调用 DeepSeek 客户端
+    try:
+        deepseek_client = get_deepseek_client()
+        diagnosis_result = await deepseek_client.diagnose_with_context(
+            conversation_id=conversation_id,
+            user_message=request.content,
+            context_messages=context_messages
+        )
+    except Exception as e:
+        # 如果 AI 调用失败，回退到简单回复
+        diagnosis_result = {
+            "suggestions": [{
+                "disease": "需要进一步评估",
+                "confidence": 0.5,
+                "recommendations": ["请咨询专业医生"]
+            }],
+            "summary": "已收到您的症状描述",
+            "disclaimer": "这仅是建议，不能替代专业医疗诊断"
+        }
+    
+    # 5. 保存 AI 消息
+    ai_message_id = str(uuid.uuid4())
+    ai_content = diagnosis_result.get("summary", "已分析您的症状")
+    
+    with get_db() as conn:
+        conn.execute(
+            """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+               VALUES (?, ?, ?, ?, ?)""",
+            (ai_message_id, conversation_id, "assistant", ai_content, json.dumps(diagnosis_result))
+        )
+        
+        # 更新对话的 updated_at
+        conn.execute(
+            "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (conversation_id,)
+        )
+    
+    # 6. 生成追问问题
+    follow_up_questions = context_engine.generate_follow_up_questions(diagnosis_result)
+    
+    return {
+        "messageId": ai_message_id,
+        "content": ai_content,
+        "context": [msg["content"] for msg in context_messages[-3:]],  # 最近 3 条
+        "followUpQuestions": follow_up_questions,
+        "diagnosisResult": diagnosis_result
+    }
+
+
+# 初始化数据库
+@app.on_event("startup")
+async def startup_event():
+    """启动时初始化数据库"""
+    init_database()
 
 
 if __name__ == "__main__":
