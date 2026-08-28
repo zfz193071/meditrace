@@ -201,7 +201,7 @@ const parseMarkdown = (markdown: string): React.ReactNode[] => {
       const level = headingMatch[1].length;
       const text = headingMatch[2];
       const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
-      const sizeClasses = {
+      const sizeClasses: Record<number, string> = {
         1: "text-3xl font-bold",
         2: "text-2xl font-bold",
         3: "text-xl font-bold",

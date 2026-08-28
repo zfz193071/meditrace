@@ -68,10 +68,25 @@ MediTrace - 医疗 AI 诊断溯源系统
 
 ## 服务管理
 
+### ⚠️ 重要：后端必须使用虚拟环境 (venv)
+
+**每次启动后端前必须激活虚拟环境**，否则会因为系统 Python 环境受保护而启动失败。
+
+```bash
+# 后端启动（必须使用 venv）
+cd src/backend
+source venv/bin/activate    # 激活虚拟环境
+python main.py
+
+# 或者直接使用虚拟环境的 Python
+cd src/backend
+./venv/bin/python main.py
+```
+
 ### 启动服务（手动）
 ```bash
 # 后端
-cd src/backend && python main.py
+cd src/backend && source venv/bin/activate && python main.py
 
 # 前端
 cd src/frontend && pnpm dev
@@ -85,6 +100,12 @@ lsof -ti:8000 | xargs kill 2>/dev/null
 # 停止前端（端口 3000）
 lsof -ti:3000 | xargs kill 2>/dev/null
 ```
+
+### 虚拟环境信息
+- **路径**: `src/backend/venv/`
+- **创建命令**: `python3 -m venv venv`
+- **激活命令**: `source venv/bin/activate`
+- **详细文档**: [DEVELOPMENT_ENV.md](./DEVELOPMENT_ENV.md)
 
 ---
 
