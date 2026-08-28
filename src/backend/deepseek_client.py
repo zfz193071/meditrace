@@ -5,7 +5,7 @@ DeepSeek API 客户端
 
 import os
 import httpx
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -126,9 +126,74 @@ class DeepSeekClient:
         except Exception as e:
             raise Exception(f"诊断处理失败：{str(e)}")
     
+    def _parse_json_from_text(self, text: str) -> Optional[Dict[str, Any]]:
+        """从文本中提取并解析 JSON"""
+        import json
+        import re
+        
+        # 尝试提取 JSON 块
+        json_match = re.search(r'\{[\s\S]*\}', text)
+        if json_match:
+            json_str = json_match.group()
+            try:
+                return json.loads(json_str)
+            except json.JSONDecodeError:
+                return None
+        return None
+    
+    def _format_diagnosis_result(self, parsed: Dict[str, Any]) -> str:
+        """将诊断结果 JSON 格式化为语义化文本"""
+        lines = []
+        
+        # 添加标题
+        lines.append("╔════════════════════════════════════════╗")
+        lines.append("║     医疗 AI 诊断建议                    ║")
+        lines.append("╚════════════════════════════════════════╝")
+        lines.append("")
+        
+        # 添加诊断建议
+        if "suggestions" in parsed and parsed["suggestions"]:
+            lines.append("📋 可能的疾病诊断:")
+            lines.append("")
+            
+            for i, suggestion in enumerate(parsed["suggestions"], 1):
+                disease = suggestion.get("disease", "未知疾病")
+                confidence = suggestion.get("confidence", 0)
+                recommendations = suggestion.get("recommendations", [])
+                
+                # 置信度转换为百分比
+                conf_percent = int(confidence * 100)
+                
+                lines.append(f"  {i}. {disease}")
+                lines.append(f"     置信度：{conf_percent}%")
+                
+                if recommendations:
+                    lines.append(f"     建议检查:")
+                    for rec in recommendations:
+                        lines.append(f"       • {rec}")
+                lines.append("")
+        
+        # 添加总结
+        if "summary" in parsed and parsed["summary"]:
+            lines.append("📝 诊断总结:")
+            lines.append(f"   {parsed['summary']}")
+            lines.append("")
+        
+        # 添加免责声明
+        if "disclaimer" in parsed and parsed["disclaimer"]:
+            lines.append("⚠️  免责声明:")
+            lines.append(f"   {parsed['disclaimer']}")
+        
+        return "\n".join(lines)
+    
     async def diagnose_with_context_stream(self, conversation_id: str, user_message: str, context_messages: List[Dict[str, Any]]):
         """
         调用 DeepSeek API 获取医疗诊断建议（带上下文，流式输出）
+        
+        流程:
+        1. 流式接收 DeepSeek 的 JSON 响应
+        2. 累积完整响应后解析 JSON
+        3. 将 JSON 转换为语义化文本并流式输出
         
         Args:
             conversation_id: 对话 ID（用于追踪）
@@ -136,7 +201,7 @@ class DeepSeekClient:
             context_messages: 历史上下文消息列表
             
         Yields:
-            流式生成的文本片段
+            格式化后的语义化文本片段
         """
         
         # 医学知识库 RAG - 系统提示词
@@ -149,7 +214,7 @@ class DeepSeekClient:
 4. 根据对话历史，了解用户之前提到的症状和信息
 
 输出格式要求 (必须严格遵守):
-返回 JSON 格式，包含以下字段:
+返回纯 JSON 格式，不包含任何额外文本，包含以下字段:
 {
     "suggestions": [
         {
@@ -169,7 +234,8 @@ class DeepSeekClient:
 - 每个疾病必须有至少 1 个建议检查项目
 - 置信度必须合理，不要全部 1.0 或全部 0.1
 - 免责声明必须明确说明这不是医疗诊断
-- summary 要简洁概括当前诊断状态"""
+- summary 要简洁概括当前诊断状态
+- 只返回 JSON，不要任何 markdown 标记或额外文本"""
 
         # 构建历史对话
         history_text = ""
@@ -183,7 +249,7 @@ class DeepSeekClient:
 
 用户当前症状描述：{user_message}
 
-请按照上述格式返回 JSON 结果。"""
+请按照上述格式返回纯 JSON 结果，不要任何额外文本。"""
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -207,6 +273,9 @@ class DeepSeekClient:
                 ) as response:
                     response.raise_for_status()
                     
+                    # 累积完整的响应内容
+                    full_content = ""
+                    
                     # 逐行读取流式响应
                     async for line in response.aiter_lines():
                         if line.startswith("data: "):
@@ -217,113 +286,26 @@ class DeepSeekClient:
                                 import json
                                 chunk = json.loads(data)
                                 content = chunk["choices"][0]["delta"].get("content", "")
-                                if content:
-                                    yield content
+                                full_content += content
                             except:
                                 pass
+                    
+                    # 解析完整的 JSON 响应
+                    parsed = self._parse_json_from_text(full_content)
+                    
+                    if parsed:
+                        # 格式化为语义化文本
+                        formatted_text = self._format_diagnosis_result(parsed)
+                        
+                        # 流式输出格式化后的文本
+                        chunk_size = 10  # 每次输出 10 个字符
+                        for i in range(0, len(formatted_text), chunk_size):
+                            yield formatted_text[i:i + chunk_size]
+                    else:
+                        # 解析失败，返回原始内容
+                        yield "未能解析诊断结果，请稍后重试。\n"
+                        yield f"原始响应：{full_content[:200]}..."
                                 
-        except httpx.HTTPError as e:
-            raise Exception(f"DeepSeek API 调用失败：{str(e)}")
-        except Exception as e:
-            raise Exception(f"诊断处理失败：{str(e)}")
-        """
-        调用 DeepSeek API 获取医疗诊断建议（带上下文）
-        
-        Args:
-            conversation_id: 对话 ID（用于追踪）
-            user_message: 当前用户消息
-            context_messages: 历史上下文消息列表
-            
-        Returns:
-            诊断建议，包含疾病列表、置信度、建议检查
-        """
-        
-        # 医学知识库 RAG - 系统提示词
-        system_prompt = """你是一位专业的医疗 AI 助手，负责提供诊断建议。
-
-重要原则:
-1. 你提供的只是**建议**,不是**医疗诊断**,不能替代专业医生
-2. 必须明确告知用户咨询专业医生
-3. 对于紧急情况，建议立即就医
-4. 根据对话历史，了解用户之前提到的症状和信息
-
-输出格式要求 (必须严格遵守):
-返回 JSON 格式，包含以下字段:
-{
-    "suggestions": [
-        {
-            "disease": "疾病名称",
-            "confidence": 0.0-1.0 之间的数字，表示置信度,
-            "recommendations": ["建议检查项目 1", "建议检查项目 2", ...]
-        },
-        ...
-    ],
-    "summary": "对本轮对话的总结",
-    "disclaimer": "免责声明文本"
-}
-
-约束:
-- suggestions 数组至少 1 个，最多 5 个可能疾病
-- 按置信度从高到低排序
-- 每个疾病必须有至少 1 个建议检查项目
-- 置信度必须合理，不要全部 1.0 或全部 0.1
-- 免责声明必须明确说明这不是医疗诊断
-- summary 要简洁概括当前诊断状态"""
-
-        # 构建历史对话
-        history_text = ""
-        for msg in context_messages:
-            role = "用户" if msg["role"] == "user" else "助手"
-            history_text += f"\n{role}: {msg['content']}"
-        
-        prompt = f"""请根据以下对话历史和用户当前的症状描述，提供可能的疾病诊断建议:
-
-对话历史:{history_text}
-
-用户当前症状描述：{user_message}
-
-请按照上述格式返回 JSON 结果。"""
-
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    f"{self.base_url}/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": self.model,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "temperature": 0.3,
-                        "max_tokens": 1500
-                    }
-                )
-                
-                response.raise_for_status()
-                result = response.json()
-                
-                # 解析 AI 返回
-                ai_content = result["choices"][0]["message"]["content"]
-                
-                # 提取 JSON (AI 可能返回额外文本)
-                import json
-                import re
-                
-                # 尝试提取 JSON 块
-                json_match = re.search(r'\{[\s\S]*\}', ai_content)
-                if json_match:
-                    json_str = json_match.group()
-                    parsed = json.loads(json_str)
-                else:
-                    # 直接尝试解析
-                    parsed = json.loads(ai_content)
-                
-                return parsed
-                
         except httpx.HTTPError as e:
             raise Exception(f"DeepSeek API 调用失败：{str(e)}")
         except Exception as e:
