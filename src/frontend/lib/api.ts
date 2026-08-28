@@ -242,7 +242,7 @@ export async function getConversations(userId: string): Promise<Conversation[]> 
       
       return {
         id: conv.id,
-        userId,
+        patientId: userId,
         title: conv.title,
         messages: convDetail.messages || [],
         createdAt: convDetail.createdAt,

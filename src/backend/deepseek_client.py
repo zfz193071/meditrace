@@ -300,7 +300,6 @@ class DeepSeekClient:
                             chunk = formatted_text[i:i + chunk_size]
                             yield chunk
                             # 添加延迟，让前端有时间更新 UI（20-50ms 随机延迟，模拟真实打字速度）
-                            import random
                             await asyncio.sleep(random.uniform(0.02, 0.05))
                     else:
                         # 解析失败，返回原始内容
