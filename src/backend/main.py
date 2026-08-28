@@ -551,7 +551,8 @@ async def create_conversation(request: CreateConversationRequest):
         "conversationId": conversation.id,
         "patientId": conversation.patient_id,
         "title": conversation.title,
-        "createdAt": int(conversation.created_at.timestamp())
+        "createdAt": int(conversation.created_at.timestamp()),
+        "updatedAt": int(conversation.created_at.timestamp())
     }
 
 

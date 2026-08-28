@@ -85,7 +85,7 @@ export interface Message {
  */
 export interface Conversation {
   id: string;
-  userId: string;
+  patientId: string;
   title: string;
   messages: Message[];
   createdAt: number;
@@ -93,10 +93,19 @@ export interface Conversation {
 }
 
 /**
+ * 对话列表项（后端返回的简略格式）
+ */
+export interface ConversationListItem {
+  id: string;
+  title: string;
+  updatedAt: number;
+}
+
+/**
  * 创建对话请求
  */
 export interface CreateConversationRequest {
-  userId: string;
+  patientId: string;
   title: string;
 }
 
@@ -201,7 +210,17 @@ export async function createConversation(request: CreateConversationRequest): Pr
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
   });
-  return handleResponse<Conversation>(response);
+  const data = await handleResponse<any>(response);
+  
+  // 转换后端格式到前端格式
+  return {
+    id: data.conversationId,
+    patientId: data.patientId,
+    title: data.title,
+    messages: [],
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+  };
 }
 
 /**
@@ -210,8 +229,27 @@ export async function createConversation(request: CreateConversationRequest): Pr
  * @returns 对话列表
  */
 export async function getConversations(userId: string): Promise<Conversation[]> {
-  const response = await fetch(`${BASE_URL}/api/conversations?userId=${userId}`);
-  return handleResponse<Conversation[]>(response);
+  const response = await fetch(`${BASE_URL}/api/conversations?patient_id=${userId}`);
+  const data = await handleResponse<{ conversations: ConversationListItem[]; total: number }>(response);
+  
+  // 转换后端格式到前端格式
+  return Promise.all(
+    data.conversations.map(async (conv) => {
+      // 获取每个对话的详细信息和消息
+      const convDetail = await handleResponse<Conversation>(
+        await fetch(`${BASE_URL}/api/conversations/${conv.id}`)
+      );
+      
+      return {
+        id: conv.id,
+        userId,
+        title: conv.title,
+        messages: convDetail.messages || [],
+        createdAt: convDetail.createdAt,
+        updatedAt: conv.updatedAt,
+      };
+    })
+  );
 }
 
 /**
@@ -242,6 +280,51 @@ export interface StreamMessageChunk {
   content: string;
   complete: boolean;
   error?: string;
+}
+
+/**
+ * 格式化消息内容
+ * 检测是否为 JSON 并尝试格式化
+ * @param content 原始内容
+ * @returns 格式化后的内容（如果是 JSON 则美化显示）
+ */
+export function formatMessageContent(content: string): string {
+  const trimmed = content.trim();
+  
+  // 只有当内容看起来像完整的 JSON 时才格式化
+  // 在流式传输过程中，JSON 可能不完整，此时直接返回原文
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    try {
+      // 尝试解析 JSON
+      const parsed = JSON.parse(trimmed);
+      // 格式化 JSON（缩进 2 空格）
+      return JSON.stringify(parsed, null, 2);
+    } catch (e) {
+      // JSON 不完整或格式错误，返回原文
+      // 这在流式传输中很常见，因为内容还在加载中
+    }
+  }
+  
+  return content;
+}
+
+/**
+ * 检查内容是否为 JSON 格式
+ * @param content 内容字符串
+ * @returns 是否为 JSON
+ */
+export function isJsonContent(content: string): boolean {
+  const trimmed = content.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return false;
+  }
+  
+  try {
+    JSON.parse(trimmed);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**

@@ -4,6 +4,9 @@ DeepSeek API 客户端
 """
 
 import os
+import json
+import random
+import asyncio
 import httpx
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
@@ -144,12 +147,6 @@ class DeepSeekClient:
     def _format_diagnosis_result(self, parsed: Dict[str, Any]) -> str:
         """将诊断结果 JSON 格式化为语义化文本"""
         lines = []
-        
-        # 添加标题
-        lines.append("╔════════════════════════════════════════╗")
-        lines.append("║     医疗 AI 诊断建议                    ║")
-        lines.append("╚════════════════════════════════════════╝")
-        lines.append("")
         
         # 添加诊断建议
         if "suggestions" in parsed and parsed["suggestions"]:
@@ -297,10 +294,14 @@ class DeepSeekClient:
                         # 格式化为语义化文本
                         formatted_text = self._format_diagnosis_result(parsed)
                         
-                        # 流式输出格式化后的文本
-                        chunk_size = 10  # 每次输出 10 个字符
+                        # 流式输出格式化后的文本（添加延迟实现打字机效果）
+                        chunk_size = 3  # 每次输出 3 个字符（更小的 chunk 让效果更流畅）
                         for i in range(0, len(formatted_text), chunk_size):
-                            yield formatted_text[i:i + chunk_size]
+                            chunk = formatted_text[i:i + chunk_size]
+                            yield chunk
+                            # 添加延迟，让前端有时间更新 UI（20-50ms 随机延迟，模拟真实打字速度）
+                            import random
+                            await asyncio.sleep(random.uniform(0.02, 0.05))
                     else:
                         # 解析失败，返回原始内容
                         yield "未能解析诊断结果，请稍后重试。\n"

@@ -44,9 +44,7 @@ export default function ConversationsPage() {
   const loadConversations = async () => {
     setLoading(true);
     try {
-      const data = await getConversations(userId);
-      // 确保 data 是数组
-      const conversationsList = Array.isArray(data) ? data : (data?.conversations || data?.items || []);
+      const conversationsList = await getConversations(userId);
       setConversations(conversationsList);
     } catch (error) {
       console.error("加载对话列表失败:", error);
@@ -65,7 +63,7 @@ export default function ConversationsPage() {
 
     try {
       const conversation = await createConversation({
-        userId,
+        patientId: userId,
         title: newTitle,
       });
       setConversations([conversation, ...conversations]);
@@ -313,7 +311,7 @@ export default function ConversationsPage() {
                               <MarkdownRenderer
                                 content={msg.content}
                                 streaming={isAiStreaming}
-                                className={msg.role === "user" ? "" : "prose prose-sm max-w-none"}
+                                className="prose prose-sm max-w-none"
                               />
                             ) : (
                               // 用户消息普通显示
