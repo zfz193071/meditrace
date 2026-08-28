@@ -15,6 +15,7 @@ import {
 import Header from "../../components/Header";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import StatusBadge from "../../components/StatusBadge";
+import MarkdownRenderer from "../../components/MarkdownRenderer";
 
 export default function ConversationsPage() {
   const router = useRouter();
@@ -116,21 +117,28 @@ export default function ConversationsPage() {
           message: newMessage,
         },
         (chunk) => {
-          // 更新 AI 消息内容
-          setActiveConversation((prev) => {
-            if (!prev) return prev;
-            const messages = [...prev.messages];
-            if (messages[aiMessageIndex]) {
-              messages[aiMessageIndex] = {
-                ...messages[aiMessageIndex],
-                content: messages[aiMessageIndex].content + chunk.content,
+          // 使用 setTimeout 确保每个 chunk 都能触发 UI 更新
+          // 避免 React 批量更新导致的显示延迟
+          setTimeout(() => {
+            // 更新 AI 消息内容
+            setActiveConversation((prev) => {
+              if (!prev) return prev;
+              const messages = [...prev.messages];
+              if (messages[aiMessageIndex]) {
+                messages[aiMessageIndex] = {
+                  ...messages[aiMessageIndex],
+                  content: messages[aiMessageIndex].content + chunk.content,
+                };
+              }
+              return {
+                ...prev,
+                messages,
               };
-            }
-            return {
-              ...prev,
-              messages,
-            };
-          });
+            });
+            
+            // 滚动到底部
+            scrollToBottom();
+          }, 0);
         }
       );
     } catch (error) {
@@ -280,31 +288,51 @@ export default function ConversationsPage() {
 
                 {/* 消息列表 */}
                 <div className="flex-1 overflow-y-auto p-6">
-                  {activeConversation.messages?.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`mb-4 flex ${
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
+                  {activeConversation.messages?.map((msg, idx) => {
+                    const isLastMessage = idx === (activeConversation.messages?.length || 0) - 1;
+                    const isAiStreaming = msg.role === "assistant" && isLastMessage && sending;
+                    
+                    return (
                       <div
-                        className={`max-w-[70%] rounded-2xl px-4 py-3 ${
-                          msg.role === "user"
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-100 text-gray-800"
+                        key={idx}
+                        className={`mb-4 flex ${
+                          msg.role === "user" ? "justify-end" : "justify-start"
                         }`}
                       >
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            msg.role === "user" ? "text-green-100" : "text-gray-500"
+                        <div
+                          className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                            msg.role === "user"
+                              ? "bg-green-500 text-white"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
                           }`}
                         >
-                          {formatTime(msg.timestamp)}
-                        </p>
+                          {/* 消息内容 */}
+                          <div className={`text-sm ${msg.role === "user" ? "" : "markdown-container"}`}>
+                            {msg.role === "assistant" ? (
+                              // AI 消息使用 Markdown 渲染器
+                              <MarkdownRenderer
+                                content={msg.content}
+                                streaming={isAiStreaming}
+                                className={msg.role === "user" ? "" : "prose prose-sm max-w-none"}
+                              />
+                            ) : (
+                              // 用户消息普通显示
+                              <p className="whitespace-pre-wrap">{msg.content}</p>
+                            )}
+                          </div>
+                          
+                          {/* 时间戳 */}
+                          <p
+                            className={`text-xs mt-2 ${
+                              msg.role === "user" ? "text-green-100" : "text-gray-500 dark:text-gray-400"
+                            }`}
+                          >
+                            {formatTime(msg.timestamp)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div ref={messagesEndRef} />
                 </div>
 

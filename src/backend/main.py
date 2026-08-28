@@ -792,8 +792,8 @@ async def send_message_stream(conversation_id: str, request: MessageRequest):
                     (conversation_id,)
                 )
             
-            # 发送完成信号
-            yield f"data: {json.dumps({'content': full_content, 'complete': True})}\n\n"
+            # 发送完成信号（content 为空，避免重复累加）
+            yield f"data: {json.dumps({'content': '', 'complete': True})}\n\n"
             yield "data: [DONE]\n\n"
             
         except Exception as e:
