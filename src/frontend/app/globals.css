@@ -68,8 +68,8 @@ body {
 
 /* 头部横幅 padding 和 margin-bottom */
 .header-banner {
-  padding: 2.5rem 2rem 2rem;
-  margin-bottom: 2rem;
+  padding: 0.25rem 2rem;
+  margin-bottom: 0.25rem;
   color: white !important;
 }
 
