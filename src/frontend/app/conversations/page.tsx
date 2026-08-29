@@ -24,19 +24,40 @@ export default function ConversationsPage() {
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const [showNewConversation, setShowNewConversation] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousMessageCountRef = useRef<number>(0);
+  const isInitialMountRef = useRef<boolean>(true);
 
   useEffect(() => {
     loadConversations();
   }, [userId]);
 
+  // 只在发送新消息时自动滚动，切换会话时不滚动
   useEffect(() => {
-    scrollToBottom();
-  }, [activeConversation?.messages]);
+    // 首次渲染或切换会话时不滚动
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      previousMessageCountRef.current = activeConversation?.messages?.length || 0;
+      return;
+    }
+
+    // 只有当消息数量增加时才滚动（新消息到达）
+    const currentCount = activeConversation?.messages?.length || 0;
+    if (currentCount > previousMessageCountRef.current) {
+      scrollToBottom();
+    }
+    previousMessageCountRef.current = currentCount;
+  }, [activeConversation?.messages?.length]);
+
+  // 修复：切换会话时重置状态
+  useEffect(() => {
+    if (activeConversation) {
+      // 切换会话时重置初始标记，但不触发滚动
+      previousMessageCountRef.current = activeConversation.messages?.length || 0;
+    }
+  }, [activeConversation?.id]);
 
   // 响应式检测
   useEffect(() => {
@@ -70,21 +91,15 @@ export default function ConversationsPage() {
     }
   };
 
-  const handleCreateConversation = async () => {
-    if (!newTitle.trim()) {
-      alert("请输入对话标题");
-      return;
-    }
-
+  const handleNewConversation = async () => {
     try {
       const conversation = await createConversation({
         patientId: userId,
-        title: newTitle,
+        title: "新的诊断对话",
       });
       setConversations([conversation, ...conversations]);
       setActiveConversation(conversation);
-      setShowNewConversation(false);
-      setNewTitle("");
+      previousMessageCountRef.current = 0;
     } catch (error) {
       console.error("创建对话失败:", error);
       alert("创建对话失败，请稍后重试");
@@ -142,8 +157,7 @@ export default function ConversationsPage() {
                 messages,
               };
             });
-            
-            scrollToBottom();
+            // 修复：流式更新时不主动滚动，让消息数量变化 useEffect 处理
           }, 0);
         }
       );
@@ -191,7 +205,7 @@ export default function ConversationsPage() {
   };
 
   return (
-    <main className="min-h-screen flex home-bg">
+    <main className="h-screen flex home-bg overflow-hidden">
       {/* 移动端遮罩层 - 点击关闭侧栏 */}
       {isMobile && !sidebarCollapsed && (
         <div 
@@ -203,46 +217,18 @@ export default function ConversationsPage() {
       {/* 左侧侧栏 - 会话列表 */}
       <aside 
         className={`bg-white border-r flex flex-col transition-all duration-300 ease-in-out ${
-          sidebarCollapsed ? 'w-0 overflow-hidden' : 'w-80'
+          sidebarCollapsed ? 'w-0' : 'w-80'
         } ${isMobile ? 'fixed inset-y-0 left-0 z-50 shadow-2xl' : ''}`}
       >
         {/* 侧栏头部 */}
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex-shrink-0">
           <button
-            onClick={() => setShowNewConversation(!showNewConversation)}
+            onClick={handleNewConversation}
             className="w-full btn-primary py-3 rounded-xl font-semibold"
           >
             + 新建对话
           </button>
         </div>
-
-        {/* 新建对话输入框 */}
-        {showNewConversation && (
-          <div className="p-4 border-b bg-gray-50">
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="输入对话标题..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2"
-              onKeyDown={(e) => e.key === "Enter" && handleCreateConversation()}
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleCreateConversation}
-                className="flex-1 bg-green-500 text-white py-2 rounded-lg text-sm"
-              >
-                创建
-              </button>
-              <button
-                onClick={() => setShowNewConversation(false)}
-                className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* 会话列表 */}
         <div className="flex-1 overflow-y-auto">
@@ -291,9 +277,9 @@ export default function ConversationsPage() {
       </aside>
 
       {/* 右侧主区域 - 聊天 */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col overflow-hidden">
         {/* 聊天顶部导航栏 */}
-        <header className="p-4 border-b bg-white flex items-center gap-2">
+        <header className="p-4 border-b bg-white flex items-center gap-2 flex-shrink-0">
           {/* 侧栏折叠/展开按钮 */}
           <button
             onClick={toggleSidebar}
@@ -322,7 +308,7 @@ export default function ConversationsPage() {
         {activeConversation ? (
           <>
             {/* 聊天头部 */}
-            <div className="p-4 border-b bg-gray-50">
+            <div className="p-4 border-b bg-gray-50 flex-shrink-0">
               <h2 className="text-xl font-bold">{activeConversation.title}</h2>
               <p className="text-sm text-gray-500">
                 {activeConversation.messages?.length || 0} 条消息
@@ -378,7 +364,7 @@ export default function ConversationsPage() {
             </div>
 
             {/* 输入区域 */}
-            <div className="p-4 border-t bg-white">
+            <div className="p-4 border-t bg-white flex-shrink-0">
               <div className="flex gap-3">
                 <input
                   type="text"
