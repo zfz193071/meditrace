@@ -29,11 +29,11 @@ export default function ConversationsPage() {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(calc(-100% - 20px));
           }
         }
         .hover-scroll-title:hover h3 {
-          animation: title-scroll-right-to-left 3s linear;
+          animation: title-scroll-right-to-left 3s linear infinite;
         }
       `;
       document.head.appendChild(style);
@@ -53,10 +53,12 @@ export default function ConversationsPage() {
   const [activeMenuConversationId, setActiveMenuConversationId] = useState<string | null>(null); // 当前打开的菜单
   const [renamingConversationId, setRenamingConversationId] = useState<string | null>(null); // 正在重命名的对话
   const [newTitle, setNewTitle] = useState(""); // 新标题
+  const [scrollingTitles, setScrollingTitles] = useState<Set<string>>(new Set()); // 需要滚动的对话 ID 集合
   const menuRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const previousMessageCountRef = useRef<number>(0);
   const isInitialMountRef = useRef<boolean>(true);
+  const titleRefs = useRef<Record<string, HTMLDivElement | null>>({}); // 标题元素 refs
 
   // Ticket 02: 页面加载时自动创建新对话
   useEffect(() => {
@@ -230,11 +232,37 @@ export default function ConversationsPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
   };
 
+  // 检查标题是否需要滚动动画
+  const checkTitleOverflow = () => {
+    const titlesToScroll = new Set<string>();
+    
+    conversations.forEach((conv) => {
+      const titleElement = titleRefs.current[conv.id];
+      if (titleElement) {
+        // 检查文本是否溢出容器
+        if (titleElement.scrollWidth > titleElement.clientWidth) {
+          titlesToScroll.add(conv.id);
+        }
+      }
+    });
+    
+    setScrollingTitles(titlesToScroll);
+  };
+
+  // 监听对话列表变化，重新检查溢出
+  useEffect(() => {
+    if (conversations.length > 0) {
+      setTimeout(() => checkTitleOverflow(), 0);
+    }
+  }, [conversations]);
+
   const loadConversations = async () => {
     setLoading(true);
     try {
       const conversationsList = await getConversations(userId);
       setConversations(conversationsList);
+      // 延迟检查溢出，等待 DOM 更新
+      setTimeout(() => checkTitleOverflow(), 0);
     } catch (error) {
       console.error("加载对话列表失败:", error);
       setConversations([]);
@@ -392,13 +420,18 @@ export default function ConversationsPage() {
                     setActiveConversation(conv);
                     setActiveMenuConversationId(null); // 关闭菜单
                   }}
-                  className={`group cursor-pointer transition-colors hover-scroll-title relative ${
+                  className={`group cursor-pointer transition-colors relative ${
                     activeConversation?.id === conv.id ? "bg-green-50" : "hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center justify-between px-4 py-3 overflow-hidden">
                     {/* 左侧：对话标题 - 支持滚动 */}
-                    <div className="flex-1 overflow-hidden mr-2">
+                    <div 
+                      className="flex-1 overflow-hidden mr-2"
+                      ref={(el) => {
+                        titleRefs.current[conv.id] = el;
+                      }}
+                    >
                       {/* 重命名输入框 */}
                       {renamingConversationId === conv.id ? (
                         <input
@@ -412,7 +445,11 @@ export default function ConversationsPage() {
                           onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
-                        <h3 className="font-semibold text-gray-800 whitespace-nowrap">
+                        <h3 
+                          className={`font-semibold text-gray-800 whitespace-nowrap ${
+                            scrollingTitles.has(conv.id) ? 'hover-scroll-title' : ''
+                          }`}
+                        >
                           {conv.title}
                         </h3>
                       )}
