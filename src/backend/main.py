@@ -532,6 +532,20 @@ class MessageRequest(BaseModel):
     contextWindow: int = 5
 
 
+class UpdateConversationRequest(BaseModel):
+    title: str
+
+
+class UpdateConversationResponse(BaseModel):
+    success: bool
+    message: str
+    conversationId: str = Field(..., alias="conversationId")
+    title: str
+
+    class Config:
+        populate_by_name = True
+
+
 @app.post("/api/conversations")
 async def create_conversation(request: CreateConversationRequest):
     """创建新对话"""
@@ -643,11 +657,9 @@ async def get_conversation(conversation_id: str):
 
 
 @app.put("/api/conversations/{conversation_id}")
-async def update_conversation(conversation_id: str, request: dict):
+async def update_conversation(conversation_id: str, request: UpdateConversationRequest):
     """更新对话信息（标题等）"""
-    title = request.get("title")
-    
-    if not title:
+    if not request.title:
         raise HTTPException(status_code=400, detail="Title is required")
     
     with get_db() as conn:
@@ -660,15 +672,15 @@ async def update_conversation(conversation_id: str, request: dict):
         
         conn.execute(
             "UPDATE conversations SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-            (title, conversation_id)
+            (request.title, conversation_id)
         )
     
-    return {
-        "success": True,
-        "message": "Conversation updated",
-        "conversationId": conversation_id,
-        "title": title
-    }
+    return UpdateConversationResponse(
+        success=True,
+        message="Conversation updated",
+        conversationId=conversation_id,
+        title=request.title
+    )
 
 
 @app.delete("/api/conversations/{conversation_id}")

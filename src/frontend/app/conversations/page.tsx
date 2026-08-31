@@ -49,6 +49,7 @@ export default function ConversationsPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAutoCreating, setIsAutoCreating] = useState(false); // 防止重复创建
+  const [isAutoCreatedConversation, setIsAutoCreatedConversation] = useState(false); // 标记当前对话是否是自动创建的
   const [activeMenuConversationId, setActiveMenuConversationId] = useState<string | null>(null); // 当前打开的菜单
   const [renamingConversationId, setRenamingConversationId] = useState<string | null>(null); // 正在重命名的对话
   const [newTitle, setNewTitle] = useState(""); // 新标题
@@ -63,6 +64,25 @@ export default function ConversationsPage() {
     autoCreateConversation();
   }, [userId]);
 
+  // 提取公共的创建并激活对话逻辑
+  const createAndActivateConversation = async (title: string = "新的诊断对话"): Promise<Conversation | null> => {
+    try {
+      const conversation = await createConversation({
+        patientId: userId,
+        title,
+      });
+      setConversations((prev) => [conversation, ...prev]);
+      setActiveConversation(conversation);
+      setIsAutoCreatedConversation(true); // 标记为自动创建的对话
+      previousMessageCountRef.current = 0;
+      return conversation;
+    } catch (error) {
+      console.error("创建对话失败:", error);
+      alert("创建对话失败，请稍后重试");
+      return null;
+    }
+  };
+
   // 自动创建对话函数
   const autoCreateConversation = async () => {
     // 只在首次挂载且没有激活对话时自动创建
@@ -72,16 +92,12 @@ export default function ConversationsPage() {
     
     setIsAutoCreating(true);
     try {
-      const conversation = await createConversation({
-        patientId: userId,
-        title: "新的诊断对话",
-      });
-      setConversations((prev) => [conversation, ...prev]);
-      setActiveConversation(conversation);
-      previousMessageCountRef.current = 0;
+      const conversation = await createAndActivateConversation("新的诊断对话");
+      if (!conversation) {
+        // 创建失败，不显示错误提示，让用户手动创建
+      }
     } catch (error) {
       console.error("自动创建对话失败:", error);
-      // 不显示错误提示，让用户手动创建
     } finally {
       setIsAutoCreating(false);
       isInitialMountRef.current = false;
@@ -151,7 +167,8 @@ export default function ConversationsPage() {
       }
     } catch (error) {
       console.error("重命名对话失败:", error);
-      alert("重命名失败，请稍后重试");
+      const errorMessage = error instanceof Error ? error.message : "重命名失败，请稍后重试";
+      alert(errorMessage);
     } finally {
       setRenamingConversationId(null);
       setNewTitle("");
@@ -190,6 +207,7 @@ export default function ConversationsPage() {
     if (activeConversation) {
       // 切换会话时重置初始标记，但不触发滚动
       previousMessageCountRef.current = activeConversation.messages?.length || 0;
+      setIsAutoCreatedConversation(false); // 从列表选择的对话不是自动创建的
     }
   }, [activeConversation?.id]);
 
@@ -226,18 +244,7 @@ export default function ConversationsPage() {
   };
 
   const handleNewConversation = async () => {
-    try {
-      const conversation = await createConversation({
-        patientId: userId,
-        title: "新的诊断对话",
-      });
-      setConversations([conversation, ...conversations]);
-      setActiveConversation(conversation);
-      previousMessageCountRef.current = 0;
-    } catch (error) {
-      console.error("创建对话失败:", error);
-      alert("创建对话失败，请稍后重试");
-    }
+    await createAndActivateConversation("新的诊断对话");
   };
 
   const handleSendMessage = async () => {
@@ -412,8 +419,9 @@ export default function ConversationsPage() {
                     </div>
                     {/* 右侧：时间或操作按钮 */}
                     <div className="flex items-center">
-                      <span className="text-xs text-gray-400 group-hover:hidden whitespace-nowrap">
-                        {formatTime(conv.updatedAt)}
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
+                        <span className="group-hover:hidden">{formatTime(conv.updatedAt)}</span>
+                        <span className="hidden group-hover:inline">···</span>
                       </span>
                       <button
                         onClick={(e) => {
@@ -485,7 +493,7 @@ export default function ConversationsPage() {
           {/* 页面标题 - Ticket 03: 动态标题展示 */}
           <div className="flex-1">
             <h1 className="text-xl font-bold">
-              {activeConversation?.messages?.length === 0 ? "MediTrace 对话" : "有效提取用户的问题"}
+              {isAutoCreatedConversation ? "MediTrace 对话" : "有效提取用户的问题"}
             </h1>
           </div>
         </header>
@@ -493,14 +501,6 @@ export default function ConversationsPage() {
         {/* 聊天内容区域 */}
         {activeConversation ? (
           <>
-            {/* 聊天头部 */}
-            <div className="p-4 border-b bg-gray-50 flex-shrink-0">
-              <h2 className="text-xl font-bold">{activeConversation.title}</h2>
-              <p className="text-sm text-gray-500">
-                {activeConversation.messages?.length || 0} 条消息
-              </p>
-            </div>
-
             {/* 消息列表 */}
             <div className="flex-1 overflow-y-auto p-6">
               {activeConversation.messages?.map((msg, idx) => {
