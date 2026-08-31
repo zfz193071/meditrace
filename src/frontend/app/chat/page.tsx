@@ -417,12 +417,8 @@ export default function ConversationsPage() {
                         </h3>
                       )}
                     </div>
-                    {/* 右侧：时间或操作按钮 */}
+                    {/* 右侧：三点菜单按钮 */}
                     <div className="flex items-center">
-                      <span className="text-xs text-gray-400 whitespace-nowrap">
-                        <span className="group-hover:hidden">{formatTime(conv.updatedAt)}</span>
-                        <span className="hidden group-hover:inline">···</span>
-                      </span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -430,7 +426,7 @@ export default function ConversationsPage() {
                             activeMenuConversationId === conv.id ? null : conv.id
                           );
                         }}
-                        className="ml-2 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                        className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         ···
                       </button>
