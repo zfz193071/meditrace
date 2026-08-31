@@ -310,7 +310,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6">
             <div className="card-modern text-center card-bottom-margin">
               <a
-                href="/conversations"
+                href="/chat"
                 className="group block"
               >
                 <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
