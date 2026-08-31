@@ -62,6 +62,10 @@ class MessageResponse(BaseModel):
     follow_up_questions: List[str]
 
 
+class UpdateConversationRequest(BaseModel):
+    title: str = Field(..., description="新的对话标题", min_length=1, max_length=200)
+
+
 # ============================================================================
 # API Endpoints
 # ============================================================================
@@ -201,6 +205,27 @@ def delete_conversation(conversation_id: str):
         conn.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
     
     return {"success": True, "message": "Conversation deleted"}
+
+
+@router.put("/{conversation_id}")
+def update_conversation(conversation_id: str, request: UpdateConversationRequest):
+    """更新对话信息（目前仅支持更新标题）"""
+    with get_db() as conn:
+        # 检查对话是否存在
+        cursor = conn.execute(
+            "SELECT id FROM conversations WHERE id = ?",
+            (conversation_id,)
+        )
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        
+        # 更新标题和更新时间
+        conn.execute(
+            "UPDATE conversations SET title = ?, updated_at = ? WHERE id = ?",
+            (request.title, datetime.now(), conversation_id)
+        )
+    
+    return {"success": True, "message": "Conversation updated", "title": request.title}
 
 
 @router.post("/{conversation_id}/messages", response_model=MessageResponse)
