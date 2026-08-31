@@ -17,6 +17,28 @@ import StatusBadge from "../../components/StatusBadge";
 import MarkdownRenderer from "../../components/MarkdownRenderer";
 
 export default function ConversationsPage() {
+  // 添加自定义滚动动画样式
+  if (typeof window !== 'undefined') {
+    const styleId = 'conversation-scroll-animation';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes title-scroll-right-to-left {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+        .hover-scroll-title:hover h3 {
+          animation: title-scroll-right-to-left 3s linear;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
   const router = useRouter();
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -26,13 +48,125 @@ export default function ConversationsPage() {
   const [sending, setSending] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isAutoCreating, setIsAutoCreating] = useState(false); // 防止重复创建
+  const [activeMenuConversationId, setActiveMenuConversationId] = useState<string | null>(null); // 当前打开的菜单
+  const [renamingConversationId, setRenamingConversationId] = useState<string | null>(null); // 正在重命名的对话
+  const [newTitle, setNewTitle] = useState(""); // 新标题
+  const menuRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const previousMessageCountRef = useRef<number>(0);
   const isInitialMountRef = useRef<boolean>(true);
 
+  // Ticket 02: 页面加载时自动创建新对话
   useEffect(() => {
     loadConversations();
+    autoCreateConversation();
   }, [userId]);
+
+  // 自动创建对话函数
+  const autoCreateConversation = async () => {
+    // 只在首次挂载且没有激活对话时自动创建
+    if (isAutoCreating || activeConversation || isInitialMountRef.current === false) {
+      return;
+    }
+    
+    setIsAutoCreating(true);
+    try {
+      const conversation = await createConversation({
+        patientId: userId,
+        title: "新的诊断对话",
+      });
+      setConversations((prev) => [conversation, ...prev]);
+      setActiveConversation(conversation);
+      previousMessageCountRef.current = 0;
+    } catch (error) {
+      console.error("自动创建对话失败:", error);
+      // 不显示错误提示，让用户手动创建
+    } finally {
+      setIsAutoCreating(false);
+      isInitialMountRef.current = false;
+    }
+  };
+
+  // 点击外部关闭菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveMenuConversationId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // ESC 键关闭菜单
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveMenuConversationId(null);
+        setRenamingConversationId(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, []);
+
+  // 重命名对话函数
+  const handleRenameConversation = async (conversationId: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    
+    const conv = conversations.find(c => c.id === conversationId);
+    if (!conv) return;
+    
+    setRenamingConversationId(conversationId);
+    setNewTitle(conv.title);
+    setActiveMenuConversationId(null);
+  };
+
+  // 确认重命名
+  const confirmRename = async () => {
+    if (!renamingConversationId || !newTitle.trim()) return;
+    
+    try {
+      // 调用后端更新对话标题 API
+      await fetch(`http://localhost:8000/api/conversations/${renamingConversationId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: newTitle.trim() }),
+      });
+      
+      // 更新本地状态
+      setConversations(conversations.map(c => 
+        c.id === renamingConversationId ? { ...c, title: newTitle.trim() } : c
+      ));
+      
+      if (activeConversation?.id === renamingConversationId) {
+        setActiveConversation({ ...activeConversation, title: newTitle.trim() });
+      }
+    } catch (error) {
+      console.error("重命名对话失败:", error);
+      alert("重命名失败，请稍后重试");
+    } finally {
+      setRenamingConversationId(null);
+      setNewTitle("");
+    }
+  };
+
+  // 回车确认重命名
+  const handleRenameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      confirmRename();
+    } else if (e.key === 'Escape') {
+      setRenamingConversationId(null);
+      setNewTitle("");
+    }
+  };
 
   // 只在发送新消息时自动滚动，切换会话时不滚动
   useEffect(() => {
@@ -247,28 +381,78 @@ export default function ConversationsPage() {
               {conversations.map((conv) => (
                 <div
                   key={conv.id}
-                  onClick={() => setActiveConversation(conv)}
-                  className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    activeConversation?.id === conv.id ? "bg-green-50" : ""
+                  onClick={() => {
+                    setActiveConversation(conv);
+                    setActiveMenuConversationId(null); // 关闭菜单
+                  }}
+                  className={`group cursor-pointer transition-colors hover-scroll-title relative ${
+                    activeConversation?.id === conv.id ? "bg-green-50" : "hover:bg-gray-50"
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-1">
-                    <h3 className="font-semibold text-gray-800 truncate flex-1">
-                      {conv.title}
-                    </h3>
-                    <button
-                      onClick={(e) => handleDeleteConversation(conv.id, e)}
-                      className="ml-2 text-gray-400 hover:text-red-500"
-                    >
-                      ✕
-                    </button>
+                  <div className="flex items-center justify-between px-4 py-3 overflow-hidden">
+                    {/* 左侧：对话标题 - 支持滚动 */}
+                    <div className="flex-1 overflow-hidden mr-2">
+                      {/* 重命名输入框 */}
+                      {renamingConversationId === conv.id ? (
+                        <input
+                          type="text"
+                          value={newTitle}
+                          onChange={(e) => setNewTitle(e.target.value)}
+                          onKeyDown={handleRenameKeyDown}
+                          onBlur={confirmRename}
+                          autoFocus
+                          className="font-semibold text-gray-800 w-full px-2 py-1 border border-green-500 rounded focus:outline-none"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      ) : (
+                        <h3 className="font-semibold text-gray-800 whitespace-nowrap">
+                          {conv.title}
+                        </h3>
+                      )}
+                    </div>
+                    {/* 右侧：时间或操作按钮 */}
+                    <div className="flex items-center">
+                      <span className="text-xs text-gray-400 group-hover:hidden whitespace-nowrap">
+                        {formatTime(conv.updatedAt)}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveMenuConversationId(
+                            activeMenuConversationId === conv.id ? null : conv.id
+                          );
+                        }}
+                        className="ml-2 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                      >
+                        ···
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500 truncate">
-                    {conv.messages?.[conv.messages.length - 1]?.content || "暂无消息"}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {formatDate(conv.updatedAt)}
-                  </p>
+                  
+                  {/* 三点菜单弹框 - Ticket 05 */}
+                  {activeMenuConversationId === conv.id && (
+                    <div
+                      ref={menuRef}
+                      className="absolute right-2 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={(e) => handleRenameConversation(conv.id, e)}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        重命名
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteConversation(conv.id, e);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors border-t"
+                      >
+                        删除
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -298,9 +482,11 @@ export default function ConversationsPage() {
             🏠
           </button>
           
-          {/* 页面标题 */}
+          {/* 页面标题 - Ticket 03: 动态标题展示 */}
           <div className="flex-1">
-            <h1 className="text-xl font-bold">MediTrace 对话</h1>
+            <h1 className="text-xl font-bold">
+              {activeConversation?.messages?.length === 0 ? "MediTrace 对话" : "有效提取用户的问题"}
+            </h1>
           </div>
         </header>
 
