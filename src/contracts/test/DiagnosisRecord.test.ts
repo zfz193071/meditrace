@@ -25,13 +25,36 @@ describe("DiagnosisRecord", function () {
         .connect(patient1)
         .recordDiagnosis(dataHash, modelVersion, ipfsCid, patient1.address);
 
-      await tx.wait();
+      const receipt = await tx.wait();
+      
+      // 从事件中获取 diagnosisId
+      const event = receipt?.logs.find((log: any) => {
+        try {
+          const parsed = diagnosisRecord.interface.parseLog({
+            topics: log.topics,
+            data: log.data,
+          });
+          return parsed?.name === "DiagnosisRecorded";
+        } catch {
+          return false;
+        }
+      });
+      
+      let diagnosisId: string;
+      if (event) {
+        const parsed = diagnosisRecord.interface.parseLog({
+          topics: event.topics,
+          data: event.data,
+        });
+        diagnosisId = parsed?.args.diagnosisId;
+      } else {
+        // 如果无法从事件中获取，直接查询最后一个记录
+        const recordCount = await diagnosisRecord.getPatientRecordCount(patient1.address);
+        const patientRecords = await diagnosisRecord.getPatientRecords(patient1.address);
+        diagnosisId = patientRecords[recordCount - 1];
+      }
 
-      const record = await diagnosisRecord.records(
-        ethers.keccak256(
-          ethers.concat([dataHash, ethers.toUtf8Bytes(patient1.address), ethers.toBeHex(await ethers.provider.getBlockNumber())])
-        )
-      );
+      const record = await diagnosisRecord.records(diagnosisId);
 
       expect(record.dataHash).to.equal(dataHash);
       expect(record.modelVersion).to.equal(modelVersion);

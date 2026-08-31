@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import get_db
 from models import Conversation, Message
+from context_engine import get_context_engine
+from deepseek_client import get_deepseek_client
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
@@ -231,16 +233,132 @@ def update_conversation(conversation_id: str, request: UpdateConversationRequest
 @router.post("/{conversation_id}/messages", response_model=MessageResponse)
 def send_message(conversation_id: str, request: MessageRequest):
     """发送消息并获取 AI 回复"""
-    # TODO: 验证对话存在
-    # TODO: 保存用户消息
-    # TODO: 调用上下文引擎获取 AI 回复
-    # TODO: 保存 AI 消息
-    # TODO: 生成追问问题
+    # 1. 验证对话存在
+    with get_db() as conn:
+        cursor = conn.execute(
+            "SELECT id, patient_id, title FROM conversations WHERE id = ?",
+            (conversation_id,)
+        )
+        conversation_row = cursor.fetchone()
+        
+        if not conversation_row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
     
-    # 临时返回 (待实现上下文引擎)
-    return MessageResponse(
-        message_id=str(uuid.uuid4()),
-        content="对话功能开发中...",
-        context=[],
-        follow_up_questions=[]
+    # 2. 保存用户消息
+    user_message = Message(
+        conversation_id=conversation_id,
+        role="user",
+        content=request.content
     )
+    
+    with get_db() as conn:
+        conn.execute(
+            """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+               VALUES (?, ?, ?, ?, ?)""",
+            (user_message.id, conversation_id, "user", request.content, json.dumps([]))
+        )
+        # 更新对话的 updated_at
+        conn.execute(
+            "UPDATE conversations SET updated_at = ? WHERE id = ?",
+            (datetime.now(), conversation_id)
+        )
+    
+    # 3. 调用上下文引擎获取 AI 回复
+    try:
+        context_engine = get_context_engine()
+        
+        # 获取历史上下文
+        context_messages = context_engine.get_conversation_context(conversation_id)
+        
+        # 调用 DeepSeek API 获取诊断建议
+        deepseek_client = get_deepseek_client()
+        import asyncio
+        
+        # 同步调用异步方法
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            diagnosis_result = loop.run_until_complete(
+                deepseek_client.diagnose_with_context(conversation_id, request.content, context_messages)
+            )
+        finally:
+            loop.close()
+        
+        # 解析 AI 回复
+        suggestions = diagnosis_result.get("suggestions", [])
+        summary = diagnosis_result.get("summary", "")
+        disclaimer = diagnosis_result.get("disclaimer", "")
+        
+        # 构建 AI 回复内容
+        ai_content = f"**诊断建议**:\n\n"
+        for i, suggestion in enumerate(suggestions, 1):
+            confidence = int(suggestion.get("confidence", 0) * 100)
+            ai_content += f"{i}. **{suggestion.get('disease', '未知疾病')}** (置信度：{confidence}%)\n"
+            recommendations = suggestion.get("recommendations", [])
+            if recommendations:
+                ai_content += f"   - 建议检查：{', '.join(recommendations)}\n"
+            ai_content += "\n"
+        
+        ai_content += f"\n**总结**: {summary}\n\n"
+        ai_content += f"⚠️ **{disclaimer}**"
+        
+        # 4. 生成追问问题
+        follow_up_questions = context_engine.generate_follow_up_questions({
+            "symptoms": request.content,
+            "confidence": suggestions[0].get("confidence", 1.0) if suggestions else 1.0,
+            "possible_conditions": [s.get("disease", "") for s in suggestions]
+        })
+        
+        # 5. 保存 AI 消息
+        ai_message = Message(
+            conversation_id=conversation_id,
+            role="assistant",
+            content=ai_content,
+            context_refs=[]
+        )
+        
+        with get_db() as conn:
+            conn.execute(
+                """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (ai_message.id, conversation_id, "assistant", ai_content, json.dumps([]))
+            )
+            # 更新对话的 updated_at
+            conn.execute(
+                "UPDATE conversations SET updated_at = ? WHERE id = ?",
+                (datetime.now(), conversation_id)
+            )
+        
+        return MessageResponse(
+            message_id=ai_message.id,
+            content=ai_content,
+            context=[msg["content"] for msg in context_messages[-request.context_window:]],
+            follow_up_questions=follow_up_questions
+        )
+        
+    except Exception as e:
+        # 如果 AI 调用失败，返回错误消息
+        print(f"❌ 对话处理失败：{e}")
+        import traceback
+        traceback.print_exc()
+        
+        # 保存错误消息
+        error_message = Message(
+            conversation_id=conversation_id,
+            role="assistant",
+            content="抱歉，AI 服务暂时不可用，请稍后重试。"
+        )
+        
+        with get_db() as conn:
+            conn.execute(
+                """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (error_message.id, conversation_id, "assistant", error_message.content, json.dumps([]))
+            )
+        
+        return MessageResponse(
+            message_id=error_message.id,
+            content="抱歉，AI 服务暂时不可用，请稍后重试。",
+            context=[],
+            follow_up_questions=[]
+        )
