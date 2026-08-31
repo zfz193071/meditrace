@@ -642,6 +642,35 @@ async def get_conversation(conversation_id: str):
     return conversation_data
 
 
+@app.put("/api/conversations/{conversation_id}")
+async def update_conversation(conversation_id: str, request: dict):
+    """更新对话信息（标题等）"""
+    title = request.get("title")
+    
+    if not title:
+        raise HTTPException(status_code=400, detail="Title is required")
+    
+    with get_db() as conn:
+        cursor = conn.execute(
+            "SELECT id FROM conversations WHERE id = ?",
+            (conversation_id,)
+        )
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        
+        conn.execute(
+            "UPDATE conversations SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (title, conversation_id)
+        )
+    
+    return {
+        "success": True,
+        "message": "Conversation updated",
+        "conversationId": conversation_id,
+        "title": title
+    }
+
+
 @app.delete("/api/conversations/{conversation_id}")
 async def delete_conversation(conversation_id: str):
     """删除对话"""

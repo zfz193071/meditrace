@@ -404,6 +404,28 @@ export async function sendMessageStream(
 }
 
 /**
+ * 更新对话信息（标题等）
+ * @param conversationId 对话 ID
+ * @param title 新的标题
+ * @returns 更新结果
+ */
+export async function updateConversation(conversationId: string, title: string): Promise<{
+  success: boolean;
+  conversationId: string;
+  title: string;
+}> {
+  const response = await fetch(`${BASE_URL}/api/conversations/${conversationId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!response.ok) {
+    throw new Error(`更新对话失败：${response.status}`);
+  }
+  return response.json();
+}
+
+/**
  * 删除对话
  * @param conversationId 对话 ID
  */
