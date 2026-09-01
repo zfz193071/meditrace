@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Conversation,
   Message,
@@ -11,6 +11,7 @@ import {
   sendMessageStream,
   deleteConversation,
   downloadBlob,
+  updateConversation,
 } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import StatusBadge from "../../components/StatusBadge";
@@ -40,6 +41,7 @@ export default function ConversationsPage() {
     }
   }
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,17 +56,28 @@ export default function ConversationsPage() {
   const [renamingConversationId, setRenamingConversationId] = useState<string | null>(null); // 正在重命名的对话
   const [newTitle, setNewTitle] = useState(""); // 新标题
   const [scrollingTitles, setScrollingTitles] = useState<Set<string>>(new Set()); // 需要滚动的对话 ID 集合
+  const [pageTitle, setPageTitle] = useState("新的对话"); // 页面动态标题
+  const [urlConversationId, setUrlConversationId] = useState<string | null>(null); // URL 中的对话 ID
   const menuRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const previousMessageCountRef = useRef<number>(0);
   const isInitialMountRef = useRef<boolean>(true);
   const titleRefs = useRef<Record<string, HTMLDivElement | null>>({}); // 标题元素 refs
 
-  // Ticket 02: 页面加载时自动创建新对话
+  // Ticket 01: 页面加载时自动创建新对话或加载 URL 指定的对话
   useEffect(() => {
     loadConversations();
-    autoCreateConversation();
-  }, [userId]);
+    
+    // 检查 URL 中是否有对话 ID
+    const id = searchParams.get('id');
+    if (id) {
+      setUrlConversationId(id);
+      // URL 有 ID 时，不自动创建新对话，而是等待加载完对话列表后查找并激活
+    } else {
+      // URL 无 ID 时，自动创建新对话
+      autoCreateConversation();
+    }
+  }, [userId, searchParams]);
 
   // 提取公共的创建并激活对话逻辑
   const createAndActivateConversation = async (title: string = "新的诊断对话"): Promise<Conversation | null> => {
@@ -75,6 +88,7 @@ export default function ConversationsPage() {
       });
       setConversations((prev) => [conversation, ...prev]);
       setActiveConversation(conversation);
+      setPageTitle(title); // Ticket 01: 设置页面标题
       setIsAutoCreatedConversation(true); // 标记为自动创建的对话
       previousMessageCountRef.current = 0;
       return conversation;
@@ -210,6 +224,8 @@ export default function ConversationsPage() {
       // 切换会话时重置初始标记，但不触发滚动
       previousMessageCountRef.current = activeConversation.messages?.length || 0;
       setIsAutoCreatedConversation(false); // 从列表选择的对话不是自动创建的
+      // Ticket 01: 更新页面标题
+      setPageTitle(activeConversation.title);
     }
   }, [activeConversation?.id]);
 
@@ -261,6 +277,22 @@ export default function ConversationsPage() {
     try {
       const conversationsList = await getConversations(userId);
       setConversations(conversationsList);
+      
+      // Ticket 01: 如果 URL 中有对话 ID，尝试加载该对话
+      if (urlConversationId) {
+        const targetConversation = conversationsList.find(c => c.id === urlConversationId);
+        if (targetConversation) {
+          setActiveConversation(targetConversation);
+          setPageTitle(targetConversation.title);
+          setIsAutoCreatedConversation(false);
+          console.log(`成功加载 URL 指定的对话：${targetConversation.title}`);
+        } else {
+          console.warn(`对话 ID ${urlConversationId} 不存在，将创建新对话`);
+          // 对话不存在，创建新对话
+          await autoCreateConversation();
+        }
+      }
+      
       // 延迟检查溢出，等待 DOM 更新
       setTimeout(() => checkTitleOverflow(), 0);
     } catch (error) {
@@ -275,6 +307,55 @@ export default function ConversationsPage() {
     await createAndActivateConversation("新的诊断对话");
   };
 
+  // Ticket 02: 生成对话标题（基于用户第一条消息）
+  const generateTitleFromMessage = (message: string): string => {
+    // 取前 50 个字符
+    const maxLength = 50;
+    let title = message.trim();
+    
+    if (title.length > maxLength) {
+      title = title.substring(0, maxLength);
+      // 去除末尾的标点符号
+      title = title.replace(/[，。！？,.!?;；:：\s]+$/, '');
+      title = title + '...';
+    } else {
+      // 去除末尾的标点符号
+      title = title.replace(/[，。！？,.!?;；:：\s]+$/, '');
+    }
+    
+    return title || "新的诊断对话";
+  };
+
+  // Ticket 02: 更新对话标题
+  const updateConversationTitle = async (conversationId: string, currentTitle: string) => {
+    // 只有当标题是默认标题时才更新
+    const defaultTitles = ["新的诊断对话", "新的对话", "MediTrace 对话", "有效提取用户的问题"];
+    if (!defaultTitles.includes(currentTitle)) {
+      console.log("对话已有自定义标题，跳过自动更新");
+      return;
+    }
+    
+    try {
+      const newTitle = generateTitleFromMessage(currentTitle);
+      await updateConversation(conversationId, newTitle);
+      
+      // 更新本地状态
+      setConversations(prev => prev.map(c => 
+        c.id === conversationId ? { ...c, title: newTitle } : c
+      ));
+      
+      if (activeConversation?.id === conversationId) {
+        setActiveConversation(prev => prev ? { ...prev, title: newTitle } : null);
+        setPageTitle(newTitle);
+      }
+      
+      console.log(`对话标题已更新：${newTitle}`);
+    } catch (error) {
+      console.error("更新对话标题失败:", error);
+      // 标题更新失败不影响消息发送
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !activeConversation) return;
 
@@ -287,6 +368,8 @@ export default function ConversationsPage() {
       };
 
       const updatedMessages = [...(activeConversation.messages || []), userMessage];
+      const hasPreviousMessages = activeConversation.messages && activeConversation.messages.length > 0;
+      
       setActiveConversation({
         ...activeConversation,
         messages: updatedMessages,
@@ -330,6 +413,11 @@ export default function ConversationsPage() {
           }, 0);
         }
       );
+
+      // Ticket 02: 如果是第一条消息，更新对话标题
+      if (!hasPreviousMessages) {
+        await updateConversationTitle(activeConversation.id, activeConversation.title);
+      }
     } catch (error) {
       console.error("发送消息失败:", error);
       alert("发送消息失败，请稍后重试");
@@ -523,10 +611,10 @@ export default function ConversationsPage() {
             🏠
           </button>
           
-          {/* 页面标题 - Ticket 03: 动态标题展示 */}
+          {/* 页面标题 - Ticket 01: 动态标题展示 */}
           <div className="flex-1">
             <h1 className="text-xl font-bold">
-              {isAutoCreatedConversation ? "MediTrace 对话" : "有效提取用户的问题"}
+              {pageTitle}
             </h1>
           </div>
         </header>
