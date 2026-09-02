@@ -714,11 +714,23 @@ export default function ConversationsPage() {
                 <div
                   key={conv.id}
                   onClick={() => {
-                    setActiveConversation(conv);
-                    setActiveMenuConversationId(null); // 关闭菜单
+                    // 关闭菜单
+                    setActiveMenuConversationId(null);
                     // 更新 URL 为动态路由
                     if (typeof window !== "undefined") {
                       window.history.pushState({}, "", `/chat/${conv.id}`);
+                    }
+                    // 查找完整的会话数据（包含消息等）
+                    const fullConversation = conversations.find(c => c.id === conv.id);
+                    if (fullConversation) {
+                      setActiveConversation(fullConversation);
+                      setPageTitle(fullConversation.title);
+                      setIsTempConversation(false);
+                      // 重置标题生成标记
+                      titleGenerationRef.current = false;
+                      setHasGeneratedTitle(false);
+                      // 切换会话时滚动到底部
+                      setTimeout(() => scrollToBottom(), 0);
                     }
                   }}
                   className={`group cursor-pointer transition-colors relative ${
@@ -806,33 +818,14 @@ export default function ConversationsPage() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* 聊天顶部导航栏 */}
         <header className="p-4 border-b bg-white flex items-center gap-2 flex-shrink-0">
-          {/* 当 URL 有对话 ID 时显示返回按钮 */}
-          {urlConversationId && (
-            <button
-              onClick={() => {
-                // 清空 URL 中的对话 ID，返回对话列表视图
-                window.history.replaceState({}, "", "/chat");
-                // 重置激活的对话
-                setActiveConversation(null);
-                setActiveMenuConversationId(null);
-              }}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="返回对话列表"
-            >
-              ←
-            </button>
-          )}
-          
-          {/* 侧栏折叠/展开按钮（仅在有对话 ID 时隐藏） */}
-          {!urlConversationId && (
-            <button
-              onClick={toggleSidebar}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title={sidebarCollapsed ? "展开侧栏" : "折叠侧栏"}
-            >
-              {sidebarCollapsed ? '▶' : '◀'}
-            </button>
-          )}
+          {/* 侧栏折叠/展开按钮 */}
+          <button
+            onClick={toggleSidebar}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title={sidebarCollapsed ? "展开侧栏" : "折叠侧栏"}
+          >
+            {sidebarCollapsed ? '▶' : '◀'}
+          </button>
           
           {/* 返回主页按钮 */}
           <button
