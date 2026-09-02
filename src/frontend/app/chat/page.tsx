@@ -806,14 +806,33 @@ export default function ConversationsPage() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* 聊天顶部导航栏 */}
         <header className="p-4 border-b bg-white flex items-center gap-2 flex-shrink-0">
-          {/* 侧栏折叠/展开按钮 */}
-          <button
-            onClick={toggleSidebar}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title={sidebarCollapsed ? "展开侧栏" : "折叠侧栏"}
-          >
-            {sidebarCollapsed ? '▶' : '◀'}
-          </button>
+          {/* 当 URL 有对话 ID 时显示返回按钮 */}
+          {urlConversationId && (
+            <button
+              onClick={() => {
+                // 清空 URL 中的对话 ID，返回对话列表视图
+                window.history.replaceState({}, "", "/chat");
+                // 重置激活的对话
+                setActiveConversation(null);
+                setActiveMenuConversationId(null);
+              }}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="返回对话列表"
+            >
+              ←
+            </button>
+          )}
+          
+          {/* 侧栏折叠/展开按钮（仅在有对话 ID 时隐藏） */}
+          {!urlConversationId && (
+            <button
+              onClick={toggleSidebar}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title={sidebarCollapsed ? "展开侧栏" : "折叠侧栏"}
+            >
+              {sidebarCollapsed ? '▶' : '◀'}
+            </button>
+          )}
           
           {/* 返回主页按钮 */}
           <button
