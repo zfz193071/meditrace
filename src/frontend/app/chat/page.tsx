@@ -808,7 +808,7 @@ export default function ConversationsPage() {
                     }`}
                   >
                     <div
-                      className={`rounded-2xl w-full px-4 py-3 ${
+                      className={`rounded-2xl px-4 py-3 max-w-[85%] ${
                         msg.role === "user"
                           ? "bg-green-500 text-white"
                           : "bg-transparent text-gray-800 dark:text-gray-100"
