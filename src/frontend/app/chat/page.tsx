@@ -14,10 +14,10 @@ import {
   downloadBlob,
   updateConversation,
   replaceConversationUrl,
-} from "../../lib/api";
-import LoadingSpinner from "../../components/LoadingSpinner";
-import StatusBadge from "../../components/StatusBadge";
-import MarkdownRenderer from "../../components/MarkdownRenderer";
+} from "@/lib/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import StatusBadge from "@/components/StatusBadge";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 export default function ConversationsPage() {
   // 添加自定义滚动动画样式 - Ticket 04

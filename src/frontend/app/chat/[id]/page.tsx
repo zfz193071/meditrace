@@ -8,9 +8,9 @@ import {
   getConversation,
   sendMessage,
   sendMessageStream,
-} from "../../lib/api";
-import LoadingSpinner from "../../components/LoadingSpinner";
-import MarkdownRenderer from "../../components/MarkdownRenderer";
+} from "@/lib/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 /**
  * 动态路由对话页面
