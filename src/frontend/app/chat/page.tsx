@@ -18,7 +18,7 @@ import StatusBadge from "../../components/StatusBadge";
 import MarkdownRenderer from "../../components/MarkdownRenderer";
 
 export default function ConversationsPage() {
-  // 添加自定义滚动动画样式
+  // 添加自定义滚动动画样式 - Ticket 04
   if (typeof window !== 'undefined') {
     const styleId = 'conversation-scroll-animation';
     if (!document.getElementById(styleId)) {
@@ -27,14 +27,21 @@ export default function ConversationsPage() {
       style.textContent = `
         @keyframes title-scroll-right-to-left {
           0% {
-            transform: translateX(0);
+            transform: translateX(100%);
+          }
+          85% {
+            transform: translateX(calc(-100% - 20px));
           }
           100% {
             transform: translateX(calc(-100% - 20px));
           }
         }
+        .hover-scroll-title h3 {
+          animation: title-scroll-right-to-left 5s linear infinite;
+          animation-play-state: paused;
+        }
         .hover-scroll-title:hover h3 {
-          animation: title-scroll-right-to-left 3s linear infinite;
+          animation-play-state: running;
         }
       `;
       document.head.appendChild(style);
@@ -51,7 +58,7 @@ export default function ConversationsPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAutoCreating, setIsAutoCreating] = useState(false); // 防止重复创建
-  const [isAutoCreatedConversation, setIsAutoCreatedConversation] = useState(false); // 标记当前对话是否是自动创建的
+  const [isTempConversation, setIsTempConversation] = useState(false); // 标记当前对话是否为临时会话
   const [activeMenuConversationId, setActiveMenuConversationId] = useState<string | null>(null); // 当前打开的菜单
   const [renamingConversationId, setRenamingConversationId] = useState<string | null>(null); // 正在重命名的对话
   const [newTitle, setNewTitle] = useState(""); // 新标题
@@ -63,6 +70,7 @@ export default function ConversationsPage() {
   const previousMessageCountRef = useRef<number>(0);
   const isInitialMountRef = useRef<boolean>(true);
   const titleRefs = useRef<Record<string, HTMLDivElement | null>>({}); // 标题元素 refs
+  const shouldAutoScrollRef = useRef<boolean>(true); // Ticket 06: 追踪是否应该自动滚动
 
   // Ticket 01: 页面加载时自动创建新对话或加载 URL 指定的对话
   useEffect(() => {
@@ -79,7 +87,25 @@ export default function ConversationsPage() {
     }
   }, [userId, searchParams]);
 
-  // 提取公共的创建并激活对话逻辑
+  // 提取公共的创建并激活对话逻辑（临时会话）
+  const createAndActivateTempConversation = async (title: string = "新的诊断对话"): Promise<void> => {
+    // 创建一个临时的 conversation 对象（不持久化到数据库）
+    const tempConversation: Conversation = {
+      id: `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      patientId: userId,
+      title,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      messages: [],
+    };
+    
+    setActiveConversation(tempConversation);
+    setPageTitle(title);
+    setIsTempConversation(true); // 标记为临时会话
+    previousMessageCountRef.current = 0;
+  };
+
+  // 提取公共的创建并激活正式对话逻辑
   const createAndActivateConversation = async (title: string = "新的诊断对话"): Promise<Conversation | null> => {
     try {
       const conversation = await createConversation({
@@ -88,8 +114,8 @@ export default function ConversationsPage() {
       });
       setConversations((prev) => [conversation, ...prev]);
       setActiveConversation(conversation);
-      setPageTitle(title); // Ticket 01: 设置页面标题
-      setIsAutoCreatedConversation(true); // 标记为自动创建的对话
+      setPageTitle(title);
+      setIsTempConversation(false); // 标记为正式会话
       previousMessageCountRef.current = 0;
       return conversation;
     } catch (error) {
@@ -99,7 +125,7 @@ export default function ConversationsPage() {
     }
   };
 
-  // 自动创建对话函数
+  // 自动创建临时对话函数
   const autoCreateConversation = async () => {
     // 只在首次挂载且没有激活对话时自动创建
     if (isAutoCreating || activeConversation || isInitialMountRef.current === false) {
@@ -108,12 +134,9 @@ export default function ConversationsPage() {
     
     setIsAutoCreating(true);
     try {
-      const conversation = await createAndActivateConversation("新的诊断对话");
-      if (!conversation) {
-        // 创建失败，不显示错误提示，让用户手动创建
-      }
+      await createAndActivateTempConversation("新的诊断对话");
     } catch (error) {
-      console.error("自动创建对话失败:", error);
+      console.error("自动创建临时对话失败:", error);
     } finally {
       setIsAutoCreating(false);
       isInitialMountRef.current = false;
@@ -143,6 +166,20 @@ export default function ConversationsPage() {
 
     document.addEventListener('keydown', handleEscKey);
     return () => document.removeEventListener('keydown', handleEscKey);
+  }, []);
+
+  // Ticket 02: 清理临时会话 - 组件卸载时删除未使用的临时会话
+  useEffect(() => {
+    return () => {
+      // 组件卸载时，如果是临时会话且没有消息，删除它
+      if (isTempConversation && activeConversation?.messages?.length === 0) {
+        const tempId = activeConversation.id;
+        if (tempId.startsWith('temp-')) {
+          console.log(`清理临时会话：${tempId}`);
+          // 不需要调用后端 API，临时会话没有持久化
+        }
+      }
+    };
   }, []);
 
   // 重命名对话函数
@@ -201,31 +238,34 @@ export default function ConversationsPage() {
     }
   };
 
-  // 只在发送新消息时自动滚动，切换会话时不滚动
+  // 只在发送新消息时自动滚动，切换会话时不滚动 - Ticket 06
   useEffect(() => {
     // 首次渲染或切换会话时不滚动
     if (isInitialMountRef.current) {
       isInitialMountRef.current = false;
       previousMessageCountRef.current = activeConversation?.messages?.length || 0;
+      shouldAutoScrollRef.current = true; // 默认允许自动滚动
       return;
     }
 
     // 只有当消息数量增加时才滚动（新消息到达）
     const currentCount = activeConversation?.messages?.length || 0;
-    if (currentCount > previousMessageCountRef.current) {
+    if (currentCount > previousMessageCountRef.current && shouldAutoScrollRef.current) {
       scrollToBottom();
     }
     previousMessageCountRef.current = currentCount;
   }, [activeConversation?.messages?.length]);
 
-  // 修复：切换会话时重置状态
+  // 修复：切换会话时重置状态，但保持滚动位置在底部 - Ticket 06
   useEffect(() => {
     if (activeConversation) {
       // 切换会话时重置初始标记，但不触发滚动
       previousMessageCountRef.current = activeConversation.messages?.length || 0;
-      setIsAutoCreatedConversation(false); // 从列表选择的对话不是自动创建的
+      setIsTempConversation(false); // 从列表选择的对话不是临时会话
       // Ticket 01: 更新页面标题
       setPageTitle(activeConversation.title);
+      // 切换会话时滚动到底部
+      setTimeout(() => scrollToBottom(), 0);
     }
   }, [activeConversation?.id]);
 
@@ -284,7 +324,7 @@ export default function ConversationsPage() {
         if (targetConversation) {
           setActiveConversation(targetConversation);
           setPageTitle(targetConversation.title);
-          setIsAutoCreatedConversation(false);
+          setIsTempConversation(false);
           console.log(`成功加载 URL 指定的对话：${targetConversation.title}`);
         } else {
           console.warn(`对话 ID ${urlConversationId} 不存在，将创建新对话`);
@@ -304,29 +344,113 @@ export default function ConversationsPage() {
   };
 
   const handleNewConversation = async () => {
-    await createAndActivateConversation("新的诊断对话");
+    await createAndActivateTempConversation("新的诊断对话");
   };
 
-  // Ticket 02: 生成对话标题（基于用户第一条消息）
+  // Ticket 02: 转换临时会话为正式会话
+  const convertTempConversationToPermanent = async (): Promise<Conversation | null> => {
+    if (!activeConversation) {
+      console.error("转换失败：activeConversation 不存在");
+      return null;
+    }
+
+    // 检查是否已经是正式会话（ID 不以 temp- 开头）
+    if (!activeConversation.id.startsWith('temp-')) {
+      console.log(`会话已经是正式的，无需转换：${activeConversation.id}`);
+      return activeConversation;
+    }
+
+    console.log(`[转换会话] 开始转换临时会话：${activeConversation.id}`);
+    console.log(`[转换会话] 用户 ID: ${userId}`);
+    console.log(`[转换会话] 标题：${activeConversation.title}`);
+
+    try {
+      // 创建正式会话
+      console.log(`[转换会话] 调用 createConversation API...`);
+      const conversation = await createConversation({
+        patientId: userId,
+        title: activeConversation.title,
+      });
+      
+      console.log(`[转换会话] API 返回：`, conversation);
+      
+      if (!conversation || !conversation.id) {
+        console.error("[转换会话] API 返回无效数据");
+        return null;
+      }
+      
+      // 更新本地状态
+      setConversations((prev) => [conversation, ...prev]);
+      setActiveConversation(conversation);
+      setIsTempConversation(false);
+      
+      console.log(`[转换会话] 转换成功，新 ID: ${conversation.id}`);
+      return conversation;
+    } catch (error) {
+      console.error("[转换会话] 转换临时会话失败:", error);
+      if (error instanceof Error) {
+        console.error("[转换会话] 错误详情:", error.message);
+      }
+      alert(`保存对话失败：${error instanceof Error ? error.message : "请稍后重试"}`);
+      return null;
+    }
+  };
+
+  // Ticket 03: 生成对话标题（基于用户第一条消息）
   const generateTitleFromMessage = (message: string): string => {
-    // 取前 50 个字符
-    const maxLength = 50;
     let title = message.trim();
     
-    if (title.length > maxLength) {
-      title = title.substring(0, maxLength);
-      // 去除末尾的标点符号
-      title = title.replace(/[，。！？,.!?;；:：\s]+$/, '');
-      title = title + '...';
-    } else {
-      // 去除末尾的标点符号
-      title = title.replace(/[，。！？,.!?;；:：\s]+$/, '');
+    // 去除末尾的标点符号
+    title = title.replace(/[，。！？,.!?;；:：\s]+$/, '');
+    
+    // ≤10 字符：直接使用
+    if (title.length <= 10) {
+      return title || "新的诊断对话";
     }
     
-    return title || "新的诊断对话";
+    // >10 字符：截断并添加省略号
+    title = title.substring(0, 30);
+    title = title.replace(/[，。！？,.!?;；:：\s]+$/, '');
+    return title + '...';
   };
 
-  // Ticket 02: 更新对话标题
+  // Ticket 03: 调用 AI 生成更智能的标题
+  const generateAITitle = async (message: string): Promise<string> => {
+    try {
+      // 调用后端 API 生成标题
+      const response = await fetch('http://localhost:8000/api/generate-title', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('标题生成失败');
+      }
+      
+      const data = await response.json();
+      let title = data.title?.trim();
+      
+      // 清理标题
+      if (!title) {
+        return generateTitleFromMessage(message);
+      }
+      
+      // 限制长度
+      if (title.length > 30) {
+        title = title.substring(0, 30) + '...';
+      }
+      
+      return title;
+    } catch (error) {
+      console.error("AI 标题生成失败，使用备用方案:", error);
+      return generateTitleFromMessage(message);
+    }
+  };
+
+  // Ticket 03: 更新对话标题
   const updateConversationTitle = async (conversationId: string, currentTitle: string) => {
     // 只有当标题是默认标题时才更新
     const defaultTitles = ["新的诊断对话", "新的对话", "MediTrace 对话", "有效提取用户的问题"];
@@ -336,7 +460,23 @@ export default function ConversationsPage() {
     }
     
     try {
-      const newTitle = generateTitleFromMessage(currentTitle);
+      // 获取最新的第一条用户消息
+      const firstUserMessage = activeConversation?.messages?.find(m => m.role === 'user')?.content;
+      if (!firstUserMessage) {
+        console.log("未找到用户消息，跳过标题更新");
+        return;
+      }
+      
+      let newTitle: string;
+      
+      // ≤10 字符：直接使用
+      if (firstUserMessage.trim().length <= 10) {
+        newTitle = generateTitleFromMessage(firstUserMessage);
+      } else {
+        // >10 字符：调用 AI 生成
+        newTitle = await generateAITitle(firstUserMessage);
+      }
+      
       await updateConversation(conversationId, newTitle);
       
       // 更新本地状态
@@ -361,6 +501,25 @@ export default function ConversationsPage() {
 
     setSending(true);
     try {
+      // Ticket 02: 如果是临时会话，先转换为正式会话
+      // 使用 activeConversation.id 作为判断依据，而不是依赖 isTempConversation 状态
+      // 因为临时会话的 ID 以 "temp-" 开头
+      let conversationId = activeConversation.id;
+      const isTemp = conversationId.startsWith('temp-');
+      
+      if (isTemp) {
+        console.log(`检测到临时会话，开始转换为正式会话：${conversationId}`);
+        const convertedConv = await convertTempConversationToPermanent();
+        if (!convertedConv) {
+          // 转换失败，不发送消息
+          console.error("临时会话转换失败，无法发送消息");
+          setSending(false);
+          return;
+        }
+        conversationId = convertedConv.id;
+        console.log(`会话已转换，新 ID: ${conversationId}`);
+      }
+
       const userMessage: Message = {
         role: "user",
         content: newMessage,
@@ -369,6 +528,9 @@ export default function ConversationsPage() {
 
       const updatedMessages = [...(activeConversation.messages || []), userMessage];
       const hasPreviousMessages = activeConversation.messages && activeConversation.messages.length > 0;
+      
+      // 新消息到达时，重置自动滚动标志
+      shouldAutoScrollRef.current = true;
       
       setActiveConversation({
         ...activeConversation,
@@ -390,7 +552,7 @@ export default function ConversationsPage() {
 
       await sendMessageStream(
         {
-          conversationId: activeConversation.id,
+          conversationId: conversationId,
           message: newMessage,
         },
         (chunk) => {
@@ -416,7 +578,7 @@ export default function ConversationsPage() {
 
       // Ticket 02: 如果是第一条消息，更新对话标题
       if (!hasPreviousMessages) {
-        await updateConversationTitle(activeConversation.id, activeConversation.title);
+        await updateConversationTitle(conversationId, activeConversation.title);
       }
     } catch (error) {
       console.error("发送消息失败:", error);
@@ -623,7 +785,17 @@ export default function ConversationsPage() {
         {activeConversation ? (
           <>
             {/* 消息列表 */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div 
+              className="flex-1 overflow-y-auto p-6"
+              onWheel={() => {
+                // 用户手动滚动时，设置 shouldAutoScrollRef = false
+                shouldAutoScrollRef.current = false;
+              }}
+              onTouchStart={() => {
+                // 移动端触摸滚动时，设置 shouldAutoScrollRef = false
+                shouldAutoScrollRef.current = false;
+              }}
+            >
               {activeConversation.messages?.map((msg, idx) => {
                 const isLastMessage = idx === (activeConversation.messages?.length || 0) - 1;
                 const isAiStreaming = msg.role === "assistant" && isLastMessage && sending;
@@ -636,10 +808,10 @@ export default function ConversationsPage() {
                     }`}
                   >
                     <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                      className={`rounded-2xl w-full px-4 py-3 ${
                         msg.role === "user"
                           ? "bg-green-500 text-white"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+                          : "bg-transparent text-gray-800 dark:text-gray-100"
                       }`}
                     >
                       {/* 消息内容 */}
