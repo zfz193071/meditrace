@@ -858,6 +858,61 @@ async def startup_event():
     init_database()
 
 
+# 生成对话标题
+class GenerateTitleRequest(BaseModel):
+    message: str
+
+
+@app.post("/api/generate-title")
+async def generate_title(request: GenerateTitleRequest):
+    """
+    使用 AI 生成对话标题
+    
+    基于用户消息内容，提取核心主题作为对话标题
+    """
+    try:
+        deepseek_client = get_deepseek_client()
+        
+        # 构建 prompt - 优化为提取症状或核心主题
+        prompt = f"""请根据以下用户消息，生成一个简洁的对话标题（15-25 个中文字符）：
+
+用户消息：{request.message}
+
+要求：
+1. 标题应准确反映用户问题的核心主题（如症状、疾病咨询等）
+2. 标题简洁明了，不超过 25 个字符
+3. 使用中文
+4. 不要使用标点符号
+5. 优先提取关键症状或疾病名称
+6. 如果是多个症状，提取最主要的症状
+
+请直接返回标题内容，不要有其他解释。"""
+
+        # 调用 AI 生成标题
+        response = await deepseek_client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "system", "content": "你是一个医疗对话助手，擅长提取用户问题的核心主题并生成简洁的诊断对话标题。"},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=50,
+            temperature=0.5,
+        )
+        
+        title = response.choices[0].message.content.strip()
+        
+        # 清理标题
+        if len(title) > 25:
+            title = title[:25]
+        
+        return {"title": title}
+        
+    except Exception as e:
+        print(f"生成标题失败：{e}")
+        # 返回默认标题（使用消息截断）
+        return {"title": request.message[:25] + "..." if len(request.message) > 25 else request.message}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

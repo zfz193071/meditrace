@@ -65,6 +65,8 @@ export default function ConversationsPage() {
   const [scrollingTitles, setScrollingTitles] = useState<Set<string>>(new Set()); // 需要滚动的对话 ID 集合
   const [pageTitle, setPageTitle] = useState("新的对话"); // 页面动态标题
   const [urlConversationId, setUrlConversationId] = useState<string | null>(null); // URL 中的对话 ID
+  const [hasGeneratedTitle, setHasGeneratedTitle] = useState(false); // 标记是否已生成标题
+  const titleGenerationRef = useRef<boolean>(false); // 防止重复生成标题的 ref
   const menuRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const previousMessageCountRef = useRef<number>(0);
@@ -264,6 +266,9 @@ export default function ConversationsPage() {
       setIsTempConversation(false); // 从列表选择的对话不是临时会话
       // Ticket 01: 更新页面标题
       setPageTitle(activeConversation.title);
+      // 重置标题生成标记，允许新会话生成标题
+      titleGenerationRef.current = false;
+      setHasGeneratedTitle(false);
       // 切换会话时滚动到底部
       setTimeout(() => scrollToBottom(), 0);
     }
@@ -450,8 +455,14 @@ export default function ConversationsPage() {
     }
   };
 
-  // Ticket 03: 更新对话标题
-  const updateConversationTitle = async (conversationId: string, currentTitle: string) => {
+  // Ticket 03: 更新对话标题（实时生成）
+  const updateConversationTitle = async (conversationId: string, currentTitle: string, userMessageContent: string) => {
+    // 检查是否已经生成过标题
+    if (titleGenerationRef.current) {
+      console.log("标题已生成，跳过");
+      return;
+    }
+    
     // 只有当标题是默认标题时才更新
     const defaultTitles = ["新的诊断对话", "新的对话", "MediTrace 对话", "有效提取用户的问题"];
     if (!defaultTitles.includes(currentTitle)) {
@@ -459,40 +470,48 @@ export default function ConversationsPage() {
       return;
     }
     
+    // 标记开始生成标题
+    titleGenerationRef.current = true;
+    
     try {
-      // 获取最新的第一条用户消息
-      const firstUserMessage = activeConversation?.messages?.find(m => m.role === 'user')?.content;
-      if (!firstUserMessage) {
-        console.log("未找到用户消息，跳过标题更新");
-        return;
-      }
-      
       let newTitle: string;
       
       // ≤10 字符：直接使用
-      if (firstUserMessage.trim().length <= 10) {
-        newTitle = generateTitleFromMessage(firstUserMessage);
+      if (userMessageContent.trim().length <= 10) {
+        newTitle = generateTitleFromMessage(userMessageContent);
       } else {
         // >10 字符：调用 AI 生成
-        newTitle = await generateAITitle(firstUserMessage);
+        newTitle = await generateAITitle(userMessageContent);
       }
       
+      // 更新后端数据库
       await updateConversation(conversationId, newTitle);
       
-      // 更新本地状态
-      setConversations(prev => prev.map(c => 
-        c.id === conversationId ? { ...c, title: newTitle } : c
-      ));
+      // 批量更新本地状态
+      setConversations(prev => {
+        const updated = prev.map(c => 
+          c.id === conversationId ? { ...c, title: newTitle } : c
+        );
+        return updated;
+      });
       
-      if (activeConversation?.id === conversationId) {
-        setActiveConversation(prev => prev ? { ...prev, title: newTitle } : null);
-        setPageTitle(newTitle);
-      }
+      setActiveConversation(prev => {
+        if (!prev) return null;
+        return { ...prev, title: newTitle };
+      });
       
+      setPageTitle(newTitle);
+      
+      // 同步更新浏览器标签页
+      document.title = newTitle + " - MediTrace";
+      
+      setHasGeneratedTitle(true);
       console.log(`对话标题已更新：${newTitle}`);
     } catch (error) {
       console.error("更新对话标题失败:", error);
       // 标题更新失败不影响消息发送
+      // 重置标记，允许下次重试
+      titleGenerationRef.current = false;
     }
   };
 
@@ -550,6 +569,9 @@ export default function ConversationsPage() {
         messages: [...updatedMessages, aiMessage],
       });
 
+      // 标记第一条用户消息内容，用于标题生成
+      const firstUserMessageContent = !hasPreviousMessages ? newMessage : "";
+
       await sendMessageStream(
         {
           conversationId: conversationId,
@@ -571,14 +593,30 @@ export default function ConversationsPage() {
                 messages,
               };
             });
+            
+            // 实时标题更新：在 AI 第一个 chunk 到达时触发标题生成
+            // 条件：
+            // 1. 是第一条用户消息（hasPreviousMessages 为 false）
+            // 2. 标题尚未生成（titleGenerationRef.current 为 false）
+            // 3. 这是第一个 chunk（chunk.content 长度在 1-10 之间，表示刚开始）
+            if (
+              !hasPreviousMessages && 
+              !titleGenerationRef.current && 
+              chunk.content.length > 0 && 
+              chunk.content.length < 100
+            ) {
+              // 异步生成标题，不阻塞消息流
+              updateConversationTitle(conversationId, activeConversation.title, firstUserMessageContent);
+            }
+            
             // 修复：流式更新时不主动滚动，让消息数量变化 useEffect 处理
           }, 0);
         }
       );
 
-      // Ticket 02: 如果是第一条消息，更新对话标题
-      if (!hasPreviousMessages) {
-        await updateConversationTitle(conversationId, activeConversation.title);
+      // 如果标题尚未生成（例如 API 调用失败），在流式完成后尝试生成
+      if (!hasPreviousMessages && !titleGenerationRef.current) {
+        await updateConversationTitle(conversationId, activeConversation.title, firstUserMessageContent);
       }
     } catch (error) {
       console.error("发送消息失败:", error);
