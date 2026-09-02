@@ -453,3 +453,23 @@ export function downloadBlob(blob: Blob, filename: string): void {
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
 }
+
+/**
+ * 导航到指定对话
+ * @param conversationId 对话 ID
+ */
+export function navigateToConversation(conversationId: string): void {
+  if (typeof window !== "undefined") {
+    window.location.href = `/chat/${conversationId}`;
+  }
+}
+
+/**
+ * 替换当前 URL 为对话 URL（不添加历史记录）
+ * @param conversationId 对话 ID
+ */
+export function replaceConversationUrl(conversationId: string): void {
+  if (typeof window !== "undefined") {
+    window.history.replaceState({}, "", `/chat/${conversationId}`);
+  }
+}

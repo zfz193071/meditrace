@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   Conversation,
   Message,
   createConversation,
   getConversations,
+  getConversation,
   sendMessage,
   sendMessageStream,
   deleteConversation,
   downloadBlob,
   updateConversation,
+  replaceConversationUrl,
 } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import StatusBadge from "../../components/StatusBadge";
@@ -48,7 +50,7 @@ export default function ConversationsPage() {
     }
   }
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const params = useParams();
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,18 +78,18 @@ export default function ConversationsPage() {
 
   // Ticket 01: 页面加载时自动创建新对话或加载 URL 指定的对话
   useEffect(() => {
-    loadConversations();
-    
-    // 检查 URL 中是否有对话 ID
-    const id = searchParams.get('id');
+    // 检查 URL 中是否有对话 ID（动态路由 /chat/{id}）
+    const id = params.id as string;
     if (id) {
       setUrlConversationId(id);
-      // URL 有 ID 时，不自动创建新对话，而是等待加载完对话列表后查找并激活
+      // URL 有 ID 时，加载对话列表后查找并激活
+      loadConversations(id);
     } else {
-      // URL 无 ID 时，自动创建新对话
+      // URL 无 ID 时，加载对话列表并自动创建新对话
+      loadConversations();
       autoCreateConversation();
     }
-  }, [userId, searchParams]);
+  }, [userId, params]);
 
   // 提取公共的创建并激活对话逻辑（临时会话）
   const createAndActivateTempConversation = async (title: string = "新的诊断对话"): Promise<void> => {
@@ -317,22 +319,22 @@ export default function ConversationsPage() {
     }
   }, [conversations]);
 
-  const loadConversations = async () => {
+  const loadConversations = async (targetId?: string) => {
     setLoading(true);
     try {
       const conversationsList = await getConversations(userId);
       setConversations(conversationsList);
       
-      // Ticket 01: 如果 URL 中有对话 ID，尝试加载该对话
-      if (urlConversationId) {
-        const targetConversation = conversationsList.find(c => c.id === urlConversationId);
+      // Ticket 01: 如果指定了对话 ID，尝试加载该对话
+      if (targetId) {
+        const targetConversation = conversationsList.find(c => c.id === targetId);
         if (targetConversation) {
           setActiveConversation(targetConversation);
           setPageTitle(targetConversation.title);
           setIsTempConversation(false);
           console.log(`成功加载 URL 指定的对话：${targetConversation.title}`);
         } else {
-          console.warn(`对话 ID ${urlConversationId} 不存在，将创建新对话`);
+          console.warn(`对话 ID ${targetId} 不存在，将创建新对话`);
           // 对话不存在，创建新对话
           await autoCreateConversation();
         }
@@ -350,6 +352,10 @@ export default function ConversationsPage() {
 
   const handleNewConversation = async () => {
     await createAndActivateTempConversation("新的诊断对话");
+    // 清空 URL 中的对话 ID
+    if (typeof window !== "undefined") {
+      window.history.replaceState({}, "", "/chat");
+    }
   };
 
   // Ticket 02: 转换临时会话为正式会话
@@ -388,6 +394,9 @@ export default function ConversationsPage() {
       setConversations((prev) => [conversation, ...prev]);
       setActiveConversation(conversation);
       setIsTempConversation(false);
+      
+      // 更新 URL 为新的对话 ID
+      replaceConversationUrl(conversation.id);
       
       console.log(`[转换会话] 转换成功，新 ID: ${conversation.id}`);
       return conversation;
@@ -707,6 +716,10 @@ export default function ConversationsPage() {
                   onClick={() => {
                     setActiveConversation(conv);
                     setActiveMenuConversationId(null); // 关闭菜单
+                    // 更新 URL 为动态路由
+                    if (typeof window !== "undefined") {
+                      window.history.pushState({}, "", `/chat/${conv.id}`);
+                    }
                   }}
                   className={`group cursor-pointer transition-colors relative ${
                     activeConversation?.id === conv.id ? "bg-green-50" : "hover:bg-gray-50"
