@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Conversation,
   Message,
@@ -50,7 +50,6 @@ export default function ConversationsPage() {
     }
   }
   const router = useRouter();
-  const params = useParams();
   const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -66,7 +65,6 @@ export default function ConversationsPage() {
   const [newTitle, setNewTitle] = useState(""); // 新标题
   const [scrollingTitles, setScrollingTitles] = useState<Set<string>>(new Set()); // 需要滚动的对话 ID 集合
   const [pageTitle, setPageTitle] = useState("新的对话"); // 页面动态标题
-  const [urlConversationId, setUrlConversationId] = useState<string | null>(null); // URL 中的对话 ID
   const [hasGeneratedTitle, setHasGeneratedTitle] = useState(false); // 标记是否已生成标题
   const titleGenerationRef = useRef<boolean>(false); // 防止重复生成标题的 ref
   const menuRef = useRef<HTMLDivElement>(null);
@@ -76,20 +74,14 @@ export default function ConversationsPage() {
   const titleRefs = useRef<Record<string, HTMLDivElement | null>>({}); // 标题元素 refs
   const shouldAutoScrollRef = useRef<boolean>(true); // Ticket 06: 追踪是否应该自动滚动
 
-  // Ticket 01: 页面加载时自动创建新对话或加载 URL 指定的对话
+  // Ticket 01: 页面加载时加载对话列表并自动创建新对话
+  // 注意：/chat 路由不依赖 URL 参数，所有对话都在列表中展示
   useEffect(() => {
-    // 检查 URL 中是否有对话 ID（动态路由 /chat/{id}）
-    const id = params.id as string;
-    if (id) {
-      setUrlConversationId(id);
-      // URL 有 ID 时，加载对话列表后查找并激活
-      loadConversations(id);
-    } else {
-      // URL 无 ID 时，加载对话列表并自动创建新对话
-      loadConversations();
-      autoCreateConversation();
-    }
-  }, [userId, params]);
+    // 加载对话列表
+    loadConversations();
+    // 自动创建临时对话
+    autoCreateConversation();
+  }, [userId]);
 
   // 提取公共的创建并激活对话逻辑（临时会话）
   const createAndActivateTempConversation = async (title: string = "新的诊断对话"): Promise<void> => {
@@ -352,10 +344,6 @@ export default function ConversationsPage() {
 
   const handleNewConversation = async () => {
     await createAndActivateTempConversation("新的诊断对话");
-    // 清空 URL 中的对话 ID
-    if (typeof window !== "undefined") {
-      window.history.replaceState({}, "", "/chat");
-    }
   };
 
   // Ticket 02: 转换临时会话为正式会话
@@ -806,33 +794,14 @@ export default function ConversationsPage() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* 聊天顶部导航栏 */}
         <header className="p-4 border-b bg-white flex items-center gap-2 flex-shrink-0">
-          {/* 当 URL 有对话 ID 时显示返回按钮 */}
-          {urlConversationId && (
-            <button
-              onClick={() => {
-                // 清空 URL 中的对话 ID，返回对话列表视图
-                window.history.replaceState({}, "", "/chat");
-                // 重置激活的对话
-                setActiveConversation(null);
-                setActiveMenuConversationId(null);
-              }}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="返回对话列表"
-            >
-              ←
-            </button>
-          )}
-          
-          {/* 侧栏折叠/展开按钮（仅在有对话 ID 时隐藏） */}
-          {!urlConversationId && (
-            <button
-              onClick={toggleSidebar}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title={sidebarCollapsed ? "展开侧栏" : "折叠侧栏"}
-            >
-              {sidebarCollapsed ? '▶' : '◀'}
-            </button>
-          )}
+          {/* 侧栏折叠/展开按钮 */}
+          <button
+            onClick={toggleSidebar}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title={sidebarCollapsed ? "展开侧栏" : "折叠侧栏"}
+          >
+            {sidebarCollapsed ? '▶' : '◀'}
+          </button>
           
           {/* 返回主页按钮 */}
           <button
