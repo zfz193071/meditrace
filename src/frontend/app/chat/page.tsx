@@ -866,14 +866,16 @@ export default function ConversationsPage() {
                         )}
                       </div>
                       
-                      {/* 时间戳 */}
-                      <p
-                        className={`text-xs mt-2 ${
-                          msg.role === "user" ? "text-green-100" : "text-gray-500 dark:text-gray-400"
-                        }`}
-                      >
-                        {formatTime(msg.timestamp)}
-                      </p>
+                      {/* 时间戳 - 只在非流式状态或用户消息时显示 */}
+                      {(!isAiStreaming || msg.role === "user") && (
+                        <p
+                          className={`text-xs mt-2 ${
+                            msg.role === "user" ? "text-green-100" : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
+                          {formatTime(msg.timestamp)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );
