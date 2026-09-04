@@ -376,8 +376,10 @@ export default function ConversationsPage() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+  const scrollToBottom = (isStreaming: boolean = false) => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: isStreaming ? "smooth" : "auto",
+    });
   };
 
   // 检查标题是否需要滚动动画
@@ -760,7 +762,10 @@ export default function ConversationsPage() {
               );
             }
 
-            // 修复：流式更新时不主动滚动，让消息数量变化 useEffect 处理
+            // 流式响应时自动滚动（如果用户没有手动滚动）
+            if (shouldAutoScrollRef.current) {
+              scrollToBottom(true); // true 表示流式响应，使用平滑滚动
+            }
           }, 0);
         }
       );
