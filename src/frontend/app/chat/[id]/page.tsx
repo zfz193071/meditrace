@@ -80,16 +80,19 @@ export default function ConversationsPage() {
   useEffect(() => {
     // 检查 URL 中是否有对话 ID（动态路由 /chat/{id}）
     const id = params.id as string;
-    if (id) {
+    
+    // 当 URL 中的对话 ID 变化时，需要重新加载并激活该对话
+    if (id && id !== urlConversationId) {
+      console.log(`[URL 变化] URL 中的对话 ID 从 ${urlConversationId} 变为 ${id}`);
       setUrlConversationId(id);
       // URL 有 ID 时，加载对话列表后查找并激活
       loadConversations(id);
-    } else {
+    } else if (!id) {
       // URL 无 ID 时，加载对话列表并自动创建新对话
       loadConversations();
       autoCreateConversation();
     }
-  }, [userId, params]);
+  }, [userId, params.id, urlConversationId]);
 
   // 提取公共的创建并激活对话逻辑（临时会话）
   const createAndActivateTempConversation = async (title: string = "新的诊断对话"): Promise<void> => {
@@ -716,10 +719,8 @@ export default function ConversationsPage() {
                   onClick={() => {
                     // 关闭菜单
                     setActiveMenuConversationId(null);
-                    // 更新 URL 为动态路由
-                    if (typeof window !== "undefined") {
-                      window.history.pushState({}, "", `/chat/${conv.id}`);
-                    }
+                    // 使用 router.push 更新 URL，触发 Next.js 路由更新
+                    router.push(`/chat/${conv.id}`);
                     // 查找完整的会话数据（包含消息等）
                     const fullConversation = conversations.find(c => c.id === conv.id);
                     if (fullConversation) {
