@@ -66,3 +66,7 @@ docs/private/
 *.bak
 *.tmp
 *.log
+
+# Database
+*.db
+src/backend/*.db
