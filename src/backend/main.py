@@ -247,9 +247,21 @@ async def diagnose(input: SymptomInput):
             model_version="deepseek-chat-v1-medkb-2024q1"
         )
         
-        # 调用 DeepSeek API 获取真实诊断
-        deepseek_client = get_deepseek_client()
-        result = await deepseek_client.diagnose(input.symptoms)
+        # 根据环境变量决定是否使用真实 AI
+        deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
+        
+        if deepseek_api_key:
+            # 本地开发模式：使用真实 DeepSeek API
+            deepseek_client = get_deepseek_client()
+            result = await deepseek_client.diagnose(input.symptoms)
+        else:
+            # 线上部署模式：使用模拟回复（不消耗 token）
+            print("ℹ️ 演示模式：/api/diagnose 使用模拟回复（DEEPSEEK_API_KEY 未设置）")
+            mock_result = get_mock_diagnosis_result(input.symptoms, [])
+            result = {
+                "suggestions": mock_result.get("suggestions", []),
+                "disclaimer": mock_result.get("disclaimer", "")
+            }
         
         suggestions = result.get("suggestions", [])
         disclaimer = result.get("disclaimer", "")
@@ -699,9 +711,15 @@ async def delete_conversation(conversation_id: str):
     return {"success": True, "message": "Conversation deleted"}
 
 
-def get_mock_diagnosis_result(user_message: str, context_messages: List[Dict[str, Any]]) -> Dict[str, Any]:
+def get_mock_diagnosis_result(user_message: str) -> Dict[str, Any]:
     """
     生成模拟的 AI 诊断结果（用于演示模式，不消耗 API token）
+    
+    Args:
+        user_message: 用户消息内容
+        
+    Returns:
+        模拟的诊断结果，包含建议、总结、免责声明
     """
     # 根据用户消息内容生成更智能的模拟回复
     user_msg_lower = user_message.lower()
@@ -796,11 +814,11 @@ async def send_message(conversation_id: str, request: MessageRequest):
             )
         except Exception as e:
             print(f"⚠️ DeepSeek API 调用失败，使用模拟回复：{e}")
-            diagnosis_result = get_mock_diagnosis_result(request.content, context_messages)
+            diagnosis_result = get_mock_diagnosis_result(request.content)
     else:
         # 线上部署模式：使用模拟回复（不消耗 token）
         print("ℹ️ 演示模式：使用模拟 AI 回复（DEEPSEEK_API_KEY 未设置）")
-        diagnosis_result = get_mock_diagnosis_result(request.content, context_messages)
+        diagnosis_result = get_mock_diagnosis_result(request.content)
     
     # 5. 保存 AI 消息
     ai_message_id = str(uuid.uuid4())
@@ -900,7 +918,7 @@ async def send_message_stream(conversation_id: str, request: MessageRequest):
             else:
                 # 线上部署模式：使用模拟回复（不消耗 token）
                 print("ℹ️ 演示模式：使用模拟 AI 回复（DEEPSEEK_API_KEY 未设置）")
-                diagnosis_result = get_mock_diagnosis_result(request.content, context_messages)
+                diagnosis_result = get_mock_diagnosis_result(request.content)
                 full_content = diagnosis_result.get("summary", "已收到您的症状描述")
                 
                 # 模拟打字机效果
@@ -928,7 +946,38 @@ async def send_message_stream(conversation_id: str, request: MessageRequest):
                 yield "data: [DONE]\n\n"
             
         except Exception as e:
-            yield f"data: {json.dumps({'error': str(e), 'complete': True})}\n\n"
+            if deepseek_api_key:
+                # 本地开发模式：DeepSeek 失败时回退到模拟回复
+                print(f"⚠️ DeepSeek API 调用失败，使用模拟回复：{e}")
+                diagnosis_result = get_mock_diagnosis_result(request.content)
+                full_content = diagnosis_result.get("summary", "已收到您的症状描述")
+                
+                # 模拟打字机效果
+                chunk_size = 3
+                for i in range(0, len(full_content), chunk_size):
+                    chunk = full_content[i:i + chunk_size]
+                    yield f"data: {json.dumps({'content': chunk, 'complete': False})}\n\n"
+                    await asyncio.sleep(0.03)
+                
+                # 保存完整的 AI 消息
+                ai_message_id = str(uuid.uuid4())
+                with get_db() as conn:
+                    conn.execute(
+                        """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+                           VALUES (?, ?, ?, ?, ?)""",
+                        (ai_message_id, conversation_id, "assistant", full_content, json.dumps(diagnosis_result))
+                    )
+                    conn.execute(
+                        "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        (conversation_id,)
+                    )
+                
+                # 发送完成信号
+                yield f"data: {json.dumps({'content': '', 'complete': True})}\n\n"
+                yield "data: [DONE]\n\n"
+            else:
+                # 线上部署模式：直接返回错误
+                yield f"data: {json.dumps({'error': str(e), 'complete': True})}\n\n"
     
     return StreamingResponse(
         generate_stream(),
@@ -960,10 +1009,15 @@ async def generate_title(request: GenerateTitleRequest):
     基于用户消息内容，提取核心主题作为对话标题
     """
     try:
-        deepseek_client = get_deepseek_client()
+        # 根据环境变量决定是否使用真实 AI
+        deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
         
-        # 构建 prompt - 优化为提取症状或核心主题
-        prompt = f"""请根据以下用户消息，生成一个简洁的对话标题（15-25 个中文字符）：
+        if deepseek_api_key:
+            # 本地开发模式：使用真实 DeepSeek API
+            deepseek_client = get_deepseek_client()
+            
+            # 构建 prompt - 优化为提取症状或核心主题
+            prompt = f"""请根据以下用户消息，生成一个简洁的对话标题（15-25 个中文字符）：
 
 用户消息：{request.message}
 
@@ -977,22 +1031,29 @@ async def generate_title(request: GenerateTitleRequest):
 
 请直接返回标题内容，不要有其他解释。"""
 
-        # 调用 AI 生成标题
-        response = await deepseek_client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[
-                {"role": "system", "content": "你是一个医疗对话助手，擅长提取用户问题的核心主题并生成简洁的诊断对话标题。"},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=50,
-            temperature=0.5,
-        )
-        
-        title = response.choices[0].message.content.strip()
-        
-        # 清理标题
-        if len(title) > 25:
-            title = title[:25]
+            # 调用 AI 生成标题
+            response = await deepseek_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": "你是一个医疗对话助手，擅长提取用户问题的核心主题并生成简洁的诊断对话标题。"},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=50,
+                temperature=0.5,
+            )
+            
+            title = response.choices[0].message.content.strip()
+            
+            # 清理标题
+            if len(title) > 25:
+                title = title[:25]
+        else:
+            # 线上部署模式：使用简单标题生成（不消耗 token）
+            print("ℹ️ 演示模式：/api/generate-title 使用简单标题生成（DEEPSEEK_API_KEY 未设置）")
+            # 从消息中提取关键词作为标题
+            title = request.message[:20].strip()
+            if not title:
+                title = "医疗诊断对话"
         
         return {"title": title}
         
