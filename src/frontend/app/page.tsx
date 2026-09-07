@@ -6,9 +6,11 @@ export default function Home() {
   const [symptoms, setSymptoms] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState("0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B");
+  const [userId, setUserId] = useState(
+    "0x262Ee58D3e7A782ceC68094A6DACb53D02Fa9d0B"
+  );
   const [addressError, setAddressError] = useState("");
-  
+
   const validateAddress = (address: string): boolean => {
     if (!address) {
       setAddressError("");
@@ -30,7 +32,7 @@ export default function Home() {
     setAddressError("");
     return true;
   };
-  
+
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setUserId(newValue);
@@ -42,14 +44,19 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/diagnose`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          symptoms,
-          userId,
-        }),
-      });
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
+        }/api/diagnose`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            symptoms,
+            userId,
+          }),
+        }
+      );
       const data = await response.json();
       setResult(data);
     } catch (error) {
@@ -86,14 +93,14 @@ export default function Home() {
       <section className="py-6 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-wrap justify-center gap-4">
-            <a 
-              href="#diagnose" 
+            <a
+              href="#diagnose"
               className="btn-primary px-8 py-3 text-lg inline-block"
             >
               开始诊断
             </a>
-            <a 
-              href="#features" 
+            <a
+              href="#features"
               className="btn-secondary px-8 py-3 text-lg inline-block"
             >
               了解更多
@@ -111,10 +118,14 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-cyan-500 rounded-2xl mb-4">
                 <span className="text-3xl">🏥</span>
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">症状描述</h2>
-              <p className="text-gray-600">请详细描述您的症状，AI 将为您提供专业诊断建议</p>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                症状描述
+              </h2>
+              <p className="text-gray-600">
+                请详细描述您的症状，AI 将为您提供专业诊断建议
+              </p>
             </div>
-            
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -128,11 +139,14 @@ export default function Home() {
                   onChange={(e) => setSymptoms(e.target.value)}
                 />
               </div>
-              
+
               {/* 用户地址设置 */}
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  用户地址 <span className="text-gray-400 font-normal">(用于区块链记录)</span>
+                  用户地址{" "}
+                  <span className="text-gray-400 font-normal">
+                    (用于区块链记录)
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -154,7 +168,7 @@ export default function Home() {
                   生产环境建议集成 MetaMask 等钱包连接
                 </p>
               </div>
-              
+
               <button
                 className="btn-primary w-full py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleDiagnose}
@@ -199,28 +213,37 @@ export default function Home() {
                   <p className="text-sm text-gray-500">AI 分析结果</p>
                 </div>
               </div>
-              
+
               <div className="space-y-4 mb-6">
                 {result.suggestions?.map((suggestion: any, index: number) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="border-2 border-gray-100 rounded-xl p-5 hover:border-green-200 transition-colors"
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-lg font-semibold text-gray-800">{suggestion.disease}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {suggestion.disease}
+                      </h3>
                       <span className="badge badge-success">
                         置信度：{Math.round(suggestion.confidence * 100)}%
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-gray-700 mb-2">建议检查：</p>
+                      <p className="text-sm font-semibold text-gray-700 mb-2">
+                        建议检查：
+                      </p>
                       <ul className="space-y-1">
-                        {suggestion.recommendations?.map((rec: string, i: number) => (
-                          <li key={i} className="text-gray-600 text-sm flex items-start">
-                            <span className="mr-2 text-green-500">✓</span>
-                            {rec}
-                          </li>
-                        ))}
+                        {suggestion.recommendations?.map(
+                          (rec: string, i: number) => (
+                            <li
+                              key={i}
+                              className="text-gray-600 text-sm flex items-start"
+                            >
+                              <span className="mr-2 text-green-500">✓</span>
+                              {rec}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </div>
                   </div>
@@ -239,7 +262,9 @@ export default function Home() {
               {result.diagnosisId && (
                 <div className="bg-gradient-to-r from-green-50 to-cyan-50 rounded-xl p-5 border-2 border-green-100">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-gray-700">溯源信息</p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      溯源信息
+                    </p>
                     {result.chainTxHash ? (
                       <span className="badge badge-success flex items-center gap-1">
                         <span>✓</span> 已上链
@@ -251,7 +276,10 @@ export default function Home() {
                     )}
                   </div>
                   <p className="text-sm text-gray-600">
-                    诊断 ID: <code className="bg-white px-3 py-1 rounded-lg font-mono text-xs">{result.diagnosisId}</code>
+                    诊断 ID:{" "}
+                    <code className="bg-white px-3 py-1 rounded-lg font-mono text-xs">
+                      {result.diagnosisId}
+                    </code>
                   </p>
                 </div>
               )}
@@ -269,28 +297,32 @@ export default function Home() {
               结合前沿技术，为您提供专业、可信的医疗诊断服务
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 md:gap-10">
             <div className="card-modern history-card-bg card-bottom-margin">
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6">
                 <span className="text-3xl">🤖</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">AI 智能诊断</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">
+                AI 智能诊断
+              </h3>
               <p className="text-gray-600">
                 基于 DeepSeek 大模型与医学知识库 RAG，提供专业、准确的诊断建议
               </p>
             </div>
-            
+
             <div className="card-modern history-card-bg card-bottom-margin">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6">
                 <span className="text-3xl">⛓️</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">区块链溯源</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">
+                区块链溯源
+              </h3>
               <p className="text-gray-600">
                 诊断记录上链存储，确保数据不可篡改，满足医疗合规审计需求
               </p>
             </div>
-            
+
             <div className="card-modern history-card-bg card-bottom-margin">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
                 <span className="text-3xl">🔒</span>
@@ -309,47 +341,38 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6">
             <div className="card-modern text-center card-bottom-margin">
-              <a
-                href="/chat"
-                className="group block"
-              >
+              <a href="/chat" className="group block">
                 <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
                   <span className="text-4xl">💬</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">多轮对话</h3>
-                <p className="text-gray-600">
-                  进行多轮深度诊断咨询
-                </p>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  多轮对话
+                </h3>
+                <p className="text-gray-600">进行多轮深度诊断咨询</p>
               </a>
             </div>
-            
+
             <div className="card-modern text-center card-bottom-margin">
-              <a
-                href="/history"
-                className="group block"
-              >
+              <a href="/history" className="group block">
                 <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-400 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
                   <span className="text-4xl">📋</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">历史记录</h3>
-                <p className="text-gray-600">
-                  查看您的诊断历史记录和溯源状态
-                </p>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  历史记录
+                </h3>
+                <p className="text-gray-600">查看您的诊断历史记录和溯源状态</p>
               </a>
             </div>
-            
+
             <div className="card-modern text-center card-bottom-margin">
-              <a
-                href="/verify"
-                className="group block"
-              >
+              <a href="/verify" className="group block">
                 <div className="w-20 h-20 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
                   <span className="text-4xl">🔍</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">链上验证</h3>
-                <p className="text-gray-600">
-                  验证诊断记录的真实性与完整性
-                </p>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  链上验证
+                </h3>
+                <p className="text-gray-600">验证诊断记录的真实性与完整性</p>
               </a>
             </div>
           </div>
@@ -361,7 +384,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
             <p className="text-sm text-amber-800">
-              ⚠️ 演示模式：AI 回复为模拟内容，不消耗 API token。真实诊断请咨询专业医生。
+              ⚠️ 演示模式：AI 回复为模拟内容, 真实诊断请咨询专业医生。
             </p>
           </div>
         </div>
@@ -370,7 +393,10 @@ export default function Home() {
       {/* 页脚 */}
       <footer className="bg-gray-800 text-white py-12 px-6">
         <div className="max-w-6xl mx-auto">
-          <p className="text-gray-500 text-sm text-center" style={{ textAlign: "center" }}>
+          <p
+            className="text-gray-500 text-sm text-center"
+            style={{ textAlign: "center" }}
+          >
             © 2024 MediTrace. Built with Next.js, FastAPI & Blockchain
           </p>
         </div>

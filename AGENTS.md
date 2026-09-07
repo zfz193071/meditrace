@@ -20,7 +20,7 @@
 - ✅ 可以自动点击页面元素（`browser_click`）
 - ✅ 可以自动读取页面内容（`browser_get_page`）
 - ✅ 可以自动抓包分析网络请求（`browser_start_capture`）
-- ✅ 其他不消耗 API token 的浏览器操作
+- ✅ 其他浏览器操作
 
 ### 正确做法
 

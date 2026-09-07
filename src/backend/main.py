@@ -713,7 +713,7 @@ async def delete_conversation(conversation_id: str):
 
 def get_mock_diagnosis_result(user_message: str) -> Dict[str, Any]:
     """
-    生成模拟的 AI 诊断结果（用于演示模式，不消耗 API token）
+    生成模拟的 AI 诊断结果（用于演示模式）
     
     Args:
         user_message: 用户消息内容

@@ -837,7 +837,7 @@ export default function ConversationsPage() {
         {/* Tooltip 提示框 */}
         <div className="absolute right-0 top-full mt-2 w-72 bg-amber-50 border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
           <p className="text-sm text-amber-800">
-            ⚠️ 演示模式：AI 回复为模拟内容，不消耗 API token。真实诊断请咨询专业医生。
+            ⚠️ 演示模式：AI 回复为模拟内容, 真实诊断请咨询专业医生。
           </p>
         </div>
       </div>

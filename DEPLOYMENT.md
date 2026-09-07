@@ -104,7 +104,164 @@ npm run dev
 
 ## 部署到生产环境
 
-### 前端部署 (Vercel)
+### 🎯 推荐方案：单域名部署（前后端一起）
+
+**域名**: `https://meditrace.baozaolaoba.top`
+
+**架构**:
+```
+用户访问
+   ↓
+https://meditrace.baozaolaoba.top
+   ↓
+[Cloudflare + Nginx 反向代理]
+   ├── / → 前端 Next.js (端口 3000)
+   └── /api → 后端 FastAPI (端口 8000)
+```
+
+**为什么选择单域名部署？**
+
+| 优势 | 说明 |
+|------|------|
+| ✅ **简单** | 一个域名、一个 SSL 证书、一套配置 |
+| ✅ **便宜** | 单服务器，成本减半 |
+| ✅ **无跨域** | 同源策略，无需配置 CORS |
+| ✅ **易维护** | 统一日志、统一监控 |
+| ✅ **适合项目规模** | MediTrace 是个人/小团队项目，用户量有限 |
+
+**何时需要分开部署？**
+- 企业级应用，需要独立扩展前后端
+- 前端需要全球 CDN 加速，后端需要内网隔离
+- 前后端由不同团队维护，独立发布
+
+---
+
+### 单域名部署步骤
+
+#### 1. Cloudflare DNS 设置
+
+登录 [Cloudflare Dashboard](https://dash.cloudflare.com/) 并添加 DNS 记录：
+
+| 类型 | 名称 | 内容 | TTL | Proxy 状态 |
+|------|------|------|-----|-----------|
+| A | meditrace | 你的服务器 IP | Auto | 🟡 代理 (橙色云) |
+
+**注意**: 只需一个 `meditrace` 记录，前端和后端共用同一域名！
+
+#### 2. 前端环境变量 (`src/frontend/.env.production`)
+
+```bash
+NEXT_PUBLIC_BACKEND_URL=https://meditrace.baozaolaoba.top/api
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x860418e7713A346c829Bc539C93c7A2d576897C5
+NEXT_PUBLIC_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
+```
+
+#### 3. 后端环境变量 (`src/backend/.env`)
+
+```bash
+# 已有配置保持不变...
+DEEPSEEK_API_KEY=your-api-key
+USE_SEPOLIA=true
+# ...
+
+# 添加 CORS 配置（单域名部署理论上不需要，但保留以防万一）
+CORS_ORIGINS=https://meditrace.baozaolaoba.top
+```
+
+#### 4. Nginx 配置
+
+创建 `/etc/nginx/sites-available/meditrace`:
+
+```nginx
+server {
+    listen 80;
+    server_name meditrace.baozaolaoba.top;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name meditrace.baozaolaoba.top;
+    
+    ssl_certificate /etc/letsencrypt/live/meditrace.baozaolaoba.top/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/meditrace.baozaolaoba.top/privkey.pem;
+    
+    # 前端 - 根路径
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Next.js SSR 需要
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+    
+    # 后端 API - /api 路径
+    location /api {
+        rewrite ^/api(.*)$ $1 break;
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+启用配置：
+```bash
+sudo ln -s /etc/nginx/sites-available/meditrace /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+#### 5. SSL 证书 (Let's Encrypt)
+
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d meditrace.baozaolaoba.top
+```
+
+#### 6. 使用 PM2 管理进程
+
+创建 `ecosystem.config.js`:
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: 'meditrace-frontend',
+      cwd: './src/frontend',
+      script: 'pnpm',
+      args: 'start',
+      env: { NODE_ENV: 'production', PORT: 3000 }
+    },
+    {
+      name: 'meditrace-backend',
+      cwd: './src/backend',
+      script: './venv/bin/python',
+      args: 'main.py',
+      env: { PYTHONUNBUFFERED: '1' }
+    }
+  ]
+};
+```
+
+启动：
+```bash
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+```
+
+---
+
+### 方案 B: 前后端分开部署（双域名）
+
+#### 前端部署 (Vercel)
 
 1. 将项目推送到 GitHub
 2. 在 Vercel 导入项目
