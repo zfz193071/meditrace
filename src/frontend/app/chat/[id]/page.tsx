@@ -826,6 +826,15 @@ export default function ConversationsPage() {
 
   return (
     <main className="h-screen flex home-bg overflow-hidden">
+      {/* 演示模式提示横幅 */}
+      <div className="fixed top-0 left-0 right-0 bg-blue-50 border-b border-blue-200 px-4 py-2 z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-center">
+          <span className="text-blue-700 text-sm font-medium">
+            ⚠️ 演示模式：AI 回复为模拟内容，不消耗 API token。真实诊断请咨询专业医生。
+          </span>
+        </div>
+      </div>
+
       {/* 移动端遮罩层 - 点击关闭侧栏 */}
       {isMobile && !sidebarCollapsed && (
         <div

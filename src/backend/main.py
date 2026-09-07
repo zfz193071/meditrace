@@ -699,6 +699,61 @@ async def delete_conversation(conversation_id: str):
     return {"success": True, "message": "Conversation deleted"}
 
 
+def get_mock_diagnosis_result(user_message: str, context_messages: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    生成模拟的 AI 诊断结果（用于演示模式，不消耗 API token）
+    """
+    # 根据用户消息内容生成更智能的模拟回复
+    user_msg_lower = user_message.lower()
+    
+    # 简单的关键词匹配，生成更有针对性的模拟回复
+    if any(keyword in user_msg_lower for keyword in ['发热', '发烧', '热', 'temperature', 'fever']):
+        return {
+            "suggestions": [{
+                "disease": "上呼吸道感染",
+                "confidence": 0.75,
+                "recommendations": ["血常规检查", "C 反应蛋白检测", "胸部 X 光"]
+            }, {
+                "disease": "病毒性感冒",
+                "confidence": 0.65,
+                "recommendations": ["病毒筛查", "体温监测"]
+            }],
+            "summary": "根据您的发热症状描述，系统检测到可能的上呼吸道感染或病毒性感冒。建议尽快就医进行详细检查。",
+            "disclaimer": "⚠️ 演示模式：这仅是模拟建议，不能替代专业医疗诊断。请咨询医生获取真实诊断。"
+        }
+    elif any(keyword in user_msg_lower for keyword in ['头痛', '头疼', 'headache', 'head']):
+        return {
+            "suggestions": [{
+                "disease": "紧张性头痛",
+                "confidence": 0.70,
+                "recommendations": ["神经系统检查", "血压测量", "头颅 CT"]
+            }],
+            "summary": "根据您的头痛描述，可能是紧张性头痛。建议注意休息，避免过度劳累，并咨询专业医生。",
+            "disclaimer": "⚠️ 演示模式：这仅是模拟建议，不能替代专业医疗诊断。请咨询医生获取真实诊断。"
+        }
+    elif any(keyword in user_msg_lower for keyword in ['肚子', '腹痛', '胃痛', '恶心', '呕吐', '腹泻', 'digestive', 'stomach']):
+        return {
+            "suggestions": [{
+                "disease": "急性胃肠炎",
+                "confidence": 0.80,
+                "recommendations": ["血常规", "腹部超声", "粪便常规"]
+            }],
+            "summary": "根据您的消化系统症状，可能是急性胃肠炎。建议及时就医，避免脱水。",
+            "disclaimer": "⚠️ 演示模式：这仅是模拟建议，不能替代专业医疗诊断。请咨询医生获取真实诊断。"
+        }
+    else:
+        # 默认回复
+        return {
+            "suggestions": [{
+                "disease": "需要进一步评估",
+                "confidence": 0.50,
+                "recommendations": ["全面体检", "专科医生咨询"]
+            }],
+            "summary": "已收到您的症状描述。为了获得准确的诊断，建议您提供更多详细信息，或直接咨询专业医生。",
+            "disclaimer": "⚠️ 演示模式：这仅是模拟建议，不能替代专业医疗诊断。请咨询医生获取真实诊断。"
+        }
+
+
 @app.post("/api/conversations/{conversation_id}/messages")
 async def send_message(conversation_id: str, request: MessageRequest):
     """发送消息并获取 AI 回复"""
@@ -727,25 +782,25 @@ async def send_message(conversation_id: str, request: MessageRequest):
     context_engine = get_context_engine()
     context_messages = context_engine.get_conversation_context(conversation_id)
     
-    # 4. 调用 DeepSeek 客户端
-    try:
-        deepseek_client = get_deepseek_client()
-        diagnosis_result = await deepseek_client.diagnose_with_context(
-            conversation_id=conversation_id,
-            user_message=request.content,
-            context_messages=context_messages
-        )
-    except Exception as e:
-        # 如果 AI 调用失败，回退到简单回复
-        diagnosis_result = {
-            "suggestions": [{
-                "disease": "需要进一步评估",
-                "confidence": 0.5,
-                "recommendations": ["请咨询专业医生"]
-            }],
-            "summary": "已收到您的症状描述",
-            "disclaimer": "这仅是建议，不能替代专业医疗诊断"
-        }
+    # 4. 根据环境变量决定是否使用真实 AI
+    deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
+    
+    if deepseek_api_key:
+        # 本地开发模式：使用真实 DeepSeek API
+        try:
+            deepseek_client = get_deepseek_client()
+            diagnosis_result = await deepseek_client.diagnose_with_context(
+                conversation_id=conversation_id,
+                user_message=request.content,
+                context_messages=context_messages
+            )
+        except Exception as e:
+            print(f"⚠️ DeepSeek API 调用失败，使用模拟回复：{e}")
+            diagnosis_result = get_mock_diagnosis_result(request.content, context_messages)
+    else:
+        # 线上部署模式：使用模拟回复（不消耗 token）
+        print("ℹ️ 演示模式：使用模拟 AI 回复（DEEPSEEK_API_KEY 未设置）")
+        diagnosis_result = get_mock_diagnosis_result(request.content, context_messages)
     
     # 5. 保存 AI 消息
     ai_message_id = str(uuid.uuid4())
@@ -805,38 +860,72 @@ async def send_message_stream(conversation_id: str, request: MessageRequest):
     context_engine = get_context_engine()
     context_messages = context_engine.get_conversation_context(conversation_id)
     
-    # 4. 创建流式响应
+    # 4. 根据环境变量决定是否使用真实 AI
+    deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
+    
+    # 创建流式响应
     async def generate_stream() -> AsyncGenerator[str, None]:
         try:
-            deepseek_client = get_deepseek_client()
-            full_content = ""
-            
-            # 流式调用 DeepSeek API
-            async for chunk in deepseek_client.diagnose_with_context_stream(
-                conversation_id=conversation_id,
-                user_message=request.content,
-                context_messages=context_messages
-            ):
-                full_content += chunk
-                # 发送 SSE 数据
-                yield f"data: {json.dumps({'content': chunk, 'complete': False})}\n\n"
-            
-            # 保存完整的 AI 消息
-            ai_message_id = str(uuid.uuid4())
-            with get_db() as conn:
-                conn.execute(
-                    """INSERT INTO messages (id, conversation_id, role, content, context_refs)
-                       VALUES (?, ?, ?, ?, ?)""",
-                    (ai_message_id, conversation_id, "assistant", full_content, json.dumps({}))
-                )
-                conn.execute(
-                    "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                    (conversation_id,)
-                )
-            
-            # 发送完成信号（content 为空，避免重复累加）
-            yield f"data: {json.dumps({'content': '', 'complete': True})}\n\n"
-            yield "data: [DONE]\n\n"
+            if deepseek_api_key:
+                # 本地开发模式：使用真实 DeepSeek API
+                deepseek_client = get_deepseek_client()
+                full_content = ""
+                
+                # 流式调用 DeepSeek API
+                async for chunk in deepseek_client.diagnose_with_context_stream(
+                    conversation_id=conversation_id,
+                    user_message=request.content,
+                    context_messages=context_messages
+                ):
+                    full_content += chunk
+                    # 发送 SSE 数据
+                    yield f"data: {json.dumps({'content': chunk, 'complete': False})}\n\n"
+                
+                # 保存完整的 AI 消息
+                ai_message_id = str(uuid.uuid4())
+                with get_db() as conn:
+                    conn.execute(
+                        """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+                           VALUES (?, ?, ?, ?, ?)""",
+                        (ai_message_id, conversation_id, "assistant", full_content, json.dumps({}))
+                    )
+                    conn.execute(
+                        "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        (conversation_id,)
+                    )
+                
+                # 发送完成信号（content 为空，避免重复累加）
+                yield f"data: {json.dumps({'content': '', 'complete': True})}\n\n"
+                yield "data: [DONE]\n\n"
+            else:
+                # 线上部署模式：使用模拟回复（不消耗 token）
+                print("ℹ️ 演示模式：使用模拟 AI 回复（DEEPSEEK_API_KEY 未设置）")
+                diagnosis_result = get_mock_diagnosis_result(request.content, context_messages)
+                full_content = diagnosis_result.get("summary", "已收到您的症状描述")
+                
+                # 模拟打字机效果
+                chunk_size = 3
+                for i in range(0, len(full_content), chunk_size):
+                    chunk = full_content[i:i + chunk_size]
+                    yield f"data: {json.dumps({'content': chunk, 'complete': False})}\n\n"
+                    await asyncio.sleep(0.03)
+                
+                # 保存完整的 AI 消息
+                ai_message_id = str(uuid.uuid4())
+                with get_db() as conn:
+                    conn.execute(
+                        """INSERT INTO messages (id, conversation_id, role, content, context_refs)
+                           VALUES (?, ?, ?, ?, ?)""",
+                        (ai_message_id, conversation_id, "assistant", full_content, json.dumps(diagnosis_result))
+                    )
+                    conn.execute(
+                        "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        (conversation_id,)
+                    )
+                
+                # 发送完成信号
+                yield f"data: {json.dumps({'content': '', 'complete': True})}\n\n"
+                yield "data: [DONE]\n\n"
             
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e), 'complete': True})}\n\n"
