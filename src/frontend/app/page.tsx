@@ -356,6 +356,17 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 免责声明 */}
+      <section className="py-6 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-amber-800">
+              ⚠️ 演示模式：AI 回复为模拟内容，不消耗 API token。真实诊断请咨询专业医生。
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* 页脚 */}
       <footer className="bg-gray-800 text-white py-12 px-6">
         <div className="max-w-6xl mx-auto">

@@ -826,12 +826,19 @@ export default function ConversationsPage() {
 
   return (
     <main className="h-screen flex home-bg overflow-hidden">
-      {/* 演示模式提示横幅 */}
-      <div className="fixed top-0 left-0 right-0 bg-blue-50 border-b border-blue-200 px-4 py-2 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <span className="text-blue-700 text-sm font-medium">
+      {/* 演示模式提示 - 图标 + Tooltip */}
+      <div className="fixed top-4 right-4 z-50 group">
+        <button
+          className="w-8 h-8 bg-amber-100 border border-amber-300 rounded-full flex items-center justify-center hover:bg-amber-200 transition-colors cursor-help"
+          title=""
+        >
+          <span className="text-amber-700 text-lg">⚠️</span>
+        </button>
+        {/* Tooltip 提示框 */}
+        <div className="absolute right-0 top-full mt-2 w-72 bg-amber-50 border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+          <p className="text-sm text-amber-800">
             ⚠️ 演示模式：AI 回复为模拟内容，不消耗 API token。真实诊断请咨询专业医生。
-          </span>
+          </p>
         </div>
       </div>
 
