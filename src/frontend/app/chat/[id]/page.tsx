@@ -856,15 +856,17 @@ export default function ConversationsPage() {
           sidebarCollapsed ? "w-0" : "w-80"
         } ${isMobile ? "fixed inset-y-0 left-0 z-50 shadow-2xl" : ""}`}
       >
-        {/* 侧栏头部 */}
-        <div className="p-4 border-b flex-shrink-0">
-          <button
-            onClick={handleNewConversation}
-            className="w-full btn-primary py-3 rounded-xl font-semibold"
-          >
-            + 新建对话
-          </button>
-        </div>
+        {/* 侧栏头部 - 新建对话按钮（侧栏展开时显示） */}
+        {!sidebarCollapsed && (
+          <div className="p-4 border-b flex-shrink-0">
+            <button
+              onClick={handleNewConversation}
+              className="w-full btn-primary py-3 rounded-xl font-semibold"
+            >
+              + 新建对话
+            </button>
+          </div>
+        )}
 
         {/* 会话列表 */}
         <div className="flex-1 overflow-y-auto">
