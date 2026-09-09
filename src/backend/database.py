@@ -19,9 +19,13 @@ def get_db_connection():
         conn.row_factory = sqlite3.Row
         return conn
     else:
-        # PostgreSQL 连接逻辑（生产环境）
-        # 使用 psycopg2 或 asyncpg
-        raise NotImplementedError("PostgreSQL support coming soon")
+        # PostgreSQL 连接（生产环境）
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
+        
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.cursor_factory = RealDictCursor
+        return conn
 
 
 @contextmanager
