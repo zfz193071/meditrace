@@ -68,7 +68,7 @@
 在 Render Dashboard 的 **Environment** 标签页添加以下变量：
 
 ```bash
-# DeepSeek API (必需)
+# DeepSeek API (必需) - 请替换为你的实际密钥
 DEEPSEEK_API_KEY=sk-xxx
 
 # Ethereum Sepolia 配置
@@ -76,10 +76,10 @@ USE_SEPOLIA=true
 SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
 CONTRACT_ADDRESS_SEPOLIA=0x860418e7713A346c829Bc539C93c7A2d576897C5
 
-# IPFS Pinata 配置 (必需)
-PINATA_API_KEY=99608ce2692e0a266838
-PINATA_SECRET_API_KEY=b9ac92a982ffab8128a6fcc39c7eecb505525c47ca280f53795cc1a897f37237
-PINATA_JWT_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# IPFS Pinata 配置 (必需) - 请替换为你的实际密钥
+PINATA_API_KEY=xxx
+PINATA_SECRET_API_KEY=xxx
+PINATA_JWT_TOKEN=xxx
 
 # CORS 配置
 CORS_ORIGINS=https://meditrace.baozaolaoba.top,https://meditrace.vercel.app,http://localhost:3000
