@@ -1,6 +1,6 @@
 """
-诊断元数据模型
-封装诊断相关的元数据，避免参数分散传递
+诊断元数据模型和数据库模型
+支持 SQLite 和 PostgreSQL
 """
 
 from dataclasses import dataclass
@@ -10,6 +10,13 @@ from datetime import datetime
 import warnings
 import uuid
 import sqlite3
+
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+Base = declarative_base()
 
 
 @dataclass
@@ -164,3 +171,48 @@ class Message:
             "content": self.content,
             "timestamp": int(self.timestamp.timestamp())
         }
+
+
+# ============================================================================
+# SQLAlchemy ORM Models for PostgreSQL (Vercel Deployment)
+# ============================================================================
+
+
+class SQLAlchemyConversation(Base):
+    """对话表 - SQLAlchemy ORM 模型"""
+    __tablename__ = "conversations"
+    
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    patient_id = Column(String(42), nullable=False)
+    title = Column(String(200), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    metadata_json = Column(JSON)
+    
+    messages = relationship("SQLAlchemyMessage", back_populates="conversation", cascade="all, delete-orphan")
+
+
+class SQLAlchemyMessage(Base):
+    """消息表 - SQLAlchemy ORM 模型"""
+    __tablename__ = "messages"
+    
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    conversation_id = Column(String(36), ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False)
+    role = Column(String(50), nullable=False)  # "user" or "assistant"
+    content = Column(Text, nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    context_refs = Column(JSON)
+    
+    conversation = relationship("SQLAlchemyConversation", back_populates="messages")
+
+
+class SQLAlchemyDiagnosisResult(Base):
+    """诊断记录表 - SQLAlchemy ORM 模型"""
+    __tablename__ = "diagnosis_records"
+    
+    id = Column(String(50), primary_key=True)  # 如：202609091234567890
+    user_id = Column(String(255), nullable=False)
+    diagnosis_data = Column(JSON, nullable=False)  # JSON 存储诊断数据
+    ipfs_hash = Column(String(255))  # IPFS 哈希
+    chain_tx_hash = Column(String(255))  # 链上交易哈希
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

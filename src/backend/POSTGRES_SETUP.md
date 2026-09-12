@@ -24,11 +24,6 @@
 - ✅ 包含 PostgreSQL + 额外功能
 - 📍 https://supabase.com
 
-### 3. **Render PostgreSQL**
-- ✅ 免费数据库服务
-- ⚠️ 需要绑定信用卡（但数据库本身免费）
-- 📍 https://render.com
-
 ---
 
 ## 🔧 配置步骤
@@ -45,12 +40,6 @@ postgresql://user:password@host:port/database?sslmode=require
 #### 本地开发（.env 文件）
 ```bash
 # src/backend/.env
-DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
-```
-
-#### Render 部署
-```bash
-# 在 Render 控制台的 Environment 标签页添加
 DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
 ```
 
@@ -144,25 +133,6 @@ python -c "from database import get_db_connection; conn = get_db_connection(); p
 ---
 
 ## 🌐 部署到不同平台
-
-### Koyeb（无需绑卡）
-```yaml
-# .koyeb.yaml
-services:
-  - name: meditrace-backend
-    type: web
-    builder:
-      type: docker
-      dockerfile: Dockerfile
-    env:
-      - key: DATABASE_URL
-        value: ${DATABASE_URL}
-      - key: DEEPSEEK_API_KEY
-        value: ${DEEPSEEK_API_KEY}
-    ports:
-      - port: 8000
-        assign: true
-```
 
 ### Vercel（Serverless）
 需要适配 Serverless 模式，参考 `vercel.json` 配置。

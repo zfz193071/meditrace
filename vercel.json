@@ -1,14 +1,6 @@
 {
-  "buildCommand": "cd src/frontend && pnpm build",
-  "outputDirectory": "src/frontend/.next",
-  "devCommand": "cd src/frontend && pnpm dev",
-  "installCommand": "cd src/frontend && pnpm install",
   "framework": "nextjs",
   "regions": ["hkg1"],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://meditrace-backend.onrender.com/api/:path*"
-    }
-  ]
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".next"
 }

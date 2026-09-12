@@ -1,0 +1,53 @@
+# Backend
+src/backend/
+*.py
+requirements.txt
+
+# Development files
+.DS_Store
+*.log
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+specs/
+
+# Test files
+__tests__/
+*.test.*
+*.spec.*
+
+# Images and large files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Scratch and temp files
+.scratch/
+
+# Vercel internal
+.vercel/
+
+# Package manager
+.pnpm-store/
+node_modules/
+
+# Build outputs
+.next/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local

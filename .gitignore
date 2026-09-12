@@ -70,3 +70,5 @@ docs/private/
 # Database
 *.db
 src/backend/*.db
+.vercel
+.env*

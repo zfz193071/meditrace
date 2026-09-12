@@ -109,6 +109,46 @@ lsof -ti:3000 | xargs kill 2>/dev/null
 
 ---
 
+## Vercel 部署配置（生产环境）
+
+### ⚠️ 重要：生产环境配置说明
+
+**生产环境不需要 DEEPSEEK_API_KEY** - AI 推理在 Vercel Serverless 函数中运行，API Key 通过 Vercel 环境变量管理。
+
+### 数据库配置
+- **类型**: PostgreSQL (Neon 免费层)
+- **环境变量**: `DATABASE_URL`
+- **初始化**: 已在 Neon SQL 编辑器中运行建表 SQL
+
+### 环境变量清单
+| 变量名 | 说明 | 是否必需 |
+|--------|------|----------|
+| `DATABASE_URL` | Neon PostgreSQL 连接字符串 | ✅ 是 |
+| `USE_SEPOLIA` | 是否使用 Sepolia 测试网 | ✅ 是 |
+| `SEPOLIA_RPC_URL` | Sepolia RPC 端点 | ✅ 是 |
+| `CONTRACT_ADDRESS_SEPOLIA` | Sepolia 合约地址 | ✅ 是 |
+| `PINATA_API_KEY` | Pinata API Key | ✅ 是 |
+| `PINATA_SECRET_API_KEY` | Pinata Secret API Key | ✅ 是 |
+| `PINATA_JWT_TOKEN` | Pinata JWT Token | ✅ 是 |
+| `CORS_ORIGINS` | 允许的前端域名 | ✅ 是 |
+| `DEEPSEEK_API_KEY` | **生产环境不需要** | ❌ 否 |
+
+### 部署脚本
+```bash
+# 赋予执行权限
+chmod +x VERCEL-DEPLOYMENT-SCRIPT.sh
+
+# 运行部署脚本
+./VERCEL-DEPLOYMENT-SCRIPT.sh
+```
+
+### 详细部署文档
+- [VERCEL-FULLSTACK-DEPLOYMENT.md](./VERCEL-FULLSTACK-DEPLOYMENT.md) - 完整部署指南
+- [VERCEL-DEPLOYMENT-CHECKLIST.md](./VERCEL-DEPLOYMENT-CHECKLIST.md) - 部署检查清单
+- [VERCEL-DEPLOYMENT-SCRIPT.sh](./VERCEL-DEPLOYMENT-SCRIPT.sh) - 自动化部署脚本
+
+---
+
 ## 开发规范
 
 1. **测试**: 禁止自动在浏览器发起对话测试（全局规则），需手动验证

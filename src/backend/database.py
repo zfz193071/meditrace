@@ -1,45 +1,64 @@
 """
-数据库配置和连接管理
-支持 SQLite (开发) 和 PostgreSQL (生产)
+数据库配置 - 支持 SQLite (开发) 和 PostgreSQL (生产)
 """
 
-import sqlite3
 import os
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, Session
 from typing import Optional
-from contextlib import contextmanager
 
-# 从环境变量读取数据库 URL，默认使用 SQLite
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./meditrace.db")
+# 检测环境
+IS_VERCEL = os.getenv('VERCEL') == '1'
+IS_PRODUCTION = os.getenv('DATABASE_URL') is not None
+
+# 数据库 URL
+if IS_PRODUCTION:
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    print(f"🔧 使用 PostgreSQL 数据库：{DATABASE_URL.split('@')[0]}@...")
+else:
+    DATABASE_URL = "sqlite:///./meditrace.db"
+    print("🔧 使用 SQLite 数据库 (开发模式)")
+
+# 创建数据库引擎
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    # PostgreSQL
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,  # 自动重连
+        pool_size=5,         # 连接池大小
+        max_overflow=10      # 最大溢出连接数
+    )
+
+# 创建会话工厂
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    """获取数据库会话"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def init_database():
+    """初始化数据库表"""
+    from models import Base
+    Base.metadata.create_all(bind=engine)
+    print("✅ 数据库表初始化完成")
 
 
 def get_db_connection():
-    """获取数据库连接"""
-    if DATABASE_URL.startswith("sqlite"):
-        conn = sqlite3.connect("meditrace.db", check_same_thread=False)
-        conn.row_factory = sqlite3.Row
+    """获取单次连接（用于迁移等）"""
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
         return conn
-    else:
-        # PostgreSQL 连接（生产环境）
-        import psycopg2
-        from psycopg2.extras import RealDictCursor
-        
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.cursor_factory = RealDictCursor
-        return conn
-
-
-@contextmanager
-def get_db():
-    """数据库连接上下文管理器"""
-    conn = get_db_connection()
-    try:
-        yield conn
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        raise e
-    finally:
-        conn.close()
 
 
 def init_database():
