@@ -1,6 +1,19 @@
 {
-  "framework": "nextjs",
-  "regions": ["hkg1"],
-  "buildCommand": "pnpm build",
-  "outputDirectory": ".next"
+  "buildCommand": "cd src/frontend && npm run build",
+  "outputDirectory": "src/frontend/.next",
+  "installCommand": "cd src/frontend && npm install",
+  "rewrites": [
+    {
+      "source": "/health",
+      "destination": "https://meditrace-backend.vercel.app/health"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://meditrace-backend.vercel.app/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
 }

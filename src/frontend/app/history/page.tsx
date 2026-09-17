@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 import { useRouter } from "next/navigation";
 
 interface HistoryRecord {
@@ -91,9 +92,7 @@ export default function HistoryPage() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/history/${userId}`
-      );
+      const response = await fetch(`${BACKEND_URL}/api/history/${userId}`);
       const data = await response.json();
       const records = data.records || [];
       records.sort((a: HistoryRecord, b: HistoryRecord) => b.timestamp - a.timestamp);
@@ -114,9 +113,7 @@ export default function HistoryPage() {
     setDownloadingId(diagnosisId);
     setGlobalLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/report/${diagnosisId}`
-      );
+      const response = await fetch(`${BACKEND_URL}/api/report/${diagnosisId}`);
       if (!response.ok) {
         let errorMsg = "下载失败";
         try {

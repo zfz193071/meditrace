@@ -1,53 +1,63 @@
-# Backend
-src/backend/
-*.py
-requirements.txt
+# ============================================================
+# Vercel 部署忽略规则（Vercel Services 架构：frontend + backend）
+# ============================================================
+# 重要：不要忽略 src/backend/ 下的 Python 源码，否则后端服务构建失败。
+# 本文件只排除「开发产物 / 密钥 / 大文件」。
+# ============================================================
 
-# Development files
-.DS_Store
-*.log
-.venv/
+# ---------- Python 后端：开发产物（必须排除）----------
 venv/
+.venv/
 env/
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+*.db
+*.sqlite
+*.sqlite3
 
-# Git
+# ---------- 前端：依赖与构建产物（必须排除）----------
+node_modules/
+.next/
+.swc/
+out/
+dist/
+build/
+coverage/
+.pnpm-store/
+*.tsbuildinfo
+
+# ---------- 环境变量文件 ----------
+# 含密钥，绝对不要上传（src/backend/.env 内有 DEEPSEEK_API_KEY / SEPOLIA_PRIVATE_KEY / PINATA 密钥）
+.env
+.env.local
+.env.*.local
+# 注意：前端 .env.production 只含公开配置（后端源地址 / 合约地址 / Sepolia RPC），
+# 且已被 git 跟踪，因此不排除；Vercel 控制台的同名环境变量优先级更高。
+
+# ---------- 版本控制与平台内部目录 ----------
 .git/
 .gitignore
+.vercel/
 
-# Documentation
+# ---------- 测试文件 ----------
+__tests__/
+*.test.*
+*.spec.*
+jest.config.js
+jest.setup.js
+
+# ---------- 文档 ----------
 *.md
 docs/
 specs/
 
-# Test files
-__tests__/
-*.test.*
-*.spec.*
-
-# Images and large files
+# ---------- 图片与临时文件 ----------
 *.png
 *.jpg
 *.jpeg
 *.gif
-*.svg
-
-# Scratch and temp files
+*.log
+.DS_Store
 .scratch/
-
-# Vercel internal
-.vercel/
-
-# Package manager
-.pnpm-store/
-node_modules/
-
-# Build outputs
-.next/
-dist/
-
-# Environment files
-.env
-.env.local
-.env.*.local

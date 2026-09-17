@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 import { useSearchParams, useRouter } from "next/navigation";
 
 interface ChainRecord {
@@ -54,9 +55,7 @@ function VerifyPageContent() {
     
     setLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/api/verify/${id}`
-      );
+      const response = await fetch(`${BACKEND_URL}/api/verify/${id}`);
       const data = await response.json();
       setResult(data);
     } catch (error) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 
 export default function Home() {
   const [symptoms, setSymptoms] = useState("");
@@ -44,11 +45,7 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
-        }/api/diagnose`,
-        {
+      const response = await fetch(`${BACKEND_URL}/api/diagnose`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

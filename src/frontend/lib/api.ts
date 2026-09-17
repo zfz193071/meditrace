@@ -3,7 +3,7 @@
  * 封装所有与后端 API 的交互
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+import { BACKEND_URL as BASE_URL } from "./backend";
 
 /**
  * 诊断 API 请求参数

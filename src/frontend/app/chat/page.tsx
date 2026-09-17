@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 import { useRouter } from "next/navigation";
 import {
   Conversation,
@@ -198,7 +199,7 @@ export default function ConversationsPage() {
     
     try {
       // 调用后端更新对话标题 API
-      await fetch(`http://localhost:8000/api/conversations/${renamingConversationId}`, {
+      await fetch(`${BACKEND_URL}/api/conversations/${renamingConversationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -420,7 +421,7 @@ export default function ConversationsPage() {
   const generateAITitle = async (message: string): Promise<string> => {
     try {
       // 调用后端 API 生成标题
-      const response = await fetch('http://localhost:8000/api/generate-title', {
+      const response = await fetch(`${BACKEND_URL}/api/generate-title`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
