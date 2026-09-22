@@ -1,213 +1,99 @@
 # MediTrace - 医疗 AI 诊断溯源系统
 
-> 一个结合大模型与 Web3 技术的医疗诊断辅助系统，通过区块链记录每次 AI 诊断的数据来源和模型版本，满足医疗合规审计需求。
+MediTrace 提供医疗咨询对话、诊断报告和链上记录查询，结合 Next.js、FastAPI、PostgreSQL、IPFS 与 Solidity。诊断建议仅用于辅助参考，不能替代医生诊断。
 
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Status](https://img.shields.io/badge/status-MVP%20Complete-brightgreen)
-![Tech Stack](https://img.shields.io/badge/tech-Next.js%20%7C%20FastAPI%20%7C%20Solidity%20%7C%20DeepSeek%20API-green)
-![Phase](https://img.shields.io/badge/phase-Phase%202%20Complete-brightgreen)
+在线地址：https://meditrace.baozaolaoba.top
 
----
+## 项目结构
 
-## 📁 项目结构
-
-```
+```text
 meditrace/
-├── README.md              # 项目概述
-├── SPEC.md                # 详细规格说明
-├── CONTEXT.md             # 领域模型
-├── DEPLOYMENT.md          # 部署指南
-├── DEMO_SCRIPT.md         # 演示脚本 ⭐新增
-├── TODO.md                # 开发任务清单
-├── docs/
-│   └── adr/
-│       ├── 0001-project-vision.md    # 项目愿景决策
-│       ├── 0002-tech-stack.md        # 技术栈选择
-│       └── 0003-blockchain-design.md # 区块链设计决策
-├── src/
-│   ├── frontend/          # Next.js 前端
-│   │   ├── app/
-│   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx           # 诊断主页
-│   │   │   ├── history/page.tsx   # 历史记录页 ⭐新增
-│   │   │   └── verify/page.tsx    # 链上验证页 ⭐新增
-│   │   ├── package.json
-│   │   ├── tsconfig.json
-│   │   └── tailwind.config.js
-│   ├── backend/
-│   │   ├── main.py           # FastAPI 主应用
-│   │   ├── deepseek_client.py # DeepSeek 集成 ⭐新增
-│   │   ├── blockchain_client.py # 区块链客户端 ⭐新增
-│   │   ├── ipfs_service.py    # IPFS 服务 ⭐新增
-│   │   ├── test_deepseek.py   # 测试脚本 ⭐新增
-│   │   └── requirements.txt
-│   └── contracts/
-│       ├── contracts/
-│       │   └── DiagnosisRecord.sol
-│       ├── scripts/
-│       │   ├── deploy.ts
-│       │   └── deploy-sepolia.ts # Sepolia 部署 ⭐新增
-│       ├── test/
-│       │   └── DiagnosisRecord.test.ts
-│       └── hardhat.config.ts
-└── scripts/               # 部署和测试脚本
+├── AGENTS.md                          # 项目协作与测试约束
+├── BACKEND-DEPLOYMENT.md              # 前后端部署、环境变量及恢复步骤
+├── BUGFIX-VERCEL-BACKEND-DEPLOYMENT.md # 后端部署修复及验证记录
+├── deploy-vercel.sh                   # 前后端一键部署入口
+├── vercel.json                       # Vercel Services 与路由配置
+├── scripts/                          # 部署流程测试
+└── src/
+    ├── frontend/                     # Next.js 前端
+    ├── backend/                      # FastAPI 后端、数据库迁移及测试
+    └── contracts/                    # Solidity 合约及部署脚本
 ```
 
-## 📖 项目背景
+## 部署
 
-### 问题陈述
+前后端运行在同一个 Vercel 项目，生产数据保存在 Neon PostgreSQL。`/health` 和 `/api/*` 交给后端，其余路径交给前端。
 
-当前医疗 AI 诊断系统面临以下挑战：
-
-- **数据溯源困难**: 无法追溯诊断建议基于哪些患者数据和模型版本
-- **合规审计缺失**: 医疗监管机构要求诊断记录可审计、不可篡改
-- **模型版本混乱**: 模型更新后无法区分历史诊断使用哪个版本
-
-### 解决方案
-
-MediTrace 通过以下技术栈解决上述问题：
-
-- **大模型**: DeepSeek API + 医学知识库 RAG，提供专业诊断建议
-- **区块链**: Solidity 智能合约记录诊断元数据，确保不可篡改
-- **去中心化存储**: IPFS 存储诊断报告，保证数据持久性
-
-## 🎯 项目目标
-
-### 主要目标
-
-1. 实现医疗问答机器人，提供初步诊断建议
-2. 每次诊断自动记录到区块链（数据哈希、模型版本、时间戳）
-3. 提供审计界面，可查询和验证历史诊断记录
-4. 完整部署文档，展示全栈工程能力
-
-### 雇主价值点
-
-- ✅ 展示 **AI + Web3 全栈能力**
-- ✅ 医疗合规场景有**商业故事**
-- ✅ 智能合约设计体现**工程严谨性**
-- ✅ 完整部署文档体现**产品思维**
-
-## 🏗 技术架构
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        前端 (Next.js)                        │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          │
-│  │  对话界面   │  │  历史记录   │  │  链上验证   │          │
-│  └─────────────┘  └─────────────┘  └─────────────┘          │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    后端 (FastAPI)                            │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          │
-│  │  对话 API   │  │  RAG 引擎   │  │  区块链客户端│          │
-│  └─────────────┘  └─────────────┘  └─────────────┘          │
-└─────────────────────────────────────────────────────────────┘
-         │                                      │
-         ▼                                      ▼
-┌─────────────────────┐          ┌─────────────────────────────┐
-│   DeepSeek API      │          │    区块链层 (Hardhat)        │
-│   + 医学知识库      │          │  ┌─────────────┐            │
-└─────────────────────┘          │  │ 诊断记录合约│            │
-                                 │  └─────────────┘            │
-                                 │  ┌─────────────┐            │
-                                 │  │   IPFS     │            │
-                                 │  └─────────────┘            │
-                                 └─────────────────────────────┘
-```
-
-## 📁 项目结构
-
-```
-meditrace/
-├── README.md              # 项目概述
-├── SPEC.md                # 详细规格说明
-├── CONTEXT.md             # 领域模型
-├── docs/
-│   └── adr/
-│       ├── 0001-project-vision.md    # 项目愿景决策
-│       ├── 0002-tech-stack.md        # 技术栈选择
-│       └── 0003-blockchain-design.md # 区块链设计决策
-├── src/
-│   ├── frontend/          # Next.js 前端
-│   ├── backend/           # FastAPI 后端
-│   └── contracts/         # Solidity 智能合约
-└── scripts/               # 部署和测试脚本
-```
-
-## 🚀 快速开始
-
-### 环境要求
-
-| 工具         | 版本    | 说明           |
-| ------------ | ------- | -------------- |
-| Node.js      | >= 18   | 前端和合约开发 |
-| Python       | >= 3.10 | 后端开发       |
-| Hardhat      | 2.x     | 区块链开发     |
-| DeepSeek API | -       | 大模型调用     |
-
-### 安装步骤
-
-````bash
-# 1. 克隆项目
-git clone <repository-url>
-cd meditrace
-
-# 2. 部署智能合约
-cd src/contracts
-npm install
-npx hardhat node                    # 终端 1: 启动本地节点
-# 新终端
-npx hardhat run scripts/deploy.ts --network localhost
-
-# 3. 安装并启动后端
-
-⚠️ **重要：必须使用虚拟环境 (venv)**
+在本项目中对助手说“部署”，或在终端运行：
 
 ```bash
-cd ../../src/backend
-python -m venv venv              # 仅首次执行
-source venv/bin/activate         # 激活虚拟环境
-pip install -r requirements.txt  # 安装依赖（含 httpx 等）
+./deploy-vercel.sh
+```
+
+脚本检查项目和免费套餐，发布前后端，验证线上接口，并在验证失败时尝试回退。
+
+```bash
+./deploy-vercel.sh --check   # 检查部署前置条件，不发布
+./deploy-vercel.sh --verify  # 只读验证当前线上服务
+```
+
+账号登录、环境变量、数据库迁移及故障恢复见 [前后端部署指南](./BACKEND-DEPLOYMENT.md)。
+
+## 本地开发
+
+需要 Node.js 18+、pnpm 和 Python 3.10+。本地服务由开发者手动启动和停止。
+
+### 后端
+
+在仓库根目录执行：
+
+```bash
+cd src/backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 cp .env.example .env
-# 编辑 .env，填入 API Key
-# 使用 venv 的 Python 启动
-./venv/bin/python3 -m uvicorn main:app --reload
-````
-
-📚 **IPFS 配置：** 详见 [docs/IPFS_SETUP.md](docs/IPFS_SETUP.md)
-
-# 4. 安装并启动前端
-
-```bash
-cd ../../src/frontend
-npm install
-cp .env.example .env.local
-npm run dev
+# 按需编辑 .env；不设置 DATABASE_URL 时使用本地 SQLite。
+./venv/bin/python main.py
 ```
 
-访问 http://localhost:3000 开始使用。
+后端默认地址为 http://localhost:8000。真实 AI 推理需要 `DEEPSEEK_API_KEY`；未配置时使用演示回复。
 
-## 📋 功能清单
+### 前端
 
-- [ ] 用户输入症状，AI 返回诊断建议
-- [ ] 诊断记录自动上链
-- [ ] 历史诊断记录查询
-- [ ] 链上记录验证界面
-- [ ] 诊断报告 IPFS 存储
-- [ ] 完整部署文档
+另开终端，从仓库根目录执行：
 
-## 📚 相关文档
+```bash
+cd src/frontend
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
 
-- [详细规格说明](./SPEC.md)
-- [领域模型](./CONTEXT.md)
-- [架构决策记录](./docs/adr/)
+访问 http://localhost:3000。对话页面为 `/chat` 和 `/chat/{id}`。
 
-## 🤝 贡献
+### 区块链与报告
 
-欢迎提出 Issue 和 Pull Request！
+合约源码和部署脚本位于 `src/contracts/`。启用链上写入需要配置 RPC、合约地址及后端签名私钥；IPFS 报告存储需要 Pinata 配置。详细变量说明见 [部署指南](./BACKEND-DEPLOYMENT.md#环境变量)。
 
-## 📄 许可证
+## 验证
+
+```bash
+# 部署与回退流程测试，不创建真实部署
+python3 scripts/test_deploy_workflow.py
+
+# 后端数据库集成测试，使用临时 SQLite，不调用 AI
+DATABASE_URL=sqlite:///:memory: src/backend/venv/bin/python -m pytest src/backend/test_database_deployment.py -q
+```
+
+**禁止自动在浏览器发送 AI 消息测试。** 对话及流式显示请手动发送消息验证，以避免自动测试消耗 API token。
+
+## 文档
+
+- [项目助手指南](./AGENTS.md)
+- [前后端部署指南](./BACKEND-DEPLOYMENT.md)
+- [Vercel 后端修复与发布记录](./BUGFIX-VERCEL-BACKEND-DEPLOYMENT.md)
+
+## 许可证
 
 MIT License

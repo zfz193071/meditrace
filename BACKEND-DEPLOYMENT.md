@@ -1,196 +1,111 @@
-# 后端服务部署指南
+# MediTrace 前后端一键部署
 
-## 📋 环境变量配置
+更新日期：2026-09-22。
 
-### 生产环境（Vercel）
+## 当前架构
 
-**重要**: 以下环境变量需要在 Vercel 控制台中配置，**不要**提交到代码仓库。
+- Vercel 项目：`meditrace`，使用 Hobby 免费套餐。
+- 仓库根目录的 `vercel.json` 定义两个 Services：Next.js 前端和 FastAPI 后端。
+- `/health`、`/api/*` 转发到后端，其余路径交给前端。
+- 生产数据库使用 Neon PostgreSQL；Vercel 上必须配置 `DATABASE_URL`，不能依赖本地 SQLite。
+- 生产域名：`https://meditrace.baozaolaoba.top`。
 
-#### 必需的环境变量
+## 环境变量
 
-| 变量名 | 说明 | 示例值 |
-|--------|------|--------|
-| `DATABASE_URL` | Neon PostgreSQL 连接字符串 | `postgresql://user:pass@host/neondb?sslmode=require` |
-| `USE_SEPOLIA` | 是否使用 Sepolia 测试网 | `true` |
-| `SEPOLIA_RPC_URL` | Sepolia RPC 端点 | `https://ethereum-sepolia-rpc.publicnode.com` |
-| `CONTRACT_ADDRESS_SEPOLIA` | Sepolia 合约地址 | `0x860418e7713A346c829Bc539C93c7A2d576897C5` |
-| `PINATA_API_KEY` | Pinata API Key | `99608ce2692e0a266838` |
-| `PINATA_SECRET_API_KEY` | Pinata Secret API Key | `b9ac92a982ffab8128a6fcc39c7eecb505525c47ca280f53795cc1a897f37237` |
-| `PINATA_JWT_TOKEN` | Pinata JWT Token | `eyJhbGci...` |
-| `CORS_ORIGINS` | 允许的前端域名 | `https://meditrace.baozaolaoba.top` |
+密钥仅放在 Vercel 项目的 Production 环境变量中，勿写进文档或提交到仓库。
 
-#### 不需要的环境变量
+| 变量 | 用途 |
+| --- | --- |
+| `DATABASE_URL` | 必需，Neon 的 PostgreSQL 连接字符串，启用 SSL；可使用 pooled 地址 |
+| `NEXT_PUBLIC_BACKEND_URL` | 前端构建配置，当前为 `https://meditrace.baozaolaoba.top`，不要添加 `/api` 后缀 |
+| `CORS_ORIGINS` | 允许访问后端的前端源地址，多个值用逗号分隔 |
+| `USE_SEPOLIA` | 当前为 `true`，使用 Sepolia 测试网 |
+| `SEPOLIA_RPC_URL` | Sepolia RPC 地址 |
+| `CONTRACT_ADDRESS_SEPOLIA` | 已部署的合约地址 |
+| `PINATA_API_KEY`、`PINATA_SECRET_API_KEY`、`PINATA_JWT_TOKEN` | IPFS 报告存储配置 |
+| `SEPOLIA_PRIVATE_KEY` | 仅后端签名写链时需要；未配置时不能完成后端签名上链 |
+| `DEEPSEEK_API_KEY` | 可选；当前生产环境未配置，诊断和对话使用代码中的演示回复 |
 
-| 变量名 | 说明 | 原因 |
-|--------|------|------|
-| `DEEPSEEK_API_KEY` | DeepSeek API Key | **生产环境不需要** - AI 推理在 Vercel Serverless 函数中运行，API Key 通过 Vercel 环境变量管理；后端使用模拟返回 |
+真实 AI 推理在 FastAPI 中执行。需要真实回复时才配置 `DEEPSEEK_API_KEY`，这会产生独立于 Vercel 的 API 费用。Vercel 和 Neon 免费套餐均有用量限制。
 
-### 本地开发环境
+## 部署
 
-本地开发时需要完整的 `.env` 文件（已在 `.gitignore` 中忽略）：
-
-```bash
-# src/backend/.env
-
-# ⚠️ 生产环境部署配置
-# 注意：DEEPSEEK_API_KEY 不部署到生产环境，使用模拟返回
-# Qwen3.5 API 配置 (备用)
-# QWEN_API_KEY=sk-xxx
-
-# 区块链配置 (本地开发)
-BLOCKCHAIN_RPC_URL=http://localhost:8545
-CONTRACT_ADDRESS=
-
-# 使用 Sepolia 测试网 (true = 使用 Sepolia, false = 使用本地)
-USE_SEPOLIA=true
-
-# 区块链配置 (Sepolia 测试网)
-SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
-SEPOLIA_PRIVATE_KEY=7e4cffc5275557070d807f772f65312bc9e561a92bad19c474871f663291f705
-CONTRACT_ADDRESS_SEPOLIA=0x860418e7713A346c829Bc539C93c7A2d576897C5
-
-# IPFS 配置 (Pinata)
-PINATA_API_KEY=99608ce2692e0a266838
-PINATA_SECRET_API_KEY=b9ac92a982ffab8128a6fcc39c7eecb505525c47ca280f53795cc1a897f37237
-PINATA_JWT_TOKEN=eyJhbGci...
-
-# CORS 配置 - 生产环境
-CORS_ORIGINS=https://meditrace.baozaolaoba.top
-
-# PostgreSQL 数据库配置 (Neon)
-DATABASE_URL=postgresql://neondb_owner:npg_rXpDkonM8mS0@ep-nameless-truth-arrrgjuc-pooler.c-4.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-```
-
-## 🔧 依赖安装
-
-### 本地开发环境
-
-在安装依赖前，确保已创建 Python 虚拟环境：
+在本项目中对助手说“部署”，会自动执行仓库根目录的可执行文件，同时发布前端和后端：
 
 ```bash
-cd src/backend
-python3 -m venv venv
-source venv/bin/activate
+./deploy-vercel.sh
 ```
 
-安装依赖（可能需要较长时间，取决于网络）：
+原 `./VERCEL-DEPLOYMENT-SCRIPT.sh` 也会转到同一个入口。脚本从自身位置定位仓库，可从任意目录调用。
+
+流程：检查项目绑定、登录状态、Hobby 套餐、Production 数据库变量和上传文件；使用 `--prod --skip-domain` 构建两个服务；验证新部署后 promote 到现有域名；检查生产首页 HTML、`/health` 及带随机患者标记的会话列表 JSON。
+
+临时 `vercel.app` 地址发生网络故障或访问保护拦截时，脚本会明确提示并改为切换后验证自定义域名。若新部署可访问但返回 HTTP 500 或错误响应，则停止，不切换生产。
+
+切换后验证失败会尝试回退到运行前记录的版本，脚本仍以非零退出；如果检测到其他人已发布另一个版本，则不覆盖对方的发布。回退失败时停止并保留状态，供人工排查。
+
+脚本复用 Vercel 已配置的环境变量，不自动覆盖密钥、不升级套餐、不提交或推送 Git，也不启动/停止本地服务。发布的是当前工作目录内容，包含未提交但未被忽略的修改。
+
+### 只检查或验证
 
 ```bash
-pip install -r requirements.txt
+./deploy-vercel.sh --check   # 检查账号、项目及实际上传文件，不发布、不迁移
+./deploy-vercel.sh --verify  # 只读验证当前线上前端、后端及数据库
+./deploy-vercel.sh --help
 ```
 
-如果网络超时，可以分批安装：
+首次在新机器使用时，需要安装 Vercel CLI 并完成 `vercel login`，然后执行
+`vercel link --project meditrace --scope lucyzhus-projects --yes`。
+脚本使用后端 venv 中的 Python（若存在），否则普通部署可使用 Python 3.9+。
+
+项目 Root Directory 应为仓库根目录，Framework Preset 为 Services。不要只上传 `src/frontend`。
+后端依赖由 `src/backend/requirements.txt` 提供，合约 ABI 位于 `src/backend/abi/DiagnosisRecord.json`，PDF 字体位于 `src/backend/fonts/`。
+
+`.vercelignore` 排除密钥文件、虚拟环境、数据库文件、测试与内部文档，保留 README 和应用源码。
+
+如果 Neon 最初创建的 `conversations` 只有 `id/title/created_at/updated_at`，需要先运行
+`src/backend/migrations/002_vercel_schema_compatibility.sql`。它追加当前 API 需要的字段，
+保留原表、UUID 主键、外键和旧时间字段；可重复执行。不要运行会 DROP TABLE 的旧开发迁移。
+
+当前生产数据库已经完成该迁移，普通部署不再执行迁移。确实需要重复兼容迁移时：
 
 ```bash
-pip install fastapi uvicorn pydantic python-dotenv
-pip install httpx aiohttp python-multipart
-pip install web3 ipfshttpclient psycopg2-binary sqlalchemy
+./deploy-vercel.sh --migrate
 ```
 
-## 🔧 Vercel 部署步骤
+该选项先执行唯一指定的 `002_vercel_schema_compatibility.sql`，然后部署。数据库地址取当前进程 `DATABASE_URL`，其次取 `src/backend/.env`；运行前应确认它指向待迁移数据库。迁移需要后端 venv 和 requirements.txt 中的依赖。它不读取或覆盖 Vercel 的敏感变量，也不自动扫描执行其他 SQL 文件。应用回退不会撤销已完成的追加字段迁移。
 
-### 1. 配置 Vercel 环境变量
+### 日志与恢复
 
-在 Vercel 控制台 → Project Settings → Environment Variables 中添加以下变量：
+- 本次日志：`.vercel/deploy-YYYYMMDD-HHMMSS.log`。
+- 最近发布状态、前后版本 ID：`.vercel/last-deploy.json`，`status: verified` 才表示发布且验证通过。
+- 同一检出中的部署/检查使用进程锁，避免两个脚本同时操作。
+- 如需人工回退：`vercel rollback <last-deploy.json 中的 previous_id> --yes --scope lucyzhus-projects`，随后运行 `./deploy-vercel.sh --verify`。
+- 登录失效、套餐不符或配置缺失时脚本会停止并说明原因；不会无限重试部署。
 
-```
-DATABASE_URL=postgresql://neondb_owner:npg_rXpDkonM8mS0@ep-nameless-truth-arrrgjuc-pooler.c-4.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-USE_SEPOLIA=true
-SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
-CONTRACT_ADDRESS_SEPOLIA=0x860418e7713A346c829Bc539C93c7A2d576897C5
-PINATA_API_KEY=99608ce2692e0a266838
-PINATA_SECRET_API_KEY=b9ac92a982ffab8128a6fcc39c7eecb505525c47ca280f53795cc1a897f37237
-PINATA_JWT_TOKEN=eyJhbGci...
-CORS_ORIGINS=https://meditrace.baozaolaoba.top
-```
-
-**注意**: 不要添加 `DEEPSEEK_API_KEY`
-
-### 2. 部署配置
-
-项目使用 Vercel Services 架构，`vercel.json` 已配置：
-
-```json
-{
-  "services": {
-    "frontend": {
-      "root": "src/frontend/",
-      "framework": "nextjs"
-    },
-    "backend": {
-      "root": "src/backend/",
-      "framework": "fastapi",
-      "entrypoint": "main:app"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/health",
-      "destination": { "service": "backend" }
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": { "service": "backend" }
-    },
-    {
-      "source": "/(.*)",
-      "destination": { "service": "frontend" }
-    }
-  ]
-}
-```
-
-### 3. 推送代码并部署
+## 验证
 
 ```bash
-git add .
-git commit -m "deploy: 配置生产环境数据库连接"
-git push origin main
+curl --fail https://meditrace.baozaolaoba.top/health
+curl --fail 'https://meditrace.baozaolaoba.top/api/conversations?patientId=deployment-check'
 ```
 
-Vercel 会自动检测并部署前后端服务。
+健康检查应返回 `{"status":"healthy","version":"0.1.0"}`；会话列表应返回 JSON。
 
-## 🧪 本地测试
-
-### 启动后端服务
+数据库回归测试不发起 AI 请求，也不需要启动本地服务：
 
 ```bash
-cd src/backend
-source venv/bin/activate
-python main.py
+DATABASE_URL=sqlite:///:memory: src/backend/venv/bin/python -m pytest src/backend/test_database_deployment.py -q
 ```
 
-后端将在 `http://localhost:8000` 启动。
+设置 `TEST_DATABASE_URL` 可同时验证真实 PostgreSQL。测试在随机独立 schema 中运行，结束后只删除该测试 schema；Neon 测试连接使用 unpooled 地址来设置 `search_path`，应用仍使用 pooled 地址。
+测试包含新建表和旧 Neon 表迁移后两种 PostgreSQL 场景。
 
-### 验证数据库连接
+请手动在浏览器发送消息测试对话；禁止自动在浏览器触发 AI 回复。
+部署脚本的验证仅发出 GET 请求，不创建业务记录，不调用 DeepSeek、IPFS 上传或区块链写入。
 
-启动后检查日志，应该看到：
-```
-🔧 使用 PostgreSQL 数据库：postgresql://neondb_owner:***@...
-✅ 数据库表初始化完成
-```
+部署和回退流程的离线测试：`python3 scripts/test_deploy_workflow.py`。它模拟 Vercel 和 HTTP 响应，不产生真实发布。
 
-### 测试 API
+## 故障记录
 
-```bash
-# 健康检查
-curl http://localhost:8000/health
-
-# 测试诊断 API（演示模式，使用模拟回复）
-curl -X POST http://localhost:8000/api/diagnose \
-  -H "Content-Type: application/json" \
-  -d '{"symptoms": "发热、咳嗽", "userId": "test-user-001"}'
-```
-
-## ⚠️ 安全注意事项
-
-1. **不要提交 `.env` 文件** - 包含敏感密钥
-2. **生产环境不使用 DEEPSEEK_API_KEY** - 避免消耗 token
-3. **数据库连接字符串包含密码** - 确保只配置在安全的环境变量中
-4. **区块链私钥** - 仅用于测试，生产环境应使用更安全的密钥管理方案
-
-## 📚 相关文档
-
-- [VERCEL-FULLSTACK-DEPLOYMENT.md](./VERCEL-FULLSTACK-DEPLOYMENT.md) - 完整部署指南
-- [VERCEL-DEPLOYMENT-CHECKLIST.md](./VERCEL-DEPLOYMENT-CHECKLIST.md) - 部署检查清单
-- [AGENTS.md](./AGENTS.md) - 项目开发指南
+见 `BUGFIX-VERCEL-BACKEND-DEPLOYMENT.md`。查看日志时不要输出连接串或密钥。

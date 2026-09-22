@@ -1,19 +1,33 @@
 {
-  "buildCommand": "cd src/frontend && npm run build",
-  "outputDirectory": "src/frontend/.next",
-  "installCommand": "cd src/frontend && npm install",
+  "services": {
+    "frontend": {
+      "root": "src/frontend/",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "root": "src/backend/",
+      "framework": "fastapi",
+      "entrypoint": "main:app"
+    }
+  },
   "rewrites": [
     {
       "source": "/health",
-      "destination": "https://meditrace-backend.vercel.app/health"
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/api/(.*)",
-      "destination": "https://meditrace-backend.vercel.app/api/$1"
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": "/$1"
+      "destination": {
+        "service": "frontend"
+      }
     }
   ]
 }

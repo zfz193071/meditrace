@@ -13,7 +13,7 @@ from eth_typing import HexStr
 # 导入工具函数
 from utils.hex_utils import ensure_bytes32
 
-load_dotenv(override=True)
+load_dotenv()
 
 
 class BlockchainClient:
@@ -51,13 +51,11 @@ class BlockchainClient:
         """加载智能合约"""
         try:
             # 读取合约 ABI
-            abi_path = "../contracts/artifacts/contracts/DiagnosisRecord.sol/DiagnosisRecord.json"
+            abi_path = os.path.join(os.path.dirname(__file__), "abi", "DiagnosisRecord.json")
             import json
             
             with open(abi_path, 'r') as f:
-                contract_data = json.load(f)
-            
-            abi = contract_data['abi']
+                abi = json.load(f)
             self.contract = self.w3.eth.contract(
                 address=self.contract_address,
                 abi=abi

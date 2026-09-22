@@ -38,7 +38,7 @@ class BaseApiModel(BaseModel):
         return super().model_dump_json(*args, **kwargs)
 
 # 加载环境变量
-load_dotenv(override=True)
+load_dotenv()
 
 # 导入 DeepSeek 客户端
 from deepseek_client import get_deepseek_client

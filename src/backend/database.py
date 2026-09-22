@@ -3,21 +3,24 @@
 """
 
 import os
+import json
+import re
+from contextlib import contextmanager
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session
-from typing import Optional
+from sqlalchemy.pool import NullPool
 
 # 检测环境
 IS_VERCEL = os.getenv('VERCEL') == '1'
-IS_PRODUCTION = os.getenv('DATABASE_URL') is not None
+DATABASE_URL = os.getenv('DATABASE_URL')
+if IS_VERCEL and not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is required on Vercel; SQLite is not persistent")
+DATABASE_URL = DATABASE_URL or "sqlite:///./meditrace.db"
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+IS_PRODUCTION = not DATABASE_URL.startswith("sqlite")
 
 # 数据库 URL
-if IS_PRODUCTION:
-    DATABASE_URL = os.getenv('DATABASE_URL')
-    print(f"🔧 使用 PostgreSQL 数据库：{DATABASE_URL.split('@')[0]}@...")
-else:
-    DATABASE_URL = "sqlite:///./meditrace.db"
-    print("🔧 使用 SQLite 数据库 (开发模式)")
+print("Database backend: PostgreSQL" if IS_PRODUCTION else "Database backend: SQLite")
 
 # 创建数据库引擎
 if DATABASE_URL.startswith("sqlite"):
@@ -29,36 +32,76 @@ else:
     # PostgreSQL
     engine = create_engine(
         DATABASE_URL,
-        pool_pre_ping=True,  # 自动重连
-        pool_size=5,         # 连接池大小
-        max_overflow=10      # 最大溢出连接数
+        poolclass=NullPool,  # Neon handles pooling; do not retain connections in idle functions.
+        connect_args={"connect_timeout": 10},
     )
 
-# 创建会话工厂
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+class DatabaseRow(dict):
+    """Keep the existing sqlite.Row interface, including JSON text and numeric indexing."""
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return list(self.values())[key]
+        return super().__getitem__(key)
+
+class DatabaseResult:
+    def __init__(self, result):
+        self.result = result
+
+    @staticmethod
+    def _row(row):
+        if row is None:
+            return None
+        return DatabaseRow({
+            key: json.dumps(value) if isinstance(value, (dict, list)) else value
+            for key, value in row._mapping.items()
+        })
+
+    def fetchone(self):
+        return self._row(self.result.fetchone())
+
+    def fetchall(self):
+        return [self._row(row) for row in self.result.fetchall()]
 
 
+class DatabaseConnection:
+    def __init__(self, connection):
+        self.connection = connection
+
+    def execute(self, statement, parameters=()):
+        # Convert existing qmark queries to dialect-independent bound parameters.
+        # Quoted SQL literals/identifiers must retain their question marks.
+        bindings = {}
+
+        def bind(match):
+            if match.group() != "?":
+                return match.group()
+            index = len(bindings)
+            name = f"param_{index}"
+            bindings[name] = parameters[index]
+            return f":{name}"
+
+        query = re.sub(r"'(?:''|[^'])*'|\"(?:\"\"|[^\"])*\"|\?", bind, statement)
+        if len(bindings) != len(parameters):
+            raise ValueError("SQL parameter count mismatch")
+        return DatabaseResult(self.connection.execute(text(query), bindings))
+
+
+@contextmanager
 def get_db():
-    """获取数据库会话"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    """Commit successful operations and roll back failed operations on both databases."""
+    with engine.begin() as connection:
+        if connection.dialect.name == "sqlite":
+            connection.exec_driver_sql("PRAGMA foreign_keys = ON")
+        yield DatabaseConnection(connection)
 
 
-def init_database():
-    """初始化数据库表"""
-    from models import Base
-    Base.metadata.create_all(bind=engine)
-    print("✅ 数据库表初始化完成")
-
-
+@contextmanager
 def get_db_connection():
     """获取单次连接（用于迁移等）"""
     with engine.connect() as conn:
         conn.execute(text("SELECT 1"))
-        return conn
+        yield conn
 
 
 def init_database():
@@ -108,6 +151,9 @@ def run_migration(migration_file: str):
     with open(migration_path, 'r') as f:
         migration_sql = f.read()
     
-    with get_db() as conn:
-        conn.executescript(migration_sql)
+    with engine.begin() as conn:
+        if conn.dialect.name == "sqlite":
+            conn.connection.driver_connection.executescript(migration_sql)
+        else:
+            conn.exec_driver_sql(migration_sql)
         print(f"Migration {migration_file} executed successfully")

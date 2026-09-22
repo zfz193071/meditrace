@@ -9,6 +9,7 @@ web3>=7.0.0
 ipfshttpclient>=0.8.0a2
 psycopg2-binary>=2.9.0
 sqlalchemy>=2.0.0
+fpdf2>=2.8.0,<3.0.0
 
 # Testing
 pytest>=8.0.0
