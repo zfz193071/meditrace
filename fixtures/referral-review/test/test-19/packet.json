@@ -1,0 +1,67 @@
+{
+  "documents": [
+    {
+      "byte_size": 362,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "fd3c39ea-de3a-5cda-b2ab-bf05e817c1c3",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "ce7be709fb4651cd2a16e7d71dd02da79094fd6222988c6b65417d870324dc18",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "ce7be709fb4651cd2a16e7d71dd02da79094fd6222988c6b65417d870324dc18",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 2118999,
+      "expected_gate": "PDF_TOO_LARGE",
+      "fixture_variant": "oversized",
+      "id": "9d5662b9-61e6-5149-bfee-9e9c12841830",
+      "kind": "pdf",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "f61017b60b23a82e13e1fabd634ccf3f8d93a5ae3f45f4c5e6a42ba2b8ed1320",
+          "text_path": "pages/document-2-1.txt"
+        }
+      ],
+      "sha256": "2041b216b3495b21afe7af39efa1aeba146c24d8691e2aeda5118b6d3625b5df",
+      "source_path": "sources/document-2.pdf",
+      "title": "Synthetic oversized sheet"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": false,
+    "checklist": {
+      "C01": "blocked",
+      "C02": "blocked",
+      "C03": "blocked",
+      "C04": "blocked",
+      "C05": "blocked",
+      "C06": "blocked",
+      "C07": "blocked",
+      "C08": "blocked"
+    },
+    "expected_rejection": "PDF_TOO_LARGE",
+    "operator_review": "pending",
+    "rationale_by_id": {},
+    "result": null
+  },
+  "id": "15aefc2e-454f-5390-b79a-48e8af756532",
+  "key": "test-19",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "test",
+  "synthetic": true,
+  "tags": [
+    "oversized"
+  ],
+  "title": "Synthetic oversized input blocks automated review"
+}

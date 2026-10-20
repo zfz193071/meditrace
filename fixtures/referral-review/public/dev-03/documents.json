@@ -1,0 +1,45 @@
+{
+  "documents": [
+    {
+      "byte_size": 22198,
+      "expected_gate": null,
+      "fixture_variant": "pdf",
+      "id": "f47b52b1-138f-5596-a254-772413872639",
+      "kind": "pdf",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "b321e7e849ea233855150a90b58351a684a41ffebfba72f078ed74cfe9fc248e",
+      "source_path": "sources/document-1.pdf",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 22005,
+      "expected_gate": null,
+      "fixture_variant": "pdf",
+      "id": "5ca2c2e6-8caa-5c3e-b012-23449cd5d967",
+      "kind": "pdf",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "e179d24a9fcd9dedd4b4b8662e90cc9d94ff26b1f2f62eb2f5a7f15e2382df74",
+          "text_path": "pages/document-2-1.txt"
+        }
+      ],
+      "sha256": "a0f0b23520f9a9cf2f1d4f28ccce8d358c736548bc9b20eccc250d915ac1855d",
+      "source_path": "sources/document-2.pdf",
+      "title": "Synthetic Follow-up Report D03"
+    }
+  ],
+  "key": "dev-03",
+  "mode": "precomputed",
+  "packet_id": "c26e8432-8363-59a6-b2c7-a6f03cde9a87",
+  "synthetic": true,
+  "title": "Complete packet with dated medication change"
+}

@@ -1,0 +1,217 @@
+{
+  "documents": [
+    {
+      "byte_size": 362,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "66f1e23c-5ea4-5df4-9b16-2f481d9e3b19",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "1666496bbeff3a2e3530c6c72c3b3344e018b8271f0d88b8f91bfa4e0bd678fa",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "1666496bbeff3a2e3530c6c72c3b3344e018b8271f0d88b8f91bfa4e0bd678fa",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 37823,
+      "expected_gate": "PACKET_PAGE_LIMIT",
+      "fixture_variant": "too_many_pages",
+      "id": "1941a93e-7381-54c0-9975-20aa7dbf4a4c",
+      "kind": "pdf",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "47970563ede5250a61e781d7d010dced876cb55b2d2691d223023df6618eefc3",
+          "text_path": "pages/document-2-1.txt"
+        },
+        {
+          "number": 2,
+          "quality": "text",
+          "text_hash": "58f723166164aadb70ffc6cddbccb9c56856b0649ff2c2d0ed8bb8eff77c080b",
+          "text_path": "pages/document-2-2.txt"
+        },
+        {
+          "number": 3,
+          "quality": "text",
+          "text_hash": "fdc77cb77112c0fbccc9902e6717ab36754fcd0562773bdd7d89521ff361e95e",
+          "text_path": "pages/document-2-3.txt"
+        },
+        {
+          "number": 4,
+          "quality": "text",
+          "text_hash": "6e84353dd943cc5da2c18db18bb614eee8023754f7348030621bf70e2eec7b82",
+          "text_path": "pages/document-2-4.txt"
+        },
+        {
+          "number": 5,
+          "quality": "text",
+          "text_hash": "0a384935b240fea52aea4ea283085f6763edba4f8f8b66cd10e058cb82642ede",
+          "text_path": "pages/document-2-5.txt"
+        },
+        {
+          "number": 6,
+          "quality": "text",
+          "text_hash": "86b2b1580bf723323fd77367fc23282002f8ef02ed2b5d2b95ab096e95c43f34",
+          "text_path": "pages/document-2-6.txt"
+        },
+        {
+          "number": 7,
+          "quality": "text",
+          "text_hash": "e9b18005630e5b67147c4511396377db54546fee23cc39ef15a6a0eb916293b5",
+          "text_path": "pages/document-2-7.txt"
+        },
+        {
+          "number": 8,
+          "quality": "text",
+          "text_hash": "861af6c223bc7accad5f538601603b97963bb8b3740fd73b19a4dafd748a86a8",
+          "text_path": "pages/document-2-8.txt"
+        },
+        {
+          "number": 9,
+          "quality": "text",
+          "text_hash": "d980488853d46fd7d9465267a57179ea770cf1045559a85cccffae92e83fc471",
+          "text_path": "pages/document-2-9.txt"
+        },
+        {
+          "number": 10,
+          "quality": "text",
+          "text_hash": "ffbdda405e05164160889f3b68f9e19303a9aff6a3f97b2eb2118fa7a9109913",
+          "text_path": "pages/document-2-10.txt"
+        },
+        {
+          "number": 11,
+          "quality": "text",
+          "text_hash": "33f30f8e98d20ebda5423148abfdb647be6e3e1ddd1292c7c367b511b1a0651c",
+          "text_path": "pages/document-2-11.txt"
+        },
+        {
+          "number": 12,
+          "quality": "text",
+          "text_hash": "d8fd5a118a5513ec6cc6c7035496be8c10f5be29c73af938aef28f12ae3f878d",
+          "text_path": "pages/document-2-12.txt"
+        },
+        {
+          "number": 13,
+          "quality": "text",
+          "text_hash": "71202ed419c0a76d5a642229896a9cf785161c55e1fb0436fd6ec855c2f8d84e",
+          "text_path": "pages/document-2-13.txt"
+        },
+        {
+          "number": 14,
+          "quality": "text",
+          "text_hash": "5ae028fa594338baaff27b742587e6e090011707e1e2ace5aa5ae73179ea60fe",
+          "text_path": "pages/document-2-14.txt"
+        },
+        {
+          "number": 15,
+          "quality": "text",
+          "text_hash": "02f78e705830577987fa98984f5b42e8c134b443a20ada1564c721d910d0b734",
+          "text_path": "pages/document-2-15.txt"
+        },
+        {
+          "number": 16,
+          "quality": "text",
+          "text_hash": "597e7c69b1ffade636d4fb472e8e405d11db896847ba6e6ad88ce24352e19252",
+          "text_path": "pages/document-2-16.txt"
+        },
+        {
+          "number": 17,
+          "quality": "text",
+          "text_hash": "ac9fa1f1b7a99dd1eb304a90c8988654749936985b0213d16382dc67fa42d9c5",
+          "text_path": "pages/document-2-17.txt"
+        },
+        {
+          "number": 18,
+          "quality": "text",
+          "text_hash": "9b82001ee26ed4aaf80ed110b71835260799ab0b519c09ef8ff0c48729a82cf4",
+          "text_path": "pages/document-2-18.txt"
+        },
+        {
+          "number": 19,
+          "quality": "text",
+          "text_hash": "ea5e182fc7dfe5f24ec9c054b615f5c9d043b330380a9f3b9c0d544359b4ad4a",
+          "text_path": "pages/document-2-19.txt"
+        },
+        {
+          "number": 20,
+          "quality": "text",
+          "text_hash": "13e3ec16e99698f4457d8701c53889522b160252c0e3def14116fbf25a3ec4b7",
+          "text_path": "pages/document-2-20.txt"
+        },
+        {
+          "number": 21,
+          "quality": "text",
+          "text_hash": "2327dac0ac727056c09c00ceb91303616c9285c7179f37783d07a30fb81c96c6",
+          "text_path": "pages/document-2-21.txt"
+        },
+        {
+          "number": 22,
+          "quality": "text",
+          "text_hash": "47544b31e6734da6224a6bd1c3cd5aa01b800dc106c092df759d04028e0f0936",
+          "text_path": "pages/document-2-22.txt"
+        },
+        {
+          "number": 23,
+          "quality": "text",
+          "text_hash": "7686daffd3a44a238f68441cb9075c44d4ad2859c565773666e6a2e043c4ae76",
+          "text_path": "pages/document-2-23.txt"
+        },
+        {
+          "number": 24,
+          "quality": "text",
+          "text_hash": "920531d81e7e216f592395a5fd38a7d5d545913a87339b20d80471ed852645dd",
+          "text_path": "pages/document-2-24.txt"
+        },
+        {
+          "number": 25,
+          "quality": "text",
+          "text_hash": "b5580e1e6921ce2cb8c66556ddfd8a3e0ddee3eca040df1e0ea8ac63df676991",
+          "text_path": "pages/document-2-25.txt"
+        },
+        {
+          "number": 26,
+          "quality": "text",
+          "text_hash": "3ab67e927b8783bd86bd1d68969ac08b5bf7fd07673da8c94eafbef9d69bb4d2",
+          "text_path": "pages/document-2-26.txt"
+        }
+      ],
+      "sha256": "8f4a8c0ae50da22c7b61e30e1c663576f5cc99d5594a74b0033c998047fd9258",
+      "source_path": "sources/document-2.pdf",
+      "title": "Synthetic too_many_pages sheet"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": false,
+    "checklist": {
+      "C01": "blocked",
+      "C02": "blocked",
+      "C03": "blocked",
+      "C04": "blocked",
+      "C05": "blocked",
+      "C06": "blocked",
+      "C07": "blocked",
+      "C08": "blocked"
+    },
+    "expected_rejection": "PACKET_PAGE_LIMIT",
+    "operator_review": "pending",
+    "rationale_by_id": {},
+    "result": null
+  },
+  "id": "ab228ca2-736d-5476-979a-7e6372c8c9f5",
+  "key": "test-20",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "test",
+  "synthetic": true,
+  "tags": [
+    "too_many_pages"
+  ],
+  "title": "Synthetic too_many_pages input blocks automated review"
+}

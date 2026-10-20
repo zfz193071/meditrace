@@ -1,0 +1,27 @@
+{
+  "documents": [
+    {
+      "byte_size": 22155,
+      "expected_gate": null,
+      "fixture_variant": "pdf",
+      "id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "kind": "pdf",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "467327b68031cc99abca29b27f4d1116c675685e4f6317ac654d9ca1537f5160",
+      "source_path": "sources/document-1.pdf",
+      "title": "Synthetic referral"
+    }
+  ],
+  "key": "dev-02",
+  "mode": "precomputed",
+  "packet_id": "440257a7-ca43-56f4-b66e-8201821b3bf2",
+  "synthetic": true,
+  "title": "Allergy status recorded as unknown"
+}

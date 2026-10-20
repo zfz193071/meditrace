@@ -67,3 +67,5 @@ specs/
 *.bak
 test_*.py
 .github/
+fixtures/referral-review/
+scripts/referral_fixture*.py

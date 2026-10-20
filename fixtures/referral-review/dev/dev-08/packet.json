@@ -1,0 +1,234 @@
+{
+  "documents": [
+    {
+      "byte_size": 446,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": true,
+    "checklist": {
+      "C01": "satisfied",
+      "C02": "satisfied",
+      "C03": "satisfied",
+      "C04": "satisfied",
+      "C05": "satisfied",
+      "C06": "satisfied",
+      "C07": "satisfied",
+      "C08": "not_applicable"
+    },
+    "expected_rejection": null,
+    "operator_review": "pending",
+    "rationale_by_id": {
+      "08e2f524-3457-5de2-9261-b8398ce75052": "Authored annotation of medications; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "5df224f3-99a3-543e-aaef-c094732e8c55": "Authored annotation of patient.dob; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "65b3bc2c-6655-5fa4-b938-3cb45453a357": "Authored annotation of recipient; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "a553e9ed-ee80-56da-92c6-699364132c1f": "Authored annotation of patient.name; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "c63f4039-36ec-5609-88eb-8aec201136c1": "Authored annotation of allergies; read the linked exact source span(s). Preserve assertion status 'explicitly_none' and raw wording; no clinical inference.",
+      "da653671-f20b-51f9-bfa3-9be27302ab7e": "Authored annotation of referral.reason; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "deb9c030-685a-5f6f-afc8-137b906f5148": "Authored annotation of referrer.contact; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "f0eeb07b-e78d-50e0-a56d-1fa5a201e242": "Authored annotation of referrer.name; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference."
+    },
+    "result": {
+      "checklist_version": "outpatient-referral-demo@1",
+      "created_at": "2026-10-20T00:00:00Z",
+      "evidence": [
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 115,
+          "id": "3c56726d-a952-5649-9d9b-f97ec8537efc",
+          "page_number": 1,
+          "quote": "Patient: Synthetic Zoë Ångström 🧪",
+          "start_cp": 82,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        },
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 131,
+          "id": "c716e760-957f-58b0-b86a-bf1b9acdeb54",
+          "page_number": 1,
+          "quote": "DOB: 1980-06-15",
+          "start_cp": 116,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        },
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 164,
+          "id": "2b4e5f10-8510-5123-ab3a-22669a930f08",
+          "page_number": 1,
+          "quote": "Referrer: Synthetic Referrer D08",
+          "start_cp": 132,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        },
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 202,
+          "id": "de39b34f-0289-5b81-8430-3c822bca3463",
+          "page_number": 1,
+          "quote": "Contact: referrer-d08@example.invalid",
+          "start_cp": 165,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        },
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 239,
+          "id": "af580e7a-5e20-5358-90ad-bd7b81fcafaf",
+          "page_number": 1,
+          "quote": "Recipient: Synthetic Outpatient Desk",
+          "start_cp": 203,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        },
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 297,
+          "id": "af736235-be49-527b-adea-854ce6ea38c9",
+          "page_number": 1,
+          "quote": "Reason: Review of the supplied fictional symptom history.",
+          "start_cp": 240,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        },
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 338,
+          "id": "d7867886-7c30-5566-906e-b24347260f1c",
+          "page_number": 1,
+          "quote": "Medications: FictionalMed C 25 µg daily.",
+          "start_cp": 298,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        },
+        {
+          "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+          "end_cp": 369,
+          "id": "761ac6d3-b022-56d1-990f-0dd16ba7347a",
+          "page_number": 1,
+          "quote": "Allergies: No known allergies.",
+          "start_cp": 339,
+          "text_hash": "066bdedd048130c190962414f5606b3b31f795a206803e9d53888a66b308e35e"
+        }
+      ],
+      "facts": [
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "3c56726d-a952-5649-9d9b-f97ec8537efc"
+          ],
+          "field_key": "patient.name",
+          "id": "a553e9ed-ee80-56da-92c6-699364132c1f",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Zoë Ångström 🧪"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "c716e760-957f-58b0-b86a-bf1b9acdeb54"
+          ],
+          "field_key": "patient.dob",
+          "id": "5df224f3-99a3-543e-aaef-c094732e8c55",
+          "temporal_context": null,
+          "value_normalized": "1980-06-15",
+          "value_raw": "1980-06-15"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "2b4e5f10-8510-5123-ab3a-22669a930f08"
+          ],
+          "field_key": "referrer.name",
+          "id": "f0eeb07b-e78d-50e0-a56d-1fa5a201e242",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Referrer D08"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "de39b34f-0289-5b81-8430-3c822bca3463"
+          ],
+          "field_key": "referrer.contact",
+          "id": "deb9c030-685a-5f6f-afc8-137b906f5148",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "referrer-d08@example.invalid"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "af580e7a-5e20-5358-90ad-bd7b81fcafaf"
+          ],
+          "field_key": "recipient",
+          "id": "65b3bc2c-6655-5fa4-b938-3cb45453a357",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Outpatient Desk"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "af736235-be49-527b-adea-854ce6ea38c9"
+          ],
+          "field_key": "referral.reason",
+          "id": "da653671-f20b-51f9-bfa3-9be27302ab7e",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Review of the supplied fictional symptom history."
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "d7867886-7c30-5566-906e-b24347260f1c"
+          ],
+          "field_key": "medications",
+          "id": "08e2f524-3457-5de2-9261-b8398ce75052",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "FictionalMed C 25 µg daily."
+        },
+        {
+          "assertion_status": "explicitly_none",
+          "evidence_ids": [
+            "761ac6d3-b022-56d1-990f-0dd16ba7347a"
+          ],
+          "field_key": "allergies",
+          "id": "c63f4039-36ec-5609-88eb-8aec201136c1",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "No known allergies."
+        }
+      ],
+      "findings": [],
+      "mode": "precomputed",
+      "prompt_version": "authored-fixture-no-model@1",
+      "revision_id": "cb2d7902-a8f0-56e3-b79b-1fa6647afc83",
+      "run_id": "64b35199-b6fc-5aa3-a85f-e662e6fc367a",
+      "schema_version": "0.1.0"
+    }
+  },
+  "id": "75c8b5b9-13d9-5e31-b31f-52994985522e",
+  "key": "dev-08",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "dev",
+  "synthetic": true,
+  "tags": [
+    "unicode",
+    "astral_codepoint",
+    "historical_template",
+    "clean"
+  ],
+  "title": "Unicode offsets and historical template text"
+}

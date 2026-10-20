@@ -1,0 +1,67 @@
+{
+  "documents": [
+    {
+      "byte_size": 362,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "b116a8f4-3e67-5de5-bcd5-16e4aef9529a",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "bfdf24a03c0153fbcc89a7826472bda4251d80f753bbf1eb5b311618ef0746a5",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "bfdf24a03c0153fbcc89a7826472bda4251d80f753bbf1eb5b311618ef0746a5",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 16349,
+      "expected_gate": "SCANNED_PAGE",
+      "fixture_variant": "scan",
+      "id": "1029ae20-b3e4-5b4e-9b10-b60021dda794",
+      "kind": "pdf",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "unreadable",
+          "text_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "text_path": "pages/document-2-1.txt"
+        }
+      ],
+      "sha256": "c899f8102579f915301c2ab5dcca52bbb8da7190133b51b968fbfcc2260cd9d8",
+      "source_path": "sources/document-2.pdf",
+      "title": "Synthetic scanned sheet"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": false,
+    "checklist": {
+      "C01": "blocked",
+      "C02": "blocked",
+      "C03": "blocked",
+      "C04": "blocked",
+      "C05": "blocked",
+      "C06": "blocked",
+      "C07": "blocked",
+      "C08": "blocked"
+    },
+    "expected_rejection": "SCANNED_PAGE",
+    "operator_review": "pending",
+    "rationale_by_id": {},
+    "result": null
+  },
+  "id": "54aa1c29-0f88-55b0-bf0d-820c2a3ff78f",
+  "key": "dev-10",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "dev",
+  "synthetic": true,
+  "tags": [
+    "scan"
+  ],
+  "title": "Scanned page blocks automated review"
+}

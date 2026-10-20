@@ -1,0 +1,219 @@
+{
+  "documents": [
+    {
+      "byte_size": 278,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "3d51b3d8ad291fcce18055d759988fd45d7118e3d6d2721c701878f7c557911a",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "3d51b3d8ad291fcce18055d759988fd45d7118e3d6d2721c701878f7c557911a",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": true,
+    "checklist": {
+      "C01": "missing",
+      "C02": "missing",
+      "C03": "missing",
+      "C04": "satisfied",
+      "C05": "satisfied",
+      "C06": "satisfied",
+      "C07": "satisfied",
+      "C08": "not_applicable"
+    },
+    "expected_rejection": null,
+    "operator_review": "pending",
+    "rationale_by_id": {
+      "1b87824b-ea87-5df9-b2b2-dae1af331059": "Authored annotation of referral.reason; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "66fbeb40-f93e-5cb1-861f-abdecf3b79d0": "Authored annotation of referrer.name; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "83f3cd4b-9570-5e76-9cae-e3f24e2180f5": "A referrer name is present but no contact is recorded.",
+      "8653a43a-2f82-5734-9da0-66701269f1bb": "No patient name was recorded.",
+      "8d380027-ddab-5715-affe-094c6a6a26f4": "Authored annotation of allergies; read the linked exact source span(s). Preserve assertion status 'explicitly_none' and raw wording; no clinical inference.",
+      "a0116c5c-a1bb-5502-b221-b99193b2ffdd": "Authored annotation of recipient; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "a3877fc1-c207-577a-a2c0-855dcfeb6431": "Authored annotation of medications; read the linked exact source span(s). Preserve assertion status 'explicitly_none' and raw wording; no clinical inference.",
+      "eba110c6-b408-5ac8-ac8e-eda30b20a4d6": "No DOB was recorded."
+    },
+    "result": {
+      "checklist_version": "outpatient-referral-demo@1",
+      "created_at": "2026-10-20T00:00:00Z",
+      "evidence": [
+        {
+          "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+          "end_cp": 114,
+          "id": "5697e3b3-bb88-5fe4-9bb2-8a95390bc8eb",
+          "page_number": 1,
+          "quote": "Referrer: Synthetic Referrer D07",
+          "start_cp": 82,
+          "text_hash": "3d51b3d8ad291fcce18055d759988fd45d7118e3d6d2721c701878f7c557911a"
+        },
+        {
+          "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+          "end_cp": 151,
+          "id": "523e73ed-1409-5105-8eb0-1b61079a313b",
+          "page_number": 1,
+          "quote": "Recipient: Synthetic Outpatient Desk",
+          "start_cp": 115,
+          "text_hash": "3d51b3d8ad291fcce18055d759988fd45d7118e3d6d2721c701878f7c557911a"
+        },
+        {
+          "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+          "end_cp": 209,
+          "id": "deb975a7-badf-5958-a5be-2c82f1543147",
+          "page_number": 1,
+          "quote": "Reason: Review of the supplied fictional symptom history.",
+          "start_cp": 152,
+          "text_hash": "3d51b3d8ad291fcce18055d759988fd45d7118e3d6d2721c701878f7c557911a"
+        },
+        {
+          "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+          "end_cp": 246,
+          "id": "61b4af29-80a2-5b9b-af05-0c459b360346",
+          "page_number": 1,
+          "quote": "Medications: No current medications.",
+          "start_cp": 210,
+          "text_hash": "3d51b3d8ad291fcce18055d759988fd45d7118e3d6d2721c701878f7c557911a"
+        },
+        {
+          "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+          "end_cp": 277,
+          "id": "6ecdf241-59e7-5d79-92f9-d9662daabfb1",
+          "page_number": 1,
+          "quote": "Allergies: No known allergies.",
+          "start_cp": 247,
+          "text_hash": "3d51b3d8ad291fcce18055d759988fd45d7118e3d6d2721c701878f7c557911a"
+        }
+      ],
+      "facts": [
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "5697e3b3-bb88-5fe4-9bb2-8a95390bc8eb"
+          ],
+          "field_key": "referrer.name",
+          "id": "66fbeb40-f93e-5cb1-861f-abdecf3b79d0",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Referrer D07"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "523e73ed-1409-5105-8eb0-1b61079a313b"
+          ],
+          "field_key": "recipient",
+          "id": "a0116c5c-a1bb-5502-b221-b99193b2ffdd",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Outpatient Desk"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "deb975a7-badf-5958-a5be-2c82f1543147"
+          ],
+          "field_key": "referral.reason",
+          "id": "1b87824b-ea87-5df9-b2b2-dae1af331059",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Review of the supplied fictional symptom history."
+        },
+        {
+          "assertion_status": "explicitly_none",
+          "evidence_ids": [
+            "61b4af29-80a2-5b9b-af05-0c459b360346"
+          ],
+          "field_key": "medications",
+          "id": "a3877fc1-c207-577a-a2c0-855dcfeb6431",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "No current medications."
+        },
+        {
+          "assertion_status": "explicitly_none",
+          "evidence_ids": [
+            "6ecdf241-59e7-5d79-92f9-d9662daabfb1"
+          ],
+          "field_key": "allergies",
+          "id": "8d380027-ddab-5715-affe-094c6a6a26f4",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "No known allergies."
+        }
+      ],
+      "findings": [
+        {
+          "checked_document_ids": [
+            "324d759e-8ec4-5b99-bc53-00a2e9c84b08"
+          ],
+          "checklist_version": "outpatient-referral-demo@1",
+          "evidence_ids": [],
+          "fact_ids": [],
+          "field_keys": [
+            "patient.name"
+          ],
+          "id": "8653a43a-2f82-5734-9da0-66701269f1bb",
+          "kind": "missing",
+          "message": "No patient name was recorded. Checked all 1 supplied, successfully parsed documents (1 pages).",
+          "rule_id": "C01"
+        },
+        {
+          "checked_document_ids": [
+            "324d759e-8ec4-5b99-bc53-00a2e9c84b08"
+          ],
+          "checklist_version": "outpatient-referral-demo@1",
+          "evidence_ids": [],
+          "fact_ids": [],
+          "field_keys": [
+            "patient.dob"
+          ],
+          "id": "eba110c6-b408-5ac8-ac8e-eda30b20a4d6",
+          "kind": "missing",
+          "message": "No DOB was recorded. Checked all 1 supplied, successfully parsed documents (1 pages).",
+          "rule_id": "C02"
+        },
+        {
+          "checked_document_ids": [
+            "324d759e-8ec4-5b99-bc53-00a2e9c84b08"
+          ],
+          "checklist_version": "outpatient-referral-demo@1",
+          "evidence_ids": [],
+          "fact_ids": [],
+          "field_keys": [
+            "referrer.contact"
+          ],
+          "id": "83f3cd4b-9570-5e76-9cae-e3f24e2180f5",
+          "kind": "missing",
+          "message": "A referrer name is present but no contact is recorded. Checked all 1 supplied, successfully parsed documents (1 pages).",
+          "rule_id": "C03"
+        }
+      ],
+      "mode": "precomputed",
+      "prompt_version": "authored-fixture-no-model@1",
+      "revision_id": "605eb65a-520a-58a9-8d88-3d671be23048",
+      "run_id": "77a924fb-77c6-5bdb-9a38-b11bfba1fa91",
+      "schema_version": "0.1.0"
+    }
+  },
+  "id": "31a2feba-2f7d-5c4f-835a-f727e4391ab2",
+  "key": "dev-07",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "dev",
+  "synthetic": true,
+  "tags": [
+    "name_missing",
+    "dob_missing",
+    "contact_missing"
+  ],
+  "title": "Identity and referrer contact missing"
+}

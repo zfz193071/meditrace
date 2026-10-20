@@ -76,3 +76,4 @@ src/backend/*.db
 *.tsbuildinfo
 .pytest_cache/
 .uv-cache/
+.scratch/referral-pdf-qa/

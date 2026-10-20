@@ -1,0 +1,223 @@
+{
+  "documents": [
+    {
+      "byte_size": 294,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "b2571993-f68b-555c-b0ce-e782f3028fc1",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": true,
+    "checklist": {
+      "C01": "satisfied",
+      "C02": "satisfied",
+      "C03": "satisfied",
+      "C04": "satisfied",
+      "C05": "satisfied",
+      "C06": "missing",
+      "C07": "missing",
+      "C08": "not_applicable"
+    },
+    "expected_rejection": null,
+    "operator_review": "pending",
+    "rationale_by_id": {
+      "012423b6-c402-5eda-9e7a-2220f05cf537": "Authored annotation of referral.reason; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "2bc1288f-607b-5276-bd66-3a8a83e5f01a": "Authored annotation of recipient; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "5fae5cce-1563-5c4c-bc0a-6ed1062272bf": "No allergy status is provided.",
+      "6ccc761e-0fed-5874-8d9f-1e3c07402eb4": "Authored annotation of patient.name; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "961cfc94-37bb-5cac-9a5f-cb47463c1614": "Authored annotation of referrer.contact; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "a0949dca-37db-50ff-a476-dfab844d77a7": "No current medication status is provided.",
+      "b5529e7b-ee0f-5b69-843a-ad083ea2834e": "Authored annotation of referrer.name; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "b9b80b9d-1c5c-5711-947c-703222e99791": "Authored annotation of patient.dob; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference."
+    },
+    "result": {
+      "checklist_version": "outpatient-referral-demo@1",
+      "created_at": "2026-10-20T00:00:00Z",
+      "evidence": [
+        {
+          "document_id": "b2571993-f68b-555c-b0ce-e782f3028fc1",
+          "end_cp": 111,
+          "id": "0518fe92-0b3f-5b0a-b19c-029bd0cdc556",
+          "page_number": 1,
+          "quote": "Patient: Synthetic Person T11",
+          "start_cp": 82,
+          "text_hash": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a"
+        },
+        {
+          "document_id": "b2571993-f68b-555c-b0ce-e782f3028fc1",
+          "end_cp": 127,
+          "id": "d013dbf5-3d8b-52c1-a39e-894f50015adb",
+          "page_number": 1,
+          "quote": "DOB: 1980-06-15",
+          "start_cp": 112,
+          "text_hash": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a"
+        },
+        {
+          "document_id": "b2571993-f68b-555c-b0ce-e782f3028fc1",
+          "end_cp": 160,
+          "id": "ff2b668a-1bc8-51cb-8a7e-fc8b4715351a",
+          "page_number": 1,
+          "quote": "Referrer: Synthetic Referrer T11",
+          "start_cp": 128,
+          "text_hash": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a"
+        },
+        {
+          "document_id": "b2571993-f68b-555c-b0ce-e782f3028fc1",
+          "end_cp": 198,
+          "id": "f3d51c51-4c28-5863-9b13-6d5670f9cfd8",
+          "page_number": 1,
+          "quote": "Contact: referrer-t11@example.invalid",
+          "start_cp": 161,
+          "text_hash": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a"
+        },
+        {
+          "document_id": "b2571993-f68b-555c-b0ce-e782f3028fc1",
+          "end_cp": 235,
+          "id": "2478e235-5677-5c79-8eaf-d32bedd02385",
+          "page_number": 1,
+          "quote": "Recipient: Synthetic Outpatient Desk",
+          "start_cp": 199,
+          "text_hash": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a"
+        },
+        {
+          "document_id": "b2571993-f68b-555c-b0ce-e782f3028fc1",
+          "end_cp": 293,
+          "id": "366b8f92-9689-50d8-b34b-5233b6a57ed5",
+          "page_number": 1,
+          "quote": "Reason: Review of the supplied fictional symptom history.",
+          "start_cp": 236,
+          "text_hash": "3c3e991aab2b179e965680efd6e80a186461ce7b60c0bc792741d6d343174a6a"
+        }
+      ],
+      "facts": [
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "0518fe92-0b3f-5b0a-b19c-029bd0cdc556"
+          ],
+          "field_key": "patient.name",
+          "id": "6ccc761e-0fed-5874-8d9f-1e3c07402eb4",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Person T11"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "d013dbf5-3d8b-52c1-a39e-894f50015adb"
+          ],
+          "field_key": "patient.dob",
+          "id": "b9b80b9d-1c5c-5711-947c-703222e99791",
+          "temporal_context": null,
+          "value_normalized": "1980-06-15",
+          "value_raw": "1980-06-15"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "ff2b668a-1bc8-51cb-8a7e-fc8b4715351a"
+          ],
+          "field_key": "referrer.name",
+          "id": "b5529e7b-ee0f-5b69-843a-ad083ea2834e",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Referrer T11"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "f3d51c51-4c28-5863-9b13-6d5670f9cfd8"
+          ],
+          "field_key": "referrer.contact",
+          "id": "961cfc94-37bb-5cac-9a5f-cb47463c1614",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "referrer-t11@example.invalid"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "2478e235-5677-5c79-8eaf-d32bedd02385"
+          ],
+          "field_key": "recipient",
+          "id": "2bc1288f-607b-5276-bd66-3a8a83e5f01a",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Outpatient Desk"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "366b8f92-9689-50d8-b34b-5233b6a57ed5"
+          ],
+          "field_key": "referral.reason",
+          "id": "012423b6-c402-5eda-9e7a-2220f05cf537",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Review of the supplied fictional symptom history."
+        }
+      ],
+      "findings": [
+        {
+          "checked_document_ids": [
+            "b2571993-f68b-555c-b0ce-e782f3028fc1"
+          ],
+          "checklist_version": "outpatient-referral-demo@1",
+          "evidence_ids": [],
+          "fact_ids": [],
+          "field_keys": [
+            "medications"
+          ],
+          "id": "a0949dca-37db-50ff-a476-dfab844d77a7",
+          "kind": "missing",
+          "message": "No current medication status is provided. Checked all 1 supplied, successfully parsed documents (1 pages).",
+          "rule_id": "C06"
+        },
+        {
+          "checked_document_ids": [
+            "b2571993-f68b-555c-b0ce-e782f3028fc1"
+          ],
+          "checklist_version": "outpatient-referral-demo@1",
+          "evidence_ids": [],
+          "fact_ids": [],
+          "field_keys": [
+            "allergies"
+          ],
+          "id": "5fae5cce-1563-5c4c-bc0a-6ed1062272bf",
+          "kind": "missing",
+          "message": "No allergy status is provided. Checked all 1 supplied, successfully parsed documents (1 pages).",
+          "rule_id": "C07"
+        }
+      ],
+      "mode": "precomputed",
+      "prompt_version": "authored-fixture-no-model@1",
+      "revision_id": "332af2ef-1845-5c10-8013-453a4c0483c4",
+      "run_id": "e7c3928b-9e8f-5906-8e87-e451cd083219",
+      "schema_version": "0.1.0"
+    }
+  },
+  "id": "a294a725-5a09-516c-b080-59231221d92b",
+  "key": "test-11",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "test",
+  "synthetic": true,
+  "tags": [
+    "medication_missing",
+    "allergy_missing"
+  ],
+  "title": "Both status fields absent"
+}

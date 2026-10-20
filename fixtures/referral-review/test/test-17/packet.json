@@ -1,0 +1,73 @@
+{
+  "documents": [
+    {
+      "byte_size": 362,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "88cad939-622d-5d68-aeb1-ce313f90a843",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "a7f774cb227a403230024d646f30ac06ebfef13002ade9b13b4e9d5a7a524543",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "a7f774cb227a403230024d646f30ac06ebfef13002ade9b13b4e9d5a7a524543",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 38732,
+      "expected_gate": "UNREADABLE_NONEMPTY_PAGE",
+      "fixture_variant": "mixed",
+      "id": "42d2c1fa-3b2c-5ec5-9350-53e6e4bf3c91",
+      "kind": "pdf",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "ea0e45f2477f133b97cff7f485777febb73d6c3330e9b4029acb0263586a6935",
+          "text_path": "pages/document-2-1.txt"
+        },
+        {
+          "number": 2,
+          "quality": "unreadable",
+          "text_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "text_path": "pages/document-2-2.txt"
+        }
+      ],
+      "sha256": "239ea6faeed340cc92cbe11c3539261405c8042fc05f76e3cac2bd1b3d0335f1",
+      "source_path": "sources/document-2.pdf",
+      "title": "Synthetic mixed sheet"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": false,
+    "checklist": {
+      "C01": "blocked",
+      "C02": "blocked",
+      "C03": "blocked",
+      "C04": "blocked",
+      "C05": "blocked",
+      "C06": "blocked",
+      "C07": "blocked",
+      "C08": "blocked"
+    },
+    "expected_rejection": "UNREADABLE_NONEMPTY_PAGE",
+    "operator_review": "pending",
+    "rationale_by_id": {},
+    "result": null
+  },
+  "id": "7d7a0d83-f304-592f-b166-049caa7e80a4",
+  "key": "test-17",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "test",
+  "synthetic": true,
+  "tags": [
+    "mixed"
+  ],
+  "title": "Synthetic mixed input blocks automated review"
+}

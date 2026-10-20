@@ -1,0 +1,14 @@
+{
+  "confirmed_at": null,
+  "has_unresolved": false,
+  "heading": "Review in progress",
+  "identity_unresolved": false,
+  "illustrative_not_actual_review": true,
+  "packet_id": "c26e8432-8363-59a6-b2c7-a6f03cde9a87",
+  "resolutions": [],
+  "review_version": 0,
+  "revision_id": "9345edb1-d7fe-5e91-b679-498896b9cd95",
+  "run_id": "8179ea38-4c72-5a0d-aa5c-b015d4fa9cee",
+  "schema_version": "demo-review-fixture-v1",
+  "status": "draft"
+}

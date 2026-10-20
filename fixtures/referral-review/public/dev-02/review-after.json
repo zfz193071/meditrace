@@ -1,0 +1,20 @@
+{
+  "confirmed_at": "2026-10-20T00:00:00Z",
+  "has_unresolved": true,
+  "heading": "Reviewed — unresolved items remain",
+  "identity_unresolved": false,
+  "illustrative_not_actual_review": true,
+  "packet_id": "440257a7-ca43-56f4-b66e-8201821b3bf2",
+  "resolutions": [
+    {
+      "finding_id": "5565d710-9f91-5ff4-9107-e8320ccde8be",
+      "reason": "Synthetic demonstration: sender clarification is still required; no new source was supplied.",
+      "status": "unresolved"
+    }
+  ],
+  "review_version": 2,
+  "revision_id": "e88f3024-3a23-5684-81c9-841664f168a2",
+  "run_id": "6664726e-90bf-565a-86bf-0e2b7dab552e",
+  "schema_version": "demo-review-fixture-v1",
+  "status": "confirmed"
+}

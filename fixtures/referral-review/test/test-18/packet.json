@@ -1,0 +1,60 @@
+{
+  "documents": [
+    {
+      "byte_size": 362,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "3308b6c3-dc04-566b-8e06-2459f3d7dabb",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "14f754e260090794e257bf1bd276a43a69801a99b5ca48aa9a5d08770f39eb5b",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "14f754e260090794e257bf1bd276a43a69801a99b5ca48aa9a5d08770f39eb5b",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 22266,
+      "expected_gate": "ENCRYPTED_PDF",
+      "fixture_variant": "encrypted",
+      "id": "fe5fe143-d863-5ca2-9396-4c9243f72cd3",
+      "kind": "pdf",
+      "pages": [],
+      "sha256": "5fdeae1168b8bc98845e437d490ef0fb163ab002f6845a533367137f9cc6afa0",
+      "source_path": "sources/document-2.pdf",
+      "title": "Synthetic encrypted sheet"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": false,
+    "checklist": {
+      "C01": "blocked",
+      "C02": "blocked",
+      "C03": "blocked",
+      "C04": "blocked",
+      "C05": "blocked",
+      "C06": "blocked",
+      "C07": "blocked",
+      "C08": "blocked"
+    },
+    "expected_rejection": "ENCRYPTED_PDF",
+    "operator_review": "pending",
+    "rationale_by_id": {},
+    "result": null
+  },
+  "id": "12c00b17-6d31-51cb-979d-369b20760c71",
+  "key": "test-18",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "test",
+  "synthetic": true,
+  "tags": [
+    "encrypted"
+  ],
+  "title": "Synthetic encrypted input blocks automated review"
+}

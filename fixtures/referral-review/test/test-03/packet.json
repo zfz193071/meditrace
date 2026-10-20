@@ -1,0 +1,271 @@
+{
+  "documents": [
+    {
+      "byte_size": 383,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 142,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "4c7c2cb4-db83-5680-9794-67ecefc4e932",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "9fa1fff92c44e696d7bd7e4379b4e32b13b16687128729b36ff610033d8907db",
+          "text_path": "pages/document-2-1.txt"
+        }
+      ],
+      "sha256": "9fa1fff92c44e696d7bd7e4379b4e32b13b16687128729b36ff610033d8907db",
+      "source_path": "sources/document-2.txt",
+      "title": "Synthetic later note"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": true,
+    "checklist": {
+      "C01": "satisfied",
+      "C02": "satisfied",
+      "C03": "satisfied",
+      "C04": "satisfied",
+      "C05": "satisfied",
+      "C06": "satisfied",
+      "C07": "satisfied",
+      "C08": "not_applicable"
+    },
+    "expected_rejection": null,
+    "operator_review": "pending",
+    "rationale_by_id": {
+      "0ab5d9e9-a034-51fe-bcb2-04428a5115d9": "Authored annotation of patient.name; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "1bc47b32-7b16-5ce1-bb15-c77926cb0cd4": "Authored annotation of referrer.name; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "4be8f998-0a85-51cd-b7ed-7883856947ad": "Authored annotation of referrer.contact; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "7c5621cf-f233-5ca5-aaaf-a7af8a9e378d": "Authored annotation of patient.dob; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "99cd675e-9c62-51a8-9ecc-48f82360f877": "Authored annotation of medications; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "9c6c41e4-7a73-5373-bd90-f80fb021163e": "Authored annotation of medications; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "b0068655-afc4-55e8-9c88-bf724189e6c6": "Authored annotation of recipient; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "b07eb6a4-37b5-5f2f-bac8-cf3b00fddb02": "Authored annotation of referral.reason; read the linked exact source span(s). Preserve assertion status 'stated' and raw wording; no clinical inference.",
+      "bd517d90-9330-5366-868b-d40152bbb46a": "Authored annotation of allergies; read the linked exact source span(s). Preserve assertion status 'explicitly_none' and raw wording; no clinical inference."
+    },
+    "result": {
+      "checklist_version": "outpatient-referral-demo@1",
+      "created_at": "2026-10-20T00:00:00Z",
+      "evidence": [
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 111,
+          "id": "3688f95c-ed7a-53d7-bf5b-1ded7961c084",
+          "page_number": 1,
+          "quote": "Patient: Synthetic Person T03",
+          "start_cp": 82,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 127,
+          "id": "54cde727-4604-5a9d-87c0-3f449fc955ba",
+          "page_number": 1,
+          "quote": "DOB: 1980-06-15",
+          "start_cp": 112,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 160,
+          "id": "ed78fd8b-1ae0-5875-a9b6-5373712be4d5",
+          "page_number": 1,
+          "quote": "Referrer: Synthetic Referrer T03",
+          "start_cp": 128,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 198,
+          "id": "20112b9f-942e-5bc2-afbb-e2eb02ef8758",
+          "page_number": 1,
+          "quote": "Contact: referrer-t03@example.invalid",
+          "start_cp": 161,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 235,
+          "id": "1449351f-536a-570d-b572-8524fea934e5",
+          "page_number": 1,
+          "quote": "Recipient: Synthetic Outpatient Desk",
+          "start_cp": 199,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 293,
+          "id": "bff22cc4-edb8-5f7a-956d-66e14fbd5a93",
+          "page_number": 1,
+          "quote": "Reason: Review of the supplied fictional symptom history.",
+          "start_cp": 236,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 351,
+          "id": "ef819725-a133-54c6-8d63-59cce5502275",
+          "page_number": 1,
+          "quote": "Medications: As of 2026-08-02: FictionalMed E 1 mg daily.",
+          "start_cp": 294,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "13d04593-c5cd-5d33-9ebb-5cfc774dc605",
+          "end_cp": 382,
+          "id": "8a5f56df-b606-5455-89f1-895a38010800",
+          "page_number": 1,
+          "quote": "Allergies: No known allergies.",
+          "start_cp": 352,
+          "text_hash": "439ba4b3432f2b9fb81aed6e2278296f0ab0b09b2e01c3dea89dbf29875f1a8b"
+        },
+        {
+          "document_id": "4c7c2cb4-db83-5680-9794-67ecefc4e932",
+          "end_cp": 141,
+          "id": "ba458f55-87d2-53e4-a9ac-7e980b878108",
+          "page_number": 1,
+          "quote": "Medications: As of 2026-08-12: FictionalMed E 3 mg daily.",
+          "start_cp": 84,
+          "text_hash": "9fa1fff92c44e696d7bd7e4379b4e32b13b16687128729b36ff610033d8907db"
+        }
+      ],
+      "facts": [
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "3688f95c-ed7a-53d7-bf5b-1ded7961c084"
+          ],
+          "field_key": "patient.name",
+          "id": "0ab5d9e9-a034-51fe-bcb2-04428a5115d9",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Person T03"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "54cde727-4604-5a9d-87c0-3f449fc955ba"
+          ],
+          "field_key": "patient.dob",
+          "id": "7c5621cf-f233-5ca5-aaaf-a7af8a9e378d",
+          "temporal_context": null,
+          "value_normalized": "1980-06-15",
+          "value_raw": "1980-06-15"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "ed78fd8b-1ae0-5875-a9b6-5373712be4d5"
+          ],
+          "field_key": "referrer.name",
+          "id": "1bc47b32-7b16-5ce1-bb15-c77926cb0cd4",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Referrer T03"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "20112b9f-942e-5bc2-afbb-e2eb02ef8758"
+          ],
+          "field_key": "referrer.contact",
+          "id": "4be8f998-0a85-51cd-b7ed-7883856947ad",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "referrer-t03@example.invalid"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "1449351f-536a-570d-b572-8524fea934e5"
+          ],
+          "field_key": "recipient",
+          "id": "b0068655-afc4-55e8-9c88-bf724189e6c6",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Synthetic Outpatient Desk"
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "bff22cc4-edb8-5f7a-956d-66e14fbd5a93"
+          ],
+          "field_key": "referral.reason",
+          "id": "b07eb6a4-37b5-5f2f-bac8-cf3b00fddb02",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "Review of the supplied fictional symptom history."
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "ef819725-a133-54c6-8d63-59cce5502275"
+          ],
+          "field_key": "medications",
+          "id": "9c6c41e4-7a73-5373-bd90-f80fb021163e",
+          "temporal_context": "2026-08-02",
+          "value_normalized": null,
+          "value_raw": "As of 2026-08-02: FictionalMed E 1 mg daily."
+        },
+        {
+          "assertion_status": "explicitly_none",
+          "evidence_ids": [
+            "8a5f56df-b606-5455-89f1-895a38010800"
+          ],
+          "field_key": "allergies",
+          "id": "bd517d90-9330-5366-868b-d40152bbb46a",
+          "temporal_context": null,
+          "value_normalized": null,
+          "value_raw": "No known allergies."
+        },
+        {
+          "assertion_status": "stated",
+          "evidence_ids": [
+            "ba458f55-87d2-53e4-a9ac-7e980b878108"
+          ],
+          "field_key": "medications",
+          "id": "99cd675e-9c62-51a8-9ecc-48f82360f877",
+          "temporal_context": "2026-08-12",
+          "value_normalized": null,
+          "value_raw": "As of 2026-08-12: FictionalMed E 3 mg daily."
+        }
+      ],
+      "findings": [],
+      "mode": "precomputed",
+      "prompt_version": "authored-fixture-no-model@1",
+      "revision_id": "c45206a7-0c6b-5c70-9cd8-ef9c91c18398",
+      "run_id": "60918ada-c768-5d07-8e9c-54d2f1377e4f",
+      "schema_version": "0.1.0"
+    }
+  },
+  "id": "9d91d304-7615-5fae-853d-818d9b2fdc87",
+  "key": "test-03",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "test",
+  "synthetic": true,
+  "tags": [
+    "clean",
+    "temporal_change"
+  ],
+  "title": "Dated dose change is not a conflict"
+}

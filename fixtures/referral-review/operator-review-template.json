@@ -1,0 +1,246 @@
+{
+  "annotation_version": "synthetic-referral@1",
+  "entries": [
+    {
+      "key": "dev-01",
+      "observations": null,
+      "packet_sha256": "9fffe2abc3abcdb4f3857284e91b7744b76475024033595482c7698d5684a581",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-02",
+      "observations": null,
+      "packet_sha256": "f9febb7d633aff590adbc6870e874d59b53c34783d00d8c598deaead49c4761d",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-03",
+      "observations": null,
+      "packet_sha256": "b67dc7990959873846552ae3f8af3e8bb8ac5c56adc89705ed67b58996595d5f",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-04",
+      "observations": null,
+      "packet_sha256": "5146a1735551b0dc2579fcf37e0c26eaa7293c6b8a7fcb37cac63969afb74e74",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-05",
+      "observations": null,
+      "packet_sha256": "58641f1bbdd7621e98672d4db5458e4d28d62eafaf5e27680c6309a90e0e6669",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-06",
+      "observations": null,
+      "packet_sha256": "acc6b33fd902de2f807a427f881df61bc1a41d30f705e393c3f178579c99bd57",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-07",
+      "observations": null,
+      "packet_sha256": "84df04e208720df81aca9ab17797e9d2b7e1bb9789abd8f16dddf428ec15774c",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-08",
+      "observations": null,
+      "packet_sha256": "0a85fa0ead1f3fcf775b5252886bd7a20888ba3493398ba7fc384dafe17ae799",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-09",
+      "observations": null,
+      "packet_sha256": "d031d0ab1ff4f10fc8bf34720871a6268b26a538cd8dea063063e35f73ba9d0d",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "dev-10",
+      "observations": null,
+      "packet_sha256": "63c302fa0a1caea8896ff80315dfd626869a030639b6ce1af5ffeb2e7232d05d",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-01",
+      "observations": null,
+      "packet_sha256": "4c3ddfcddba8ad435ddcac472d5d6b0ae26f5d252d0268deba15871e412ac84e",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-02",
+      "observations": null,
+      "packet_sha256": "3495578191372bf4f0594da0bc1f0f1fe553593ebe595c703ff8ce5f124ee571",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-03",
+      "observations": null,
+      "packet_sha256": "4cce90c07dddd1657e0833524e21875d9d51dc9ab1f7c035159a19f22f790c01",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-04",
+      "observations": null,
+      "packet_sha256": "b2aa95b4838f3a6af80d264369680142addf68fa3dbd9de3ff2a34e9c4e1535e",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-05",
+      "observations": null,
+      "packet_sha256": "f479ea3477957c69d9fb7f1fd8037e0dcbad5f9d37ea114d07d677cb3c43e99e",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-06",
+      "observations": null,
+      "packet_sha256": "c379695da2a14bbcb70273212b0385a17d1e913e22ec015d779e813b1b5a18b1",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-07",
+      "observations": null,
+      "packet_sha256": "81ccc5f892fc4259eea1b923d18b71e85e1d094b40af72f89e37e24138f489f6",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-08",
+      "observations": null,
+      "packet_sha256": "cb3866a85415234b2beb8acc7e75ed24b6aad9c17bce34220fa3e2337321693f",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-09",
+      "observations": null,
+      "packet_sha256": "7f3fb2bebc3693cb8aed9d3a91bf2d934421d8eb359d3c0ab7478c28f045a411",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-10",
+      "observations": null,
+      "packet_sha256": "7e4ffc97912788b6cc663b4e4230b819a15dd0678effd64c7df12eabe13bc323",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-11",
+      "observations": null,
+      "packet_sha256": "601b79d0f70d2701e925a2ddde452563b53738e0502f93458391506212199ed7",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-12",
+      "observations": null,
+      "packet_sha256": "845e9ce4eb5afb90ac73ab7e339a3e8274f319d93a223a7d8cc3adde6e70150a",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-13",
+      "observations": null,
+      "packet_sha256": "02037b0fd0d334644e7943fa90ab9d18c8a368cc6b817841bcd47c51116924ec",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-14",
+      "observations": null,
+      "packet_sha256": "f59b4611a67637ace5160a41fd6665d5779b677c5ffea6ccf407c2286efef522",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-15",
+      "observations": null,
+      "packet_sha256": "a7362bd77f951b8bf5dff7c3275084edef938d22a63ca20352ac279023b3ecbb",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-16",
+      "observations": null,
+      "packet_sha256": "466350efc9835a6c38f7a34bef76abf55c258cd716a667e727071098fd5d88d1",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-17",
+      "observations": null,
+      "packet_sha256": "b979da49c4911acbe5c136d83a694d4d1d74154076623037a0a0c6c776c5ed67",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-18",
+      "observations": null,
+      "packet_sha256": "b9f3f24f62a66568650b5eeb0c1cfc6e8611ea9236ae18f4799e348c19e043fc",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-19",
+      "observations": null,
+      "packet_sha256": "0d43531a0816eddc65167a7be23f50ce03358b3bd843d0cf99c3af128ab840a9",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    },
+    {
+      "key": "test-20",
+      "observations": null,
+      "packet_sha256": "cb75b42adf2bcfd97035777979ba7df3b9cbbaa6a942f91196d67ffead301d87",
+      "reviewed_at": null,
+      "reviewer": null,
+      "status": "pending"
+    }
+  ],
+  "instructions": "Copy outside generated files; inspect all facts, findings, missing scopes and source pages; record actual reviewer and date. Do not claim expert review."
+}

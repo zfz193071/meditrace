@@ -1,0 +1,257 @@
+{
+  "checklist_version": "outpatient-referral-demo@1",
+  "created_at": "2026-10-20T00:00:00Z",
+  "evidence": [
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 111,
+      "id": "96787de8-e8b4-5408-8d78-2149d20ece12",
+      "page_number": 1,
+      "quote": "Patient: Synthetic Person D01",
+      "start_cp": 82,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 127,
+      "id": "787d3b7f-e867-5955-9b02-e35bd08b6a6c",
+      "page_number": 1,
+      "quote": "DOB: 1980-06-15",
+      "start_cp": 112,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 160,
+      "id": "d009cdac-6a58-57df-9478-23c6aee8f1cf",
+      "page_number": 1,
+      "quote": "Referrer: Synthetic Referrer D01",
+      "start_cp": 128,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 198,
+      "id": "678866ac-8898-5f35-b86e-7eb64c14697c",
+      "page_number": 1,
+      "quote": "Contact: referrer-d01@example.invalid",
+      "start_cp": 161,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 235,
+      "id": "dac8bbac-2b12-5167-9ff6-ba6e5076e965",
+      "page_number": 1,
+      "quote": "Recipient: Synthetic Outpatient Desk",
+      "start_cp": 199,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 293,
+      "id": "c37045af-525a-5520-9feb-3a0972fec80b",
+      "page_number": 1,
+      "quote": "Reason: Review of the supplied fictional symptom history.",
+      "start_cp": 236,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 330,
+      "id": "595ebfac-513d-561f-b40c-763d02bd30ca",
+      "page_number": 1,
+      "quote": "Medications: No current medications.",
+      "start_cp": 294,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 361,
+      "id": "0bf766a5-e4b4-5a2e-aa99-016eca903b41",
+      "page_number": 1,
+      "quote": "Allergies: No known allergies.",
+      "start_cp": 331,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+      "end_cp": 410,
+      "id": "a55a2d27-e232-53ee-b516-eeea7778e64e",
+      "page_number": 1,
+      "quote": "Attachment: Synthetic Echo Report A is attached.",
+      "start_cp": 362,
+      "text_hash": "3f204a7813fbf56d6db79fe8c3af0e16c5f0f93f3836f837924bb6749ca03723"
+    },
+    {
+      "document_id": "a2578df1-7982-58f9-b079-90082dd61e04",
+      "end_cp": 100,
+      "id": "cae8d214-8998-559e-aac2-f5e36e39f705",
+      "page_number": 1,
+      "quote": "DOB: 1981-06-15",
+      "start_cp": 85,
+      "text_hash": "9cb3c4b1efbf6211c6306d35022fed37205eb937a59bb422b0ed393626d64b72"
+    }
+  ],
+  "facts": [
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "96787de8-e8b4-5408-8d78-2149d20ece12"
+      ],
+      "field_key": "patient.name",
+      "id": "c783b295-afbe-5343-b221-61e55546862f",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Person D01"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "787d3b7f-e867-5955-9b02-e35bd08b6a6c"
+      ],
+      "field_key": "patient.dob",
+      "id": "1d846058-f611-5eb7-bcd8-d1d8aebea1fd",
+      "temporal_context": null,
+      "value_normalized": "1980-06-15",
+      "value_raw": "1980-06-15"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "d009cdac-6a58-57df-9478-23c6aee8f1cf"
+      ],
+      "field_key": "referrer.name",
+      "id": "2550af7f-9ff5-5d51-a4d4-2f44a308318b",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Referrer D01"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "678866ac-8898-5f35-b86e-7eb64c14697c"
+      ],
+      "field_key": "referrer.contact",
+      "id": "add74ed4-161d-5324-8871-4bb7772b3386",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "referrer-d01@example.invalid"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "dac8bbac-2b12-5167-9ff6-ba6e5076e965"
+      ],
+      "field_key": "recipient",
+      "id": "02226d74-73fc-5bb8-8039-80908f473e63",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Outpatient Desk"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "c37045af-525a-5520-9feb-3a0972fec80b"
+      ],
+      "field_key": "referral.reason",
+      "id": "fdc313e3-67bc-5610-a09a-dfabde2b6385",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Review of the supplied fictional symptom history."
+    },
+    {
+      "assertion_status": "explicitly_none",
+      "evidence_ids": [
+        "595ebfac-513d-561f-b40c-763d02bd30ca"
+      ],
+      "field_key": "medications",
+      "id": "a4b0df2a-b8a7-5344-a6c5-e4c3b814ebe2",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "No current medications."
+    },
+    {
+      "assertion_status": "explicitly_none",
+      "evidence_ids": [
+        "0bf766a5-e4b4-5a2e-aa99-016eca903b41"
+      ],
+      "field_key": "allergies",
+      "id": "386e0975-e531-5010-a85c-72750ccf7444",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "No known allergies."
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "a55a2d27-e232-53ee-b516-eeea7778e64e"
+      ],
+      "field_key": "attachment_reference",
+      "id": "24bff7e9-fb9f-5357-8e2e-fbef7bace597",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Echo Report A is attached."
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "cae8d214-8998-559e-aac2-f5e36e39f705"
+      ],
+      "field_key": "patient.dob",
+      "id": "7f649253-86ec-5ead-b2c7-9b118d02b672",
+      "temporal_context": null,
+      "value_normalized": "1981-06-15",
+      "value_raw": "1981-06-15"
+    }
+  ],
+  "findings": [
+    {
+      "checked_document_ids": [
+        "70847318-dc87-54ff-a3fb-e9f742a0f923",
+        "a2578df1-7982-58f9-b079-90082dd61e04"
+      ],
+      "checklist_version": "outpatient-referral-demo@1",
+      "evidence_ids": [
+        "787d3b7f-e867-5955-9b02-e35bd08b6a6c",
+        "cae8d214-8998-559e-aac2-f5e36e39f705"
+      ],
+      "fact_ids": [
+        "1d846058-f611-5eb7-bcd8-d1d8aebea1fd",
+        "7f649253-86ec-5ead-b2c7-9b118d02b672"
+      ],
+      "field_keys": [
+        "patient.dob"
+      ],
+      "id": "2016f6a8-b623-548d-8d99-2822c09f85f0",
+      "kind": "identity_mismatch",
+      "message": "Two complete DOB values differ. Do not select an identity automatically. Checked all 2 supplied, successfully parsed documents (2 pages).",
+      "rule_id": "C02"
+    },
+    {
+      "checked_document_ids": [
+        "70847318-dc87-54ff-a3fb-e9f742a0f923",
+        "a2578df1-7982-58f9-b079-90082dd61e04"
+      ],
+      "checklist_version": "outpatient-referral-demo@1",
+      "evidence_ids": [
+        "a55a2d27-e232-53ee-b516-eeea7778e64e"
+      ],
+      "fact_ids": [
+        "24bff7e9-fb9f-5357-8e2e-fbef7bace597"
+      ],
+      "field_keys": [
+        "attachment_reference"
+      ],
+      "id": "8c14ba13-94e4-5b6e-8beb-e01a1f4250fb",
+      "kind": "attachment_unmatched",
+      "message": "Synthetic Echo Report A is claimed as attached; neither supplied document is that report. Check with the sender. Checked all 2 supplied, successfully parsed documents (2 pages).",
+      "rule_id": "C08"
+    }
+  ],
+  "mode": "precomputed",
+  "prompt_version": "authored-fixture-no-model@1",
+  "revision_id": "c56fa48c-45ef-5ef9-9108-6a37e0b4e17b",
+  "run_id": "7cadd4d5-8df2-528c-8f22-7beb1790da7b",
+  "schema_version": "0.1.0"
+}

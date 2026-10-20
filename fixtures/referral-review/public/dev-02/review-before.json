@@ -1,0 +1,20 @@
+{
+  "confirmed_at": null,
+  "has_unresolved": false,
+  "heading": "Review in progress",
+  "identity_unresolved": false,
+  "illustrative_not_actual_review": true,
+  "packet_id": "440257a7-ca43-56f4-b66e-8201821b3bf2",
+  "resolutions": [
+    {
+      "finding_id": "5565d710-9f91-5ff4-9107-e8320ccde8be",
+      "reason": null,
+      "status": "open"
+    }
+  ],
+  "review_version": 0,
+  "revision_id": "e88f3024-3a23-5684-81c9-841664f168a2",
+  "run_id": "6664726e-90bf-565a-86bf-0e2b7dab552e",
+  "schema_version": "demo-review-fixture-v1",
+  "status": "draft"
+}

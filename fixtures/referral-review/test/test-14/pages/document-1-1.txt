@@ -1,0 +1,10 @@
+SYNTHETIC - fictional training material, not clinical guidance
+Synthetic referral
+Patient: Synthetic Person T14
+DOB: 1980-06-15
+Referrer: Synthetic Referrer T14
+Contact: referrer-t14@example.invalid
+Recipient: Synthetic Outpatient Desk
+Reason: Review of the supplied fictional symptom history.
+Medications: No current medications.
+Allergies: No known allergies.

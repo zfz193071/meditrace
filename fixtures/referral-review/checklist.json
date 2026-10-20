@@ -1,0 +1,48 @@
+{
+  "version": "outpatient-referral-demo@1",
+  "title": "Outpatient Referral — Demonstration Checklist",
+  "demonstration_only": true,
+  "clinical_standard": false,
+  "rules": [
+    {
+      "id": "C01", "fields": ["patient.name"], "presence": "all",
+      "requirement": "Patient name is recorded.",
+      "safeguards": ["Compare trimmed whitespace/case-normalized names only.", "Do not merge aliases, transliterations or fuzzy matches."]
+    },
+    {
+      "id": "C02", "fields": ["patient.dob"], "presence": "all",
+      "requirement": "Date of birth is recorded.",
+      "safeguards": ["Compare only complete unambiguous dates.", "Preserve ambiguous dates verbatim without choosing a locale."]
+    },
+    {
+      "id": "C03", "fields": ["referrer.name", "referrer.contact"], "presence": "all",
+      "requirement": "Referrer name and contact information are both recorded.",
+      "safeguards": ["Check presence only.", "Do not contact the sender or validate contact authenticity."]
+    },
+    {
+      "id": "C04", "fields": ["recipient"], "presence": "any",
+      "requirement": "Recipient or recipient specialty is recorded.",
+      "safeguards": ["Do not recommend a specialty or perform clinical triage."]
+    },
+    {
+      "id": "C05", "fields": ["referral.reason"], "presence": "all",
+      "requirement": "Referral reason is recorded.",
+      "safeguards": ["Retain the supplied wording.", "Do not infer a diagnosis."]
+    },
+    {
+      "id": "C06", "fields": ["medications"], "presence": "all", "unknown_behavior": "clarify",
+      "requirement": "Current medication status is recorded.",
+      "safeguards": ["Listed, explicitly none, unknown and missing are distinct.", "Unknown is recorded but needs clarification; explicit none satisfies presence.", "Different dates are not automatic conflicts.", "Only directly opposing statements with the same explicit time support a statement_difference.", "Do not judge dose appropriateness."]
+    },
+    {
+      "id": "C07", "fields": ["allergies"], "presence": "all", "unknown_behavior": "clarify",
+      "requirement": "Allergy status is recorded.",
+      "safeguards": ["Listed, explicitly none, unknown and missing are distinct.", "Unknown is recorded but needs clarification; explicit none satisfies presence.", "Absence of text is not absence of allergies."]
+    },
+    {
+      "id": "C08", "fields": ["attachment_reference"], "presence": "explicit_attachment_only",
+      "requirement": "An explicitly claimed attachment has an identifiable match in this packet.",
+      "safeguards": ["No attachment claim means not applicable, not a missing test.", "Absent or ambiguous matches need manual verification.", "Never claim the patient did not undergo an examination."]
+    }
+  ]
+}

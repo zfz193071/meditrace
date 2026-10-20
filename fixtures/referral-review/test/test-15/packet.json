@@ -1,0 +1,60 @@
+{
+  "documents": [
+    {
+      "byte_size": 362,
+      "expected_gate": null,
+      "fixture_variant": "text",
+      "id": "693ebde4-ed15-51f5-bbe1-00f80f3959a3",
+      "kind": "text",
+      "pages": [
+        {
+          "number": 1,
+          "quality": "text",
+          "text_hash": "d1c06af59c2b4e66a62ec416ac057570cac686fc463dc4855ccdb3632dc1f40c",
+          "text_path": "pages/document-1-1.txt"
+        }
+      ],
+      "sha256": "d1c06af59c2b4e66a62ec416ac057570cac686fc463dc4855ccdb3632dc1f40c",
+      "source_path": "sources/document-1.txt",
+      "title": "Synthetic referral"
+    },
+    {
+      "byte_size": 70,
+      "expected_gate": "CORRUPT_PDF",
+      "fixture_variant": "corrupt",
+      "id": "e8ebbd1a-eb44-50c1-a23d-392aaa210e1f",
+      "kind": "pdf",
+      "pages": [],
+      "sha256": "0677f7e9b7a0ee2e7f0c64e39f3388b56a34c54df2620f600b5dc64922e40405",
+      "source_path": "sources/document-2.pdf",
+      "title": "Synthetic corrupt sheet"
+    }
+  ],
+  "gold": {
+    "automated_review_allowed": false,
+    "checklist": {
+      "C01": "blocked",
+      "C02": "blocked",
+      "C03": "blocked",
+      "C04": "blocked",
+      "C05": "blocked",
+      "C06": "blocked",
+      "C07": "blocked",
+      "C08": "blocked"
+    },
+    "expected_rejection": "CORRUPT_PDF",
+    "operator_review": "pending",
+    "rationale_by_id": {},
+    "result": null
+  },
+  "id": "e0e5ae10-3cb0-5c99-b5ed-b7e884107143",
+  "key": "test-15",
+  "public_demo": false,
+  "schema_version": "fixture-v1",
+  "split": "test",
+  "synthetic": true,
+  "tags": [
+    "corrupt"
+  ],
+  "title": "Synthetic corrupt input blocks automated review"
+}

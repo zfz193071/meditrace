@@ -1,0 +1,194 @@
+{
+  "checklist_version": "outpatient-referral-demo@1",
+  "created_at": "2026-10-20T00:00:00Z",
+  "evidence": [
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 111,
+      "id": "7e516050-e68b-5ad3-918c-d28989c51f11",
+      "page_number": 1,
+      "quote": "Patient: Synthetic Person D02",
+      "start_cp": 82,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    },
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 127,
+      "id": "da3af84d-e41f-584f-bac1-d8d24529407e",
+      "page_number": 1,
+      "quote": "DOB: 1980-06-15",
+      "start_cp": 112,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    },
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 160,
+      "id": "5fd8b559-8656-55ad-bdb2-2c000efb3aea",
+      "page_number": 1,
+      "quote": "Referrer: Synthetic Referrer D02",
+      "start_cp": 128,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    },
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 198,
+      "id": "a266706d-0a9d-5dd2-80c5-58522ee4fe9f",
+      "page_number": 1,
+      "quote": "Contact: referrer-d02@example.invalid",
+      "start_cp": 161,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    },
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 235,
+      "id": "118a83f3-ce4b-54f6-9f2d-d9b234313ac3",
+      "page_number": 1,
+      "quote": "Recipient: Synthetic Outpatient Desk",
+      "start_cp": 199,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    },
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 293,
+      "id": "0cda7cc7-67da-55d5-b229-c14f5cf4e2d1",
+      "page_number": 1,
+      "quote": "Reason: Review of the supplied fictional symptom history.",
+      "start_cp": 236,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    },
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 330,
+      "id": "f97a9195-8c9c-5ada-8ffa-80004356a317",
+      "page_number": 1,
+      "quote": "Medications: No current medications.",
+      "start_cp": 294,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    },
+    {
+      "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+      "end_cp": 375,
+      "id": "cd780203-8c9a-5258-8124-b8f4b45998d4",
+      "page_number": 1,
+      "quote": "Allergies: Unknown; not confirmed at intake.",
+      "start_cp": 331,
+      "text_hash": "3f00ed8415e6471d6819832f48cdc2dc4d9861ed0368be6cf26be60b13b74bf3"
+    }
+  ],
+  "facts": [
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "7e516050-e68b-5ad3-918c-d28989c51f11"
+      ],
+      "field_key": "patient.name",
+      "id": "c6b1cdc6-4992-5479-b6d4-44faa1430361",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Person D02"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "da3af84d-e41f-584f-bac1-d8d24529407e"
+      ],
+      "field_key": "patient.dob",
+      "id": "82e8c200-95f1-554e-a9e0-120b9a35206b",
+      "temporal_context": null,
+      "value_normalized": "1980-06-15",
+      "value_raw": "1980-06-15"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "5fd8b559-8656-55ad-bdb2-2c000efb3aea"
+      ],
+      "field_key": "referrer.name",
+      "id": "97d3ce26-9bf1-5142-a4f6-0d004682f178",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Referrer D02"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "a266706d-0a9d-5dd2-80c5-58522ee4fe9f"
+      ],
+      "field_key": "referrer.contact",
+      "id": "b85e380a-0187-57e3-b939-a2e545dd57ed",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "referrer-d02@example.invalid"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "118a83f3-ce4b-54f6-9f2d-d9b234313ac3"
+      ],
+      "field_key": "recipient",
+      "id": "a703745a-ecef-500a-93fa-52b795d8514e",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Outpatient Desk"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "0cda7cc7-67da-55d5-b229-c14f5cf4e2d1"
+      ],
+      "field_key": "referral.reason",
+      "id": "a8f9dba7-51e6-5a20-b458-8f5898df79fd",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Review of the supplied fictional symptom history."
+    },
+    {
+      "assertion_status": "explicitly_none",
+      "evidence_ids": [
+        "f97a9195-8c9c-5ada-8ffa-80004356a317"
+      ],
+      "field_key": "medications",
+      "id": "fc9d4cf0-40ca-50f2-8c77-f077d6a7e759",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "No current medications."
+    },
+    {
+      "assertion_status": "unknown",
+      "evidence_ids": [
+        "cd780203-8c9a-5258-8124-b8f4b45998d4"
+      ],
+      "field_key": "allergies",
+      "id": "802afb34-7372-595c-bf83-71cb2482da2e",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Unknown; not confirmed at intake."
+    }
+  ],
+  "findings": [
+    {
+      "checked_document_ids": [
+        "93140915-2343-57d5-b8f2-d855201d9ac7"
+      ],
+      "checklist_version": "outpatient-referral-demo@1",
+      "evidence_ids": [
+        "cd780203-8c9a-5258-8124-b8f4b45998d4"
+      ],
+      "fact_ids": [
+        "802afb34-7372-595c-bf83-71cb2482da2e"
+      ],
+      "field_keys": [
+        "allergies"
+      ],
+      "id": "5565d710-9f91-5ff4-9107-e8320ccde8be",
+      "kind": "unknown",
+      "message": "Allergy status is recorded but explicitly unknown, requiring clarification. Checked all 1 supplied, successfully parsed documents (1 pages).",
+      "rule_id": "C07"
+    }
+  ],
+  "mode": "precomputed",
+  "prompt_version": "authored-fixture-no-model@1",
+  "revision_id": "e88f3024-3a23-5684-81c9-841664f168a2",
+  "run_id": "6664726e-90bf-565a-86bf-0e2b7dab552e",
+  "schema_version": "0.1.0"
+}

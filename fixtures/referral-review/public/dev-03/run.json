@@ -1,0 +1,234 @@
+{
+  "checklist_version": "outpatient-referral-demo@1",
+  "created_at": "2026-10-20T00:00:00Z",
+  "evidence": [
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 111,
+      "id": "08c87401-ff61-570b-af76-c7d3f440db01",
+      "page_number": 1,
+      "quote": "Patient: Synthetic Person D03",
+      "start_cp": 82,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 127,
+      "id": "2d0e6c20-6e22-5908-9260-55a33ba3ba61",
+      "page_number": 1,
+      "quote": "DOB: 1980-06-15",
+      "start_cp": 112,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 160,
+      "id": "6259b970-4d4e-5684-b01c-8a3fa4e2b762",
+      "page_number": 1,
+      "quote": "Referrer: Synthetic Referrer D03",
+      "start_cp": 128,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 198,
+      "id": "d1a1862f-76b6-57db-a790-145fe010819c",
+      "page_number": 1,
+      "quote": "Contact: referrer-d03@example.invalid",
+      "start_cp": 161,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 235,
+      "id": "f913fa73-7707-5390-a46e-69138546fb04",
+      "page_number": 1,
+      "quote": "Recipient: Synthetic Outpatient Desk",
+      "start_cp": 199,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 293,
+      "id": "34ab4d14-1306-5a03-8777-4e43fc92e7b7",
+      "page_number": 1,
+      "quote": "Reason: Review of the supplied fictional symptom history.",
+      "start_cp": 236,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 351,
+      "id": "b3625e34-a693-55f9-b886-5730fa449ac1",
+      "page_number": 1,
+      "quote": "Medications: As of 2026-09-01: FictionalMed A 5 mg daily.",
+      "start_cp": 294,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 382,
+      "id": "e8031a37-2391-5b84-8d22-e5c5ba7ccd56",
+      "page_number": 1,
+      "quote": "Allergies: No known allergies.",
+      "start_cp": 352,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "f47b52b1-138f-5596-a254-772413872639",
+      "end_cp": 438,
+      "id": "1bdbab89-823b-5c32-8fe6-43fbfc08df12",
+      "page_number": 1,
+      "quote": "Attachment: Synthetic Follow-up Report D03 is attached.",
+      "start_cp": 383,
+      "text_hash": "b904cd73c9857c8ff2098fb09ada10d3615ad5d2d3f3c1cb339553de235983f3"
+    },
+    {
+      "document_id": "5ca2c2e6-8caa-5c3e-b012-23449cd5d967",
+      "end_cp": 152,
+      "id": "4c211f6d-217b-55e1-a8d9-9f4426987d21",
+      "page_number": 1,
+      "quote": "Medications: As of 2026-10-01: FictionalMed A 10 mg daily.",
+      "start_cp": 94,
+      "text_hash": "e179d24a9fcd9dedd4b4b8662e90cc9d94ff26b1f2f62eb2f5a7f15e2382df74"
+    },
+    {
+      "document_id": "5ca2c2e6-8caa-5c3e-b012-23449cd5d967",
+      "end_cp": 210,
+      "id": "5245ce21-510d-5894-99c8-03c178941e9b",
+      "page_number": 1,
+      "quote": "Report: Synthetic Follow-up Report D03, dated 2026-10-01.",
+      "start_cp": 153,
+      "text_hash": "e179d24a9fcd9dedd4b4b8662e90cc9d94ff26b1f2f62eb2f5a7f15e2382df74"
+    }
+  ],
+  "facts": [
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "08c87401-ff61-570b-af76-c7d3f440db01"
+      ],
+      "field_key": "patient.name",
+      "id": "7b1fd68b-fb68-5b04-8641-ad12d3ef6504",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Person D03"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "2d0e6c20-6e22-5908-9260-55a33ba3ba61"
+      ],
+      "field_key": "patient.dob",
+      "id": "acbf1e09-c0c2-574a-bce5-47cc7ebc07bc",
+      "temporal_context": null,
+      "value_normalized": "1980-06-15",
+      "value_raw": "1980-06-15"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "6259b970-4d4e-5684-b01c-8a3fa4e2b762"
+      ],
+      "field_key": "referrer.name",
+      "id": "309dc3c1-c84c-5bde-b200-ecdf1ee0e2ff",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Referrer D03"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "d1a1862f-76b6-57db-a790-145fe010819c"
+      ],
+      "field_key": "referrer.contact",
+      "id": "6a507170-1712-51a6-892a-78013f0f423b",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "referrer-d03@example.invalid"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "f913fa73-7707-5390-a46e-69138546fb04"
+      ],
+      "field_key": "recipient",
+      "id": "0157b290-222a-5dc9-bcfc-ccd33ad70c98",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Outpatient Desk"
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "34ab4d14-1306-5a03-8777-4e43fc92e7b7"
+      ],
+      "field_key": "referral.reason",
+      "id": "87eeddf6-f6b9-5423-b5d1-8fbebfbd7edf",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Review of the supplied fictional symptom history."
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "b3625e34-a693-55f9-b886-5730fa449ac1"
+      ],
+      "field_key": "medications",
+      "id": "89b29002-33f6-57bc-995c-ffb733f28fb0",
+      "temporal_context": "2026-09-01",
+      "value_normalized": null,
+      "value_raw": "As of 2026-09-01: FictionalMed A 5 mg daily."
+    },
+    {
+      "assertion_status": "explicitly_none",
+      "evidence_ids": [
+        "e8031a37-2391-5b84-8d22-e5c5ba7ccd56"
+      ],
+      "field_key": "allergies",
+      "id": "20612256-3e77-58c3-bb6f-c3b15640fc86",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "No known allergies."
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "1bdbab89-823b-5c32-8fe6-43fbfc08df12"
+      ],
+      "field_key": "attachment_reference",
+      "id": "aeec280e-9429-5343-ae76-cc5b8fa9e217",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Follow-up Report D03 is attached."
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "4c211f6d-217b-55e1-a8d9-9f4426987d21"
+      ],
+      "field_key": "medications",
+      "id": "8843b5e9-328a-5814-8556-8ed493b06552",
+      "temporal_context": "2026-10-01",
+      "value_normalized": null,
+      "value_raw": "As of 2026-10-01: FictionalMed A 10 mg daily."
+    },
+    {
+      "assertion_status": "stated",
+      "evidence_ids": [
+        "5245ce21-510d-5894-99c8-03c178941e9b"
+      ],
+      "field_key": "report.description",
+      "id": "665417b2-6905-5cb7-9dec-4b20998bbace",
+      "temporal_context": null,
+      "value_normalized": null,
+      "value_raw": "Synthetic Follow-up Report D03, dated 2026-10-01."
+    }
+  ],
+  "findings": [],
+  "mode": "precomputed",
+  "prompt_version": "authored-fixture-no-model@1",
+  "revision_id": "9345edb1-d7fe-5e91-b679-498896b9cd95",
+  "run_id": "8179ea38-4c72-5a0d-aa5c-b015d4fa9cee",
+  "schema_version": "0.1.0"
+}

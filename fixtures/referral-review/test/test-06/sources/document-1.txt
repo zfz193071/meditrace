@@ -1,0 +1,8 @@
+SYNTHETIC - fictional training material, not clinical guidance
+Synthetic referral
+Patient: Synthetic Person T06
+DOB: 1980-06-15
+Referrer: Synthetic Referrer T06
+Contact: referrer-t06@example.invalid
+Medications: No current medications.
+Allergies: No known allergies.
