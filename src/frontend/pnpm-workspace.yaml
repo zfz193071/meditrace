@@ -1,3 +1,10 @@
-allowBuilds:
-  msw: true
-  unrs-resolver: true
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
+overrides:
+  # GHSA-68fv-2mgg-jv7q: patch Next/PostCSS's transitive source-map parser.
+  source-map-js: 1.2.2
+  "js-yaml@^3": 3.15.2
+  "brace-expansion@^1": 1.1.21
+  "brace-expansion@^2": 2.1.7
+  "postcss-selector-parser@^6": 7.1.6

@@ -1,0 +1,41 @@
+name: Referral foundation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_DOTENV_DISABLED: "1"
+      DATABASE_URL: "sqlite:///:memory:"
+      RR_ENVIRONMENT: test
+      REAL_AI_ENABLED: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.7
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.3"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --project src/backend --frozen
+      - run: python3 scripts/check_backend_lock.py
+      - run: pnpm --dir src/frontend install --frozen-lockfile
+      - run: python3 scripts/referral_contracts.py --check
+      - run: src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review
+      - run: src/backend/.venv/bin/python -m pytest -q src/backend/test_database_deployment.py
+      - run: python3 scripts/test_deploy_workflow.py
+      - run: pnpm --dir src/frontend lint
+      - run: pnpm --dir src/frontend test --runInBand
+      - run: pnpm --dir src/frontend build
+      - run: pnpm --dir src/frontend typecheck
+      - run: pnpm --dir src/frontend audit --prod --audit-level=high --registry=https://registry.npmjs.org
+      - run: src/backend/.venv/bin/pip-audit -r src/backend/requirements.txt --no-deps --disable-pip

@@ -45,7 +45,7 @@ meditrace/
 
 ## 本地开发
 
-需要 Node.js 18+、pnpm 和 Python 3.10+。本地服务由开发者手动启动和停止。
+需要 Node.js 22、pnpm 10.34.7、Python 3.12 和 uv 0.13.3。本地服务由开发者手动启动和停止。新模块的配置、契约生成和测试见 [Referral Review 工程操作](docs/referral-review/CONFIGURATION.md)。
 
 ### 后端
 
@@ -53,15 +53,14 @@ meditrace/
 
 ```bash
 cd src/backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+uv sync --frozen
+# .env 不存在时才复制模板；保留已有配置
 cp .env.example .env
 # 按需编辑 .env；不设置 DATABASE_URL 时使用本地 SQLite。
-./venv/bin/python main.py
+./.venv/bin/python main.py
 ```
 
-后端默认地址为 http://localhost:8000。真实 AI 推理需要 `DEEPSEEK_API_KEY`；未配置时使用演示回复。
+后端默认地址为 http://localhost:8000。旧聊天的真实 AI 推理需要 `DEEPSEEK_API_KEY`；未配置时使用演示回复。新的 `/api/v1` 目前仅提供基础 capabilities／readiness，真实执行始终关闭，不能将它视为完整业务已就绪。
 
 ### 前端
 
@@ -69,7 +68,7 @@ cp .env.example .env
 
 ```bash
 cd src/frontend
-pnpm install
+pnpm install --frozen-lockfile
 cp .env.example .env.local
 pnpm dev
 ```
@@ -87,7 +86,7 @@ pnpm dev
 python3 scripts/test_deploy_workflow.py
 
 # 后端数据库集成测试，使用临时 SQLite，不调用 AI
-DATABASE_URL=sqlite:///:memory: src/backend/venv/bin/python -m pytest src/backend/test_database_deployment.py -q
+PYTHON_DOTENV_DISABLED=1 DATABASE_URL=sqlite:///:memory: src/backend/.venv/bin/python -m pytest src/backend/tests/referral_review src/backend/test_database_deployment.py -q
 ```
 
 **禁止自动在浏览器发送 AI 消息测试。** 对话及流式显示请手动发送消息验证，以避免自动测试消耗 API token。

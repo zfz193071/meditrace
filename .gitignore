@@ -72,3 +72,7 @@ docs/private/
 src/backend/*.db
 .vercel
 .env*
+!.env.example
+*.tsbuildinfo
+.pytest_cache/
+.uv-cache/

@@ -86,6 +86,11 @@ app = FastAPI(
     version="0.1.0"
 )
 
+# New contracts and errors are isolated from the legacy API until its MT-21 retirement.
+from referral_review.app import create_app as create_referral_app
+
+app.mount("/api/v1", create_referral_app())
+
 # 添加 CORS 中间件 - 允许前端访问
 app.add_middleware(
     CORSMiddleware,

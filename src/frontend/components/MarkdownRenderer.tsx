@@ -200,7 +200,7 @@ const parseMarkdown = (markdown: string): React.ReactNode[] => {
       flushQuote();
       const level = headingMatch[1].length;
       const text = headingMatch[2];
-      const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+      const HeadingTag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
       const sizeClasses: Record<number, string> = {
         1: "text-3xl font-bold",
         2: "text-2xl font-bold",

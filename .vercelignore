@@ -13,6 +13,7 @@ __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
+.uv-cache/
 *.db
 *.sqlite
 *.sqlite3
@@ -42,6 +43,7 @@ coverage/
 
 # ---------- 测试文件 ----------
 __tests__/
+tests/
 *.test.*
 *.spec.*
 jest.config.js

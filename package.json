@@ -2,13 +2,16 @@
   "name": "meditrace",
   "version": "0.1.0",
   "description": "医疗 AI 诊断溯源系统",
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@10.34.7",
+  "engines": { "node": "22.x" },
   "scripts": {
     "dev:contracts": "cd src/contracts && npm run node",
     "deploy:contracts": "cd src/contracts && npm run deploy:localhost",
     "dev:backend": "cd src/backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
     "dev:frontend": "cd src/frontend && npm run dev",
-    "build": "cd src/frontend && pnpm build",
+    "build": "pnpm --dir src/frontend build",
+    "check:contracts": "python3 scripts/referral_contracts.py --check",
+    "generate:contracts": "python3 scripts/referral_contracts.py --write",
     "dev": "npm run dev:contracts & npm run deploy:contracts & npm run dev:backend & npm run dev:frontend"
   },
   "keywords": [
