@@ -4,6 +4,10 @@ MediTrace 提供医疗咨询对话、诊断报告和链上记录查询，结合 
 
 在线地址：https://meditrace.baozaolaoba.top
 
+## 新版开发规划
+
+已确定下一版方向为 **MediTrace — Referral Review Copilot**：转诊材料核对、原文证据定位、人工审核和交接导出，用于 AI 应用／全栈求职展示。架构、模块规格、24 张开发工单和最终验收标准见 [V1 开发基线](docs/referral-review/README.md)。当前为规划，尚未完成新版开发；以下仍描述现有实现。
+
 ## 项目结构
 
 ```text
