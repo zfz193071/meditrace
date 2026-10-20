@@ -39,3 +39,31 @@ jobs:
       - run: pnpm --dir src/frontend typecheck
       - run: pnpm --dir src/frontend audit --prod --audit-level=high --registry=https://registry.npmjs.org
       - run: src/backend/.venv/bin/pip-audit -r src/backend/requirements.txt --no-deps --disable-pip
+  postgres-persistence:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: referral_test
+          POSTGRES_PASSWORD: disposable_ci_only
+          POSTGRES_DB: referral_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U referral_test -d referral_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Ephemeral CI service only; no repository/production database secret needed.
+      TEST_DATABASE_URL: postgresql://referral_test:disposable_ci_only@127.0.0.1:5432/referral_test
+      PYTHON_DOTENV_DISABLED: "1"
+      REAL_AI_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.3"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --project src/backend --frozen
+      - run: src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review/test_persistence.py src/backend/tests/referral_review/test_pg_concurrency.py

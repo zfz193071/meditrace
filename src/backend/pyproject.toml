@@ -12,6 +12,7 @@ dependencies = [
   "python-multipart>=0.0.22,<1",
   "psycopg2-binary>=2.9.13,<3",
   "sqlalchemy>=2.0.54,<3",
+  "alembic>=1.19,<2",
   "fpdf2>=2.8.8,<3",
   # Legacy routes remain until MT-21. No new chain or IPFS functionality.
   "web3>=8,<9",
