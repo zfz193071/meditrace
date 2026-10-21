@@ -1,0 +1,74 @@
+Referral review handoff
+
+Reviewed
+
+Not automatically checked
+
+Synthetic QA example - illustrative confirmation only
+
+Identity and referral details
+
+Patient name: Not recorded in the confirmed source result.
+
+Date of birth: Not recorded in the confirmed source result.
+
+Referrer: Not recorded in the confirmed source result.
+
+Referrer contact: Not recorded in the confirmed source result.
+
+Recipient: Not recorded in the confirmed source result.
+
+Referral reason
+
+Referral reason: Not recorded in the confirmed source result.
+
+Medications
+
+Medications: Not recorded in the confirmed source result.
+
+Allergies
+
+Allergies: Not recorded in the confirmed source result.
+
+Reports and attachment references
+
+Report description: Not recorded in the confirmed source result.
+
+Attachment reference: Not recorded in the confirmed source result.
+
+Unresolved items
+
+Not automatically checked; completeness has not been established.
+
+Reviewer decisions and corrections
+
+No other reviewer decisions recorded.
+
+Reviewer supplied additions
+
+Patient name: Synthetic José Łukasz / 王明 / Ольга / Δημήτρης
+Reviewer supplied; no source citation is implied.
+
+Referral reason: Synthetic referral for document review. No clinical conclusion is implied.
+Reviewer supplied; no source citation is implied.
+
+Source index
+
+No source evidence attached to this confirmation.
+
+Confirmation and version
+
+Snapshot: bcda0af4-bddf-5586-a35b-4b994c26a2dd
+Packet: bfa6021b-425d-51d5-bb0b-3e5232f623ba
+Revision: 1 (f5eb77c3-32eb-5906-8a71-266987657206)
+Review version: 1
+
+Confirmed: 2026-10-21T00:00:00+00:00
+Reviewer: ee15188a-14a4-5cdf-b8a2-e65657deb190
+Mode: manual
+Run: None - manual review
+
+Checklist: Not automatically checked
+Snapshot SHA-256: 564599e63f7576b6658d7227ce8b98f87c814098c55ac52658d814922cc99f94
+
+Referral material handoff only. This is not a diagnosis, referral approval or proof of completeness.

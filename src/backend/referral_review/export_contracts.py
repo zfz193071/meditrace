@@ -11,12 +11,13 @@ from . import CONTRACT_VERSION
 from .app import create_app
 from .config import Settings
 from .schemas import DOMAIN_CONTRACTS
+from .handoff.contracts import HandoffView
 from .extraction.contracts import Extraction, ExtractionRevision, ModelOutput
 from .checklist.contracts import ChecklistManifest, ChecklistEvaluation, DifferenceCandidate
 
 
 def artifacts() -> dict[str, dict]:
-    adapter = TypeAdapter(Union[DOMAIN_CONTRACTS + (Extraction, ExtractionRevision, ModelOutput, ChecklistManifest, ChecklistEvaluation, DifferenceCandidate)])
+    adapter = TypeAdapter(Union[DOMAIN_CONTRACTS + (Extraction, ExtractionRevision, ModelOutput, ChecklistManifest, ChecklistEvaluation, DifferenceCandidate, HandoffView)])
     domain_schema = adapter.json_schema()
     domain_schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
     domain_schema["title"] = "MediTrace referral domain contracts"

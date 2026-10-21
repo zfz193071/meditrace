@@ -209,3 +209,12 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 - review-history 包含 resolution／draft／confirmation，按 created_at、id 倒序分页（同时间用 id 稳定排序），返回审核版本供重建顺序；cursor 带签名并绑定资料包，limit 为 1—50。历史记录不允许 UPDATE。
 - 快照固定保存原始 result、当前 run 的最新 decisions、finding_states、相同 revision/run 的 handoff、身份警示及确认者／时间。未处理事项阻止 assisted 确认；manual 显示 `Not automatically checked`。身份差异只有 resolve 才移除顶部 `Identity unresolved`，dismiss 仍保留该警示；defer 产生 `Reviewed — unresolved items remain`。
 - payload_hash 为 payload 经过 UTF-8 JSON（sort_keys=True、ensure_ascii=True、分隔符逗号／冒号、不含空格）后的 SHA-256。historical 是响应派生字段，不写回 payload，不影响哈希。新批次不复制旧决定或旧草稿。
+
+
+### MT-13 交接导出接口细化
+
+- 新增 GET `/packets/{pid}/snapshots/{sid}/handoff` 返回 HandoffView，供界面和复制文本使用；固定示例由同一纯模型离线生成，不写业务数据库。
+- GET `/packets/{pid}/snapshots/{sid}/export?format=pdf|txt` 只接受这两种格式，输出完整已确认内容；资料归属／删除／到期在渲染前后检查，窗口内共享限流 10 次／分钟、60 次／小时，不要求会员余额。
+- 屏幕、txt、PDF 保留来源陈述、人工修正、人工补充及未解决事项；来源文件以 snapshot 中 document UUID、页号、字符范围和原文识别，不向可变文件名查询补数据。
+- 历史提示为派生显示，快照 hash 不变；PDF 每页显示 Historical revision。渲染中历史状态变化返回 REVIEW_CONFLICT，重试后下载正确标记的历史版本。
+- 最大响应 4,000,000 bytes；PDF 上限 200 页和 500,000 输入字符。超限 EXPORT_TOO_LARGE（413），没有部分成功。缺字或未支持塑形的脚本返回 EXPORT_UNSUPPORTED_TEXT（422），提示改用完整 UTF-8 txt。

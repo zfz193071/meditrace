@@ -1,0 +1,87 @@
+{
+  "schema_version": "handoff-v1",
+  "snapshot_id": "bcda0af4-bddf-5586-a35b-4b994c26a2dd",
+  "packet_id": "bfa6021b-425d-51d5-bb0b-3e5232f623ba",
+  "revision_id": "f5eb77c3-32eb-5906-8a71-266987657206",
+  "review_version": 1,
+  "confirmed_at": "2026-10-21T00:00:00Z",
+  "payload_hash": "564599e63f7576b6658d7227ce8b98f87c814098c55ac52658d814922cc99f94",
+  "historical": false,
+  "title": "Referral review handoff",
+  "status": "Reviewed",
+  "warnings": [
+    "Not automatically checked",
+    "Synthetic QA example - illustrative confirmation only"
+  ],
+  "sections": [
+    {
+      "heading": "Identity and referral details",
+      "paragraphs": [
+        "Patient name: Not recorded in the confirmed source result.",
+        "Date of birth: Not recorded in the confirmed source result.",
+        "Referrer: Not recorded in the confirmed source result.",
+        "Referrer contact: Not recorded in the confirmed source result.",
+        "Recipient: Not recorded in the confirmed source result."
+      ]
+    },
+    {
+      "heading": "Referral reason",
+      "paragraphs": [
+        "Referral reason: Not recorded in the confirmed source result."
+      ]
+    },
+    {
+      "heading": "Medications",
+      "paragraphs": [
+        "Medications: Not recorded in the confirmed source result."
+      ]
+    },
+    {
+      "heading": "Allergies",
+      "paragraphs": [
+        "Allergies: Not recorded in the confirmed source result."
+      ]
+    },
+    {
+      "heading": "Reports and attachment references",
+      "paragraphs": [
+        "Report description: Not recorded in the confirmed source result.",
+        "Attachment reference: Not recorded in the confirmed source result."
+      ]
+    },
+    {
+      "heading": "Unresolved items",
+      "paragraphs": [
+        "Not automatically checked; completeness has not been established."
+      ]
+    },
+    {
+      "heading": "Reviewer decisions and corrections",
+      "paragraphs": [
+        "No other reviewer decisions recorded."
+      ]
+    },
+    {
+      "heading": "Reviewer supplied additions",
+      "paragraphs": [
+        "Patient name: Synthetic José Łukasz / 王明 / Ольга / Δημήτρης\nReviewer supplied; no source citation is implied.",
+        "Referral reason: Synthetic referral for document review. No clinical conclusion is implied.\nReviewer supplied; no source citation is implied."
+      ]
+    },
+    {
+      "heading": "Source index",
+      "paragraphs": [
+        "No source evidence attached to this confirmation."
+      ]
+    },
+    {
+      "heading": "Confirmation and version",
+      "paragraphs": [
+        "Snapshot: bcda0af4-bddf-5586-a35b-4b994c26a2dd\nPacket: bfa6021b-425d-51d5-bb0b-3e5232f623ba\nRevision: 1 (f5eb77c3-32eb-5906-8a71-266987657206)\nReview version: 1",
+        "Confirmed: 2026-10-21T00:00:00+00:00\nReviewer: ee15188a-14a4-5cdf-b8a2-e65657deb190\nMode: manual\nRun: None - manual review",
+        "Checklist: Not automatically checked\nSnapshot SHA-256: 564599e63f7576b6658d7227ce8b98f87c814098c55ac52658d814922cc99f94",
+        "Referral material handoff only. This is not a diagnosis, referral approval or proof of completeness."
+      ]
+    }
+  ]
+}

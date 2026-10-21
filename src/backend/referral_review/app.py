@@ -14,6 +14,8 @@ from .identity.service import DATABASE_FAILURES, configured_identity
 from .identity.authorization import protect_request
 from .documents import configured_documents
 from .documents.routes import document_router
+from .handoff import Handoff
+from .handoff.routes import handoff_router
 from .reviews import Reviews
 from .reviews.routes import review_router
 from .runs import Runs
@@ -50,6 +52,8 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     app.state.usage = Usage(identity) if identity is not None else None
     app.state.runs = Runs(identity) if identity is not None else None
     app.state.reviews = Reviews(identity) if identity is not None else None
+    app.state.handoff = Handoff(identity) if identity is not None else None
+    app.include_router(handoff_router())
     app.include_router(review_router())
     app.include_router(run_router())
     app.include_router(usage_router())

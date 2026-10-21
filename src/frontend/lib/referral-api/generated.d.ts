@@ -349,6 +349,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/packets/{packet_id}/snapshots/{snapshot_id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Handoff */
+        get: operations["export_handoff"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/packets/{packet_id}/snapshots/{snapshot_id}/handoff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Handoff */
+        get: operations["get_handoff"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/readiness": {
         parameters: {
             query?: never;
@@ -672,7 +706,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "REVIEW_CONFLICT" | "STALE_RUN" | "OPEN_FINDINGS" | "SOURCE_CHANGED" | "CHECKLIST_UNSUPPORTED" | "PARSE_COVERAGE_INCOMPLETE" | "MODEL_INPUT_LIMIT" | "MEMBERSHIP_REQUIRED" | "QUOTA_EXHAUSTED" | "BUDGET_EXHAUSTED" | "RUN_ACTIVE" | "RATE_LIMITED" | "USAGE_CONFLICT" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
+        ErrorCode: "EXPORT_TOO_LARGE" | "EXPORT_UNSUPPORTED_TEXT" | "REVIEW_CONFLICT" | "STALE_RUN" | "OPEN_FINDINGS" | "SOURCE_CHANGED" | "CHECKLIST_UNSUPPORTED" | "PARSE_COVERAGE_INCOMPLETE" | "MODEL_INPUT_LIMIT" | "MEMBERSHIP_REQUIRED" | "QUOTA_EXHAUSTED" | "BUDGET_EXHAUSTED" | "RUN_ACTIVE" | "RATE_LIMITED" | "USAGE_CONFLICT" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
         /** ErrorDetail */
         ErrorDetail: {
             code: components["schemas"]["ErrorCode"];
@@ -847,6 +881,56 @@ export interface components {
             draft: components["schemas"]["ReviewEvent"] | null;
             /** Stale */
             stale: boolean;
+        };
+        /** HandoffSection */
+        HandoffSection: {
+            /** Heading */
+            heading: string;
+            /** Paragraphs */
+            paragraphs: string[];
+        };
+        /** HandoffView */
+        HandoffView: {
+            /**
+             * Confirmed At
+             * Format: date-time
+             */
+            confirmed_at: string;
+            /** Historical */
+            historical: boolean;
+            /**
+             * Packet Id
+             * Format: uuid
+             */
+            packet_id: string;
+            /** Payload Hash */
+            payload_hash: string;
+            /** Review Version */
+            review_version: number;
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+            /**
+             * Schema Version
+             * @default handoff-v1
+             * @constant
+             */
+            schema_version: "handoff-v1";
+            /** Sections */
+            sections: components["schemas"]["HandoffSection"][];
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Warnings */
+            warnings: string[];
         };
         /** InputLimits */
         InputLimits: {
@@ -3354,6 +3438,163 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SnapshotResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    export_handoff: {
+        parameters: {
+            query: {
+                format: "pdf" | "txt";
+            };
+            header?: never;
+            path: {
+                packet_id: string;
+                snapshot_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                    "text/plain": string;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_handoff: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: string;
+                snapshot_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoffView"];
                 };
             };
             /** @description Unauthorized */

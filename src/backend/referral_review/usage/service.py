@@ -324,7 +324,7 @@ class Usage:
 
     def check_export(self, token, packet_id):
         """MT-13 must invoke before rendering; membership expiry never blocks export."""
-        with self.engine.begin() as conn:
+        with self.engine.connect().execution_options(sqlite_immediate=True) as conn, conn.begin():
             require_current_schema(conn)
             packet = self.identity.require_owner(conn, token, packet_id)
             rates.consume(conn, packet["owner_id"], "export", self.clock())

@@ -1,0 +1,105 @@
+{
+  "schema_version": "handoff-v1",
+  "snapshot_id": "4e7e5f4c-69c7-50a6-97ee-5664cc4011d7",
+  "packet_id": "f9c2aa1a-24ec-54a5-975a-fd8b8adf1753",
+  "revision_id": "c56fa48c-45ef-5ef9-9108-6a37e0b4e17b",
+  "review_version": 3,
+  "confirmed_at": "2026-10-20T00:00:00Z",
+  "payload_hash": "97572f8c007c95f232c9d4255e92e30fa2b1114177f8db8807e261cb5e8b4b2b",
+  "historical": true,
+  "title": "Referral review handoff",
+  "status": "Reviewed — unresolved items remain",
+  "warnings": [
+    "Historical revision - not the current confirmed review",
+    "Identity unresolved",
+    "Precomputed synthetic example - illustrative confirmation only",
+    "Synthetic QA variant - includes an authored two-page report",
+    "Synthetic demonstration - precomputed result; not a live AI review"
+  ],
+  "sections": [
+    {
+      "heading": "Identity and referral details",
+      "paragraphs": [
+        "Patient name: Synthetic Person D01\nSource statement; Recorded in source. [S2]",
+        "Date of birth: 1980-06-15\nSource statement; Recorded in source. [S3]",
+        "Date of birth: 1981-06-15\nSource statement; Recorded in source. [S11]",
+        "Referrer: Synthetic Referrer D01\nSource statement; Recorded in source. [S4]",
+        "Referrer contact: referrer-d01@example.invalid\nSource statement; Recorded in source. [S5]",
+        "Recipient: Synthetic Outpatient Desk\nSource statement; Recorded in source. [S6]"
+      ]
+    },
+    {
+      "heading": "Referral reason",
+      "paragraphs": [
+        "Referral reason: Review of the supplied fictional symptom history.\nSource statement; Recorded in source. [S7]"
+      ]
+    },
+    {
+      "heading": "Medications",
+      "paragraphs": [
+        "Medications: No current medications.\nSource statement; Explicitly none recorded. [S8]"
+      ]
+    },
+    {
+      "heading": "Allergies",
+      "paragraphs": [
+        "Allergies: No known allergies.\nSource statement; Explicitly none recorded. [S9]"
+      ]
+    },
+    {
+      "heading": "Reports and attachment references",
+      "paragraphs": [
+        "Report description: Synthetic QA report on source page two; no clinical conclusion.\nSource statement; Recorded in source. [S1]",
+        "Attachment reference: Synthetic Echo Report A is attached.\nSource statement; Recorded in source. [S10]"
+      ]
+    },
+    {
+      "heading": "Unresolved items",
+      "paragraphs": [
+        "C02 - Date of birth [unresolved]\nTwo complete DOB values differ. Do not select an identity automatically. Checked all 2 supplied, successfully parsed documents (2 pages).\nReviewer supplied correction: Synthetic reviewer note: identity is still awaiting sender verification.\nReason: Synthetic demonstration: sender clarification is still required; no new source was supplied.\nNo additional evidence linked by reviewer.\nFinding sources: [S3, S11].\nDecision 5612b2a7-3ead-5760-ab81-b7cadf647089; reviewer 33933e8a-3bdf-546c-971c-d129ff585b24; review v1; 2026-10-20T00:00:00Z.",
+        "C08 - Attachment reference [unresolved]\nSynthetic Echo Report A is claimed as attached; neither supplied document is that report. Check with the sender. Checked all 2 supplied, successfully parsed documents (2 pages).\nReason: Synthetic demonstration: sender clarification is still required; no new source was supplied.\nNo additional evidence linked by reviewer.\nFinding sources: [S10].\nDecision cb63773b-c50c-5180-a7af-c0d6c6e97338; reviewer 33933e8a-3bdf-546c-971c-d129ff585b24; review v2; 2026-10-20T00:00:00Z."
+      ]
+    },
+    {
+      "heading": "Reviewer decisions and corrections",
+      "paragraphs": [
+        "No other reviewer decisions recorded."
+      ]
+    },
+    {
+      "heading": "Reviewer supplied additions",
+      "paragraphs": [
+        "handoff.notes1: Synthetic note 001: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 002: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 003: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 004: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 005: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 006: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nReviewer supplied; no source citation is implied.",
+        "handoff.notes2: Synthetic note 007: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 008: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 009: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 010: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 011: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 012: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nReviewer supplied; no source citation is implied.",
+        "handoff.notes3: Synthetic note 013: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 014: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 015: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 016: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 017: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nSynthetic note 018: Please request the missing source report. Identity remains unverified; do not merge the records. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName\nReviewer supplied; no source citation is implied.",
+        "Patient name: Synthetic José Łukasz / 王明 / Ольга / Δημήτρης\nReviewer supplied; no source citation is implied.",
+        "Referral reason: Synthetic referral for document review. No clinical conclusion is implied.\nReviewer supplied; no source citation is implied."
+      ]
+    },
+    {
+      "heading": "Source index",
+      "paragraphs": [
+        "[S1] Document 0eec2f38-8725-54cb-bde7-304f011f7b84; page 2; characters 0-63 (end exclusive).\nSynthetic QA report on source page two; no clinical conclusion.",
+        "[S2] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 82-111 (end exclusive).\nPatient: Synthetic Person D01",
+        "[S3] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 112-127 (end exclusive).\nDOB: 1980-06-15",
+        "[S4] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 128-160 (end exclusive).\nReferrer: Synthetic Referrer D01",
+        "[S5] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 161-198 (end exclusive).\nContact: referrer-d01@example.invalid",
+        "[S6] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 199-235 (end exclusive).\nRecipient: Synthetic Outpatient Desk",
+        "[S7] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 236-293 (end exclusive).\nReason: Review of the supplied fictional symptom history.",
+        "[S8] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 294-330 (end exclusive).\nMedications: No current medications.",
+        "[S9] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 331-361 (end exclusive).\nAllergies: No known allergies.",
+        "[S10] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 362-410 (end exclusive).\nAttachment: Synthetic Echo Report A is attached.",
+        "[S11] Document a2578df1-7982-58f9-b079-90082dd61e04; page 1; characters 85-100 (end exclusive).\nDOB: 1981-06-15"
+      ]
+    },
+    {
+      "heading": "Confirmation and version",
+      "paragraphs": [
+        "Snapshot: 4e7e5f4c-69c7-50a6-97ee-5664cc4011d7\nPacket: f9c2aa1a-24ec-54a5-975a-fd8b8adf1753\nRevision: 1 (c56fa48c-45ef-5ef9-9108-6a37e0b4e17b)\nReview version: 3",
+        "Confirmed: 2026-10-20T00:00:00+00:00\nReviewer: 33933e8a-3bdf-546c-971c-d129ff585b24\nMode: assisted\nRun: 7cadd4d5-8df2-528c-8f22-7beb1790da7b",
+        "Checklist: outpatient-referral-demo@1\nSnapshot SHA-256: 97572f8c007c95f232c9d4255e92e30fa2b1114177f8db8807e261cb5e8b4b2b",
+        "Referral material handoff only. This is not a diagnosis, referral approval or proof of completeness."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,290 @@
+{
+  "dev-01": {
+    "confirmed_at": "2026-10-20T00:00:00Z",
+    "historical": false,
+    "packet_id": "f9c2aa1a-24ec-54a5-975a-fd8b8adf1753",
+    "payload_hash": "837c747885a17303aee0225a5669fe3f756d40557bfab29d4332dac673e689a4",
+    "review_version": 3,
+    "revision_id": "c56fa48c-45ef-5ef9-9108-6a37e0b4e17b",
+    "schema_version": "handoff-v1",
+    "sections": [
+      {
+        "heading": "Identity and referral details",
+        "paragraphs": [
+          "Patient name: Synthetic Person D01\nSource statement; Recorded in source. [S1]",
+          "Date of birth: 1980-06-15\nSource statement; Recorded in source. [S2]",
+          "Date of birth: 1981-06-15\nSource statement; Recorded in source. [S10]",
+          "Referrer: Synthetic Referrer D01\nSource statement; Recorded in source. [S3]",
+          "Referrer contact: referrer-d01@example.invalid\nSource statement; Recorded in source. [S4]",
+          "Recipient: Synthetic Outpatient Desk\nSource statement; Recorded in source. [S5]"
+        ]
+      },
+      {
+        "heading": "Referral reason",
+        "paragraphs": [
+          "Referral reason: Review of the supplied fictional symptom history.\nSource statement; Recorded in source. [S6]"
+        ]
+      },
+      {
+        "heading": "Medications",
+        "paragraphs": [
+          "Medications: No current medications.\nSource statement; Explicitly none recorded. [S7]"
+        ]
+      },
+      {
+        "heading": "Allergies",
+        "paragraphs": [
+          "Allergies: No known allergies.\nSource statement; Explicitly none recorded. [S8]"
+        ]
+      },
+      {
+        "heading": "Reports and attachment references",
+        "paragraphs": [
+          "Report description: Not recorded in the confirmed source result.",
+          "Attachment reference: Synthetic Echo Report A is attached.\nSource statement; Recorded in source. [S9]"
+        ]
+      },
+      {
+        "heading": "Unresolved items",
+        "paragraphs": [
+          "C02 - Date of birth [unresolved]\nTwo complete DOB values differ. Do not select an identity automatically. Checked all 2 supplied, successfully parsed documents (2 pages).\nReason: Synthetic demonstration: sender clarification is still required; no new source was supplied.\nNo additional evidence linked by reviewer.\nFinding sources: [S2, S10].\nDecision 5612b2a7-3ead-5760-ab81-b7cadf647089; reviewer 33933e8a-3bdf-546c-971c-d129ff585b24; review v1; 2026-10-20T00:00:00Z.",
+          "C08 - Attachment reference [unresolved]\nSynthetic Echo Report A is claimed as attached; neither supplied document is that report. Check with the sender. Checked all 2 supplied, successfully parsed documents (2 pages).\nReason: Synthetic demonstration: sender clarification is still required; no new source was supplied.\nNo additional evidence linked by reviewer.\nFinding sources: [S9].\nDecision cb63773b-c50c-5180-a7af-c0d6c6e97338; reviewer 33933e8a-3bdf-546c-971c-d129ff585b24; review v2; 2026-10-20T00:00:00Z."
+        ]
+      },
+      {
+        "heading": "Reviewer decisions and corrections",
+        "paragraphs": [
+          "No other reviewer decisions recorded."
+        ]
+      },
+      {
+        "heading": "Reviewer supplied additions",
+        "paragraphs": [
+          "No reviewer additions recorded."
+        ]
+      },
+      {
+        "heading": "Source index",
+        "paragraphs": [
+          "[S1] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 82-111 (end exclusive).\nPatient: Synthetic Person D01",
+          "[S2] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 112-127 (end exclusive).\nDOB: 1980-06-15",
+          "[S3] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 128-160 (end exclusive).\nReferrer: Synthetic Referrer D01",
+          "[S4] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 161-198 (end exclusive).\nContact: referrer-d01@example.invalid",
+          "[S5] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 199-235 (end exclusive).\nRecipient: Synthetic Outpatient Desk",
+          "[S6] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 236-293 (end exclusive).\nReason: Review of the supplied fictional symptom history.",
+          "[S7] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 294-330 (end exclusive).\nMedications: No current medications.",
+          "[S8] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 331-361 (end exclusive).\nAllergies: No known allergies.",
+          "[S9] Document 70847318-dc87-54ff-a3fb-e9f742a0f923; page 1; characters 362-410 (end exclusive).\nAttachment: Synthetic Echo Report A is attached.",
+          "[S10] Document a2578df1-7982-58f9-b079-90082dd61e04; page 1; characters 85-100 (end exclusive).\nDOB: 1981-06-15"
+        ]
+      },
+      {
+        "heading": "Confirmation and version",
+        "paragraphs": [
+          "Snapshot: dd0586d7-d10b-561b-a74f-bd65cc1433bd\nPacket: f9c2aa1a-24ec-54a5-975a-fd8b8adf1753\nRevision: 1 (c56fa48c-45ef-5ef9-9108-6a37e0b4e17b)\nReview version: 3",
+          "Confirmed: 2026-10-20T00:00:00+00:00\nReviewer: 33933e8a-3bdf-546c-971c-d129ff585b24\nMode: assisted\nRun: 7cadd4d5-8df2-528c-8f22-7beb1790da7b",
+          "Checklist: outpatient-referral-demo@1\nSnapshot SHA-256: 837c747885a17303aee0225a5669fe3f756d40557bfab29d4332dac673e689a4",
+          "Referral material handoff only. This is not a diagnosis, referral approval or proof of completeness."
+        ]
+      }
+    ],
+    "snapshot_id": "dd0586d7-d10b-561b-a74f-bd65cc1433bd",
+    "status": "Reviewed — unresolved items remain",
+    "title": "Referral review handoff",
+    "warnings": [
+      "Identity unresolved",
+      "Precomputed synthetic example - illustrative confirmation only",
+      "Synthetic demonstration - precomputed result; not a live AI review"
+    ]
+  },
+  "dev-02": {
+    "confirmed_at": "2026-10-20T00:00:00Z",
+    "historical": false,
+    "packet_id": "440257a7-ca43-56f4-b66e-8201821b3bf2",
+    "payload_hash": "84deff2213f3709d6ed461f0eb79ceb8b4fa497a4602b1c0931e471c70e9ae54",
+    "review_version": 2,
+    "revision_id": "e88f3024-3a23-5684-81c9-841664f168a2",
+    "schema_version": "handoff-v1",
+    "sections": [
+      {
+        "heading": "Identity and referral details",
+        "paragraphs": [
+          "Patient name: Synthetic Person D02\nSource statement; Recorded in source. [S1]",
+          "Date of birth: 1980-06-15\nSource statement; Recorded in source. [S2]",
+          "Referrer: Synthetic Referrer D02\nSource statement; Recorded in source. [S3]",
+          "Referrer contact: referrer-d02@example.invalid\nSource statement; Recorded in source. [S4]",
+          "Recipient: Synthetic Outpatient Desk\nSource statement; Recorded in source. [S5]"
+        ]
+      },
+      {
+        "heading": "Referral reason",
+        "paragraphs": [
+          "Referral reason: Review of the supplied fictional symptom history.\nSource statement; Recorded in source. [S6]"
+        ]
+      },
+      {
+        "heading": "Medications",
+        "paragraphs": [
+          "Medications: No current medications.\nSource statement; Explicitly none recorded. [S7]"
+        ]
+      },
+      {
+        "heading": "Allergies",
+        "paragraphs": [
+          "Allergies: Unknown; not confirmed at intake.\nSource statement; Unknown in source. [S8]"
+        ]
+      },
+      {
+        "heading": "Reports and attachment references",
+        "paragraphs": [
+          "Report description: Not recorded in the confirmed source result.",
+          "Attachment reference: Not recorded in the confirmed source result."
+        ]
+      },
+      {
+        "heading": "Unresolved items",
+        "paragraphs": [
+          "C07 - Allergies [unresolved]\nAllergy status is recorded but explicitly unknown, requiring clarification. Checked all 1 supplied, successfully parsed documents (1 pages).\nReason: Synthetic demonstration: sender clarification is still required; no new source was supplied.\nNo additional evidence linked by reviewer.\nFinding sources: [S8].\nDecision a4655b8d-5571-5b17-af39-2a050a3ac372; reviewer 7551f3a9-76b3-5f3b-8ab1-15380e85a0a0; review v1; 2026-10-20T00:00:00Z."
+        ]
+      },
+      {
+        "heading": "Reviewer decisions and corrections",
+        "paragraphs": [
+          "No other reviewer decisions recorded."
+        ]
+      },
+      {
+        "heading": "Reviewer supplied additions",
+        "paragraphs": [
+          "No reviewer additions recorded."
+        ]
+      },
+      {
+        "heading": "Source index",
+        "paragraphs": [
+          "[S1] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 82-111 (end exclusive).\nPatient: Synthetic Person D02",
+          "[S2] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 112-127 (end exclusive).\nDOB: 1980-06-15",
+          "[S3] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 128-160 (end exclusive).\nReferrer: Synthetic Referrer D02",
+          "[S4] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 161-198 (end exclusive).\nContact: referrer-d02@example.invalid",
+          "[S5] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 199-235 (end exclusive).\nRecipient: Synthetic Outpatient Desk",
+          "[S6] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 236-293 (end exclusive).\nReason: Review of the supplied fictional symptom history.",
+          "[S7] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 294-330 (end exclusive).\nMedications: No current medications.",
+          "[S8] Document 93140915-2343-57d5-b8f2-d855201d9ac7; page 1; characters 331-375 (end exclusive).\nAllergies: Unknown; not confirmed at intake."
+        ]
+      },
+      {
+        "heading": "Confirmation and version",
+        "paragraphs": [
+          "Snapshot: 94dd2dd0-bd3e-52ec-9b47-2d62e8312d8b\nPacket: 440257a7-ca43-56f4-b66e-8201821b3bf2\nRevision: 1 (e88f3024-3a23-5684-81c9-841664f168a2)\nReview version: 2",
+          "Confirmed: 2026-10-20T00:00:00+00:00\nReviewer: 7551f3a9-76b3-5f3b-8ab1-15380e85a0a0\nMode: assisted\nRun: 6664726e-90bf-565a-86bf-0e2b7dab552e",
+          "Checklist: outpatient-referral-demo@1\nSnapshot SHA-256: 84deff2213f3709d6ed461f0eb79ceb8b4fa497a4602b1c0931e471c70e9ae54",
+          "Referral material handoff only. This is not a diagnosis, referral approval or proof of completeness."
+        ]
+      }
+    ],
+    "snapshot_id": "94dd2dd0-bd3e-52ec-9b47-2d62e8312d8b",
+    "status": "Reviewed — unresolved items remain",
+    "title": "Referral review handoff",
+    "warnings": [
+      "Precomputed synthetic example - illustrative confirmation only",
+      "Synthetic demonstration - precomputed result; not a live AI review"
+    ]
+  },
+  "dev-03": {
+    "confirmed_at": "2026-10-20T00:00:00Z",
+    "historical": false,
+    "packet_id": "c26e8432-8363-59a6-b2c7-a6f03cde9a87",
+    "payload_hash": "00eddd9a193eb087385e8839d648d0af2702983041c9a081d4ac2a528d01a798",
+    "review_version": 1,
+    "revision_id": "9345edb1-d7fe-5e91-b679-498896b9cd95",
+    "schema_version": "handoff-v1",
+    "sections": [
+      {
+        "heading": "Identity and referral details",
+        "paragraphs": [
+          "Patient name: Synthetic Person D03\nSource statement; Recorded in source. [S3]",
+          "Date of birth: 1980-06-15\nSource statement; Recorded in source. [S4]",
+          "Referrer: Synthetic Referrer D03\nSource statement; Recorded in source. [S5]",
+          "Referrer contact: referrer-d03@example.invalid\nSource statement; Recorded in source. [S6]",
+          "Recipient: Synthetic Outpatient Desk\nSource statement; Recorded in source. [S7]"
+        ]
+      },
+      {
+        "heading": "Referral reason",
+        "paragraphs": [
+          "Referral reason: Review of the supplied fictional symptom history.\nSource statement; Recorded in source. [S8]"
+        ]
+      },
+      {
+        "heading": "Medications",
+        "paragraphs": [
+          "Medications: As of 2026-09-01: FictionalMed A 5 mg daily.\nSource statement; Recorded in source; context: 2026-09-01. [S9]",
+          "Medications: As of 2026-10-01: FictionalMed A 10 mg daily.\nSource statement; Recorded in source; context: 2026-10-01. [S1]"
+        ]
+      },
+      {
+        "heading": "Allergies",
+        "paragraphs": [
+          "Allergies: No known allergies.\nSource statement; Explicitly none recorded. [S10]"
+        ]
+      },
+      {
+        "heading": "Reports and attachment references",
+        "paragraphs": [
+          "Report description: Synthetic Follow-up Report D03, dated 2026-10-01.\nSource statement; Recorded in source. [S2]",
+          "Attachment reference: Synthetic Follow-up Report D03 is attached.\nSource statement; Recorded in source. [S11]"
+        ]
+      },
+      {
+        "heading": "Unresolved items",
+        "paragraphs": [
+          "No unresolved items recorded."
+        ]
+      },
+      {
+        "heading": "Reviewer decisions and corrections",
+        "paragraphs": [
+          "No other reviewer decisions recorded."
+        ]
+      },
+      {
+        "heading": "Reviewer supplied additions",
+        "paragraphs": [
+          "No reviewer additions recorded."
+        ]
+      },
+      {
+        "heading": "Source index",
+        "paragraphs": [
+          "[S1] Document 5ca2c2e6-8caa-5c3e-b012-23449cd5d967; page 1; characters 94-152 (end exclusive).\nMedications: As of 2026-10-01: FictionalMed A 10 mg daily.",
+          "[S2] Document 5ca2c2e6-8caa-5c3e-b012-23449cd5d967; page 1; characters 153-210 (end exclusive).\nReport: Synthetic Follow-up Report D03, dated 2026-10-01.",
+          "[S3] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 82-111 (end exclusive).\nPatient: Synthetic Person D03",
+          "[S4] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 112-127 (end exclusive).\nDOB: 1980-06-15",
+          "[S5] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 128-160 (end exclusive).\nReferrer: Synthetic Referrer D03",
+          "[S6] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 161-198 (end exclusive).\nContact: referrer-d03@example.invalid",
+          "[S7] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 199-235 (end exclusive).\nRecipient: Synthetic Outpatient Desk",
+          "[S8] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 236-293 (end exclusive).\nReason: Review of the supplied fictional symptom history.",
+          "[S9] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 294-351 (end exclusive).\nMedications: As of 2026-09-01: FictionalMed A 5 mg daily.",
+          "[S10] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 352-382 (end exclusive).\nAllergies: No known allergies.",
+          "[S11] Document f47b52b1-138f-5596-a254-772413872639; page 1; characters 383-438 (end exclusive).\nAttachment: Synthetic Follow-up Report D03 is attached."
+        ]
+      },
+      {
+        "heading": "Confirmation and version",
+        "paragraphs": [
+          "Snapshot: 0c726075-dc88-5600-b0ab-18c93ec07887\nPacket: c26e8432-8363-59a6-b2c7-a6f03cde9a87\nRevision: 1 (9345edb1-d7fe-5e91-b679-498896b9cd95)\nReview version: 1",
+          "Confirmed: 2026-10-20T00:00:00+00:00\nReviewer: 09eb8d9c-a424-5795-af20-73976b83ad78\nMode: assisted\nRun: 8179ea38-4c72-5a0d-aa5c-b015d4fa9cee",
+          "Checklist: outpatient-referral-demo@1\nSnapshot SHA-256: 00eddd9a193eb087385e8839d648d0af2702983041c9a081d4ac2a528d01a798",
+          "Referral material handoff only. This is not a diagnosis, referral approval or proof of completeness."
+        ]
+      }
+    ],
+    "snapshot_id": "0c726075-dc88-5600-b0ab-18c93ec07887",
+    "status": "Reviewed",
+    "title": "Referral review handoff",
+    "warnings": [
+      "Precomputed synthetic example - illustrative confirmation only",
+      "Synthetic demonstration - precomputed result; not a live AI review"
+    ]
+  }
+}

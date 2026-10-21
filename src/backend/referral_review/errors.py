@@ -12,6 +12,8 @@ from .schemas import ErrorCode, ErrorDetail, ErrorEnvelope
 
 logger = logging.getLogger("meditrace.referral")
 ERRORS = {
+    ErrorCode.EXPORT_TOO_LARGE: (413, "Complete export exceeds the response or page limit; content was not truncated."),
+    ErrorCode.EXPORT_UNSUPPORTED_TEXT: (422, "PDF cannot render every character safely; download the complete UTF-8 text instead."),
     ErrorCode.REVIEW_CONFLICT: (409, "Review changed; refresh before saving."),
     ErrorCode.STALE_RUN: (409, "A succeeded run for the current revision is required."),
     ErrorCode.OPEN_FINDINGS: (409, "Open findings must be reviewed before confirmation."),
