@@ -1,5 +1,53 @@
 {
   "$defs": {
+    "DocumentPageResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "format": "uuid",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "normalized_text": {
+          "title": "Normalized Text",
+          "type": "string"
+        },
+        "page_number": {
+          "minimum": 1,
+          "title": "Page Number",
+          "type": "integer"
+        },
+        "parse_quality": {
+          "enum": [
+            "ready",
+            "empty",
+            "unreadable",
+            "failed"
+          ],
+          "title": "Parse Quality",
+          "type": "string"
+        },
+        "parser_version": {
+          "title": "Parser Version",
+          "type": "string"
+        },
+        "text_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Text Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_id",
+        "page_number",
+        "normalized_text",
+        "text_hash",
+        "parse_quality",
+        "parser_version"
+      ],
+      "title": "DocumentPageResponse",
+      "type": "object"
+    },
     "Evidence": {
       "additionalProperties": false,
       "properties": {
@@ -49,6 +97,121 @@
         "text_hash"
       ],
       "title": "Evidence",
+      "type": "object"
+    },
+    "Extraction": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "fake",
+            "real"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_reported": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model Reported"
+        },
+        "model_requested": {
+          "title": "Model Requested",
+          "type": "string"
+        },
+        "prompt_version": {
+          "default": "referral-extract-v1",
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "provider_request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provider Request Id"
+        },
+        "revision_id": {
+          "format": "uuid",
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "extraction-v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TokenUsage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "revision_id",
+        "mode",
+        "model_requested",
+        "model_reported",
+        "provider_request_id",
+        "usage",
+        "facts",
+        "evidence"
+      ],
+      "title": "Extraction",
+      "type": "object"
+    },
+    "ExtractionRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/DocumentPageResponse"
+          },
+          "maxItems": 25,
+          "minItems": 1,
+          "title": "Pages",
+          "type": "array"
+        },
+        "revision_id": {
+          "format": "uuid",
+          "title": "Revision Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision_id",
+        "pages"
+      ],
+      "title": "ExtractionRevision",
       "type": "object"
     },
     "Fact": {
@@ -216,6 +379,128 @@
       "title": "Finding",
       "type": "object"
     },
+    "ModelFact": {
+      "additionalProperties": false,
+      "properties": {
+        "assertion_status": {
+          "enum": [
+            "stated",
+            "explicitly_none",
+            "unknown"
+          ],
+          "title": "Assertion Status",
+          "type": "string"
+        },
+        "field_key": {
+          "$ref": "#/$defs/FieldKey"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/ModelQuote"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "temporal_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temporal Context"
+        },
+        "value_normalized": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value Normalized"
+        },
+        "value_raw": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Value Raw",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field_key",
+        "value_raw",
+        "value_normalized",
+        "assertion_status",
+        "temporal_context",
+        "sources"
+      ],
+      "title": "ModelFact",
+      "type": "object"
+    },
+    "ModelOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/ModelFact"
+          },
+          "maxItems": 200,
+          "title": "Facts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "facts"
+      ],
+      "title": "ModelOutput",
+      "type": "object"
+    },
+    "ModelQuote": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "After",
+          "type": "string"
+        },
+        "before": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Before",
+          "type": "string"
+        },
+        "document_id": {
+          "format": "uuid",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "page_number": {
+          "minimum": 1,
+          "title": "Page Number",
+          "type": "integer"
+        },
+        "quote": {
+          "maxLength": 30000,
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_id",
+        "page_number",
+        "quote"
+      ],
+      "title": "ModelQuote",
+      "type": "object"
+    },
     "ReviewResult": {
       "additionalProperties": false,
       "description": "A completed result, not a pending job; no invented execution endpoints in MT-01.",
@@ -305,6 +590,32 @@
       ],
       "title": "RunState",
       "type": "string"
+    },
+    "TokenUsage": {
+      "properties": {
+        "completion_tokens": {
+          "minimum": 0,
+          "title": "Completion Tokens",
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 0,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "total_tokens": {
+          "minimum": 0,
+          "title": "Total Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt_tokens",
+        "completion_tokens",
+        "total_tokens"
+      ],
+      "title": "TokenUsage",
+      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -323,6 +634,15 @@
     },
     {
       "$ref": "#/$defs/RunState"
+    },
+    {
+      "$ref": "#/$defs/Extraction"
+    },
+    {
+      "$ref": "#/$defs/ExtractionRevision"
+    },
+    {
+      "$ref": "#/$defs/ModelOutput"
     }
   ],
   "title": "MediTrace referral domain contracts",

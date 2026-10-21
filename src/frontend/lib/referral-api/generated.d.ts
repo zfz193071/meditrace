@@ -455,6 +455,50 @@ export interface components {
             /** Text Hash */
             text_hash: string;
         };
+        /** Extraction */
+        Extraction: {
+            /** Evidence */
+            evidence: components["schemas"]["Evidence"][];
+            /** Facts */
+            facts: components["schemas"]["Fact"][];
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "fake" | "real";
+            /** Model Reported */
+            model_reported: string | null;
+            /** Model Requested */
+            model_requested: string;
+            /**
+             * Prompt Version
+             * @default referral-extract-v1
+             */
+            prompt_version: string;
+            /** Provider Request Id */
+            provider_request_id: string | null;
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+            /**
+             * Schema Version
+             * @default extraction-v1
+             */
+            schema_version: string;
+            usage: components["schemas"]["TokenUsage"] | null;
+        };
+        /** ExtractionRevision */
+        ExtractionRevision: {
+            /** Pages */
+            pages: components["schemas"]["DocumentPageResponse"][];
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+        };
         /** Fact */
         Fact: {
             /**
@@ -557,6 +601,50 @@ export interface components {
              * @default 10000
              */
             max_text_codepoints: number;
+        };
+        /** ModelFact */
+        ModelFact: {
+            /**
+             * Assertion Status
+             * @enum {string}
+             */
+            assertion_status: "stated" | "explicitly_none" | "unknown";
+            field_key: components["schemas"]["FieldKey"];
+            /** Sources */
+            sources: components["schemas"]["ModelQuote"][];
+            /** Temporal Context */
+            temporal_context: string | null;
+            /** Value Normalized */
+            value_normalized: string | null;
+            /** Value Raw */
+            value_raw: string;
+        };
+        /** ModelOutput */
+        ModelOutput: {
+            /** Facts */
+            facts: components["schemas"]["ModelFact"][];
+        };
+        /** ModelQuote */
+        ModelQuote: {
+            /**
+             * After
+             * @default
+             */
+            after: string;
+            /**
+             * Before
+             * @default
+             */
+            before: string;
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Page Number */
+            page_number: number;
+            /** Quote */
+            quote: string;
         };
         /** PacketDeleteResponse */
         PacketDeleteResponse: {
@@ -831,6 +919,15 @@ export interface components {
              * Format: uuid
              */
             id: string;
+        };
+        /** TokenUsage */
+        TokenUsage: {
+            /** Completion Tokens */
+            completion_tokens: number;
+            /** Prompt Tokens */
+            prompt_tokens: number;
+            /** Total Tokens */
+            total_tokens: number;
         };
         /** UpdatePacketInput */
         UpdatePacketInput: {

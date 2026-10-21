@@ -117,7 +117,7 @@
             "type": "string"
           },
           "page_number": {
-            "minimum": 1.0,
+            "minimum": 1,
             "title": "Page Number",
             "type": "integer"
           },
@@ -393,6 +393,121 @@
         "title": "Evidence",
         "type": "object"
       },
+      "Extraction": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/Fact"
+            },
+            "title": "Facts",
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "fake",
+              "real"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "model_reported": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Reported"
+          },
+          "model_requested": {
+            "title": "Model Requested",
+            "type": "string"
+          },
+          "prompt_version": {
+            "default": "referral-extract-v1",
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "provider_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Request Id"
+          },
+          "revision_id": {
+            "format": "uuid",
+            "title": "Revision Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "default": "extraction-v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenUsage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "revision_id",
+          "mode",
+          "model_requested",
+          "model_reported",
+          "provider_request_id",
+          "usage",
+          "facts",
+          "evidence"
+        ],
+        "title": "Extraction",
+        "type": "object"
+      },
+      "ExtractionRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentPageResponse"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "title": "Pages",
+            "type": "array"
+          },
+          "revision_id": {
+            "format": "uuid",
+            "title": "Revision Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "revision_id",
+          "pages"
+        ],
+        "title": "ExtractionRevision",
+        "type": "object"
+      },
       "Fact": {
         "additionalProperties": false,
         "properties": {
@@ -611,6 +726,128 @@
           }
         },
         "title": "InputLimits",
+        "type": "object"
+      },
+      "ModelFact": {
+        "additionalProperties": false,
+        "properties": {
+          "assertion_status": {
+            "enum": [
+              "stated",
+              "explicitly_none",
+              "unknown"
+            ],
+            "title": "Assertion Status",
+            "type": "string"
+          },
+          "field_key": {
+            "$ref": "#/components/schemas/FieldKey"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ModelQuote"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Sources",
+            "type": "array"
+          },
+          "temporal_context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temporal Context"
+          },
+          "value_normalized": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Normalized"
+          },
+          "value_raw": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Value Raw",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field_key",
+          "value_raw",
+          "value_normalized",
+          "assertion_status",
+          "temporal_context",
+          "sources"
+        ],
+        "title": "ModelFact",
+        "type": "object"
+      },
+      "ModelOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/ModelFact"
+            },
+            "maxItems": 200,
+            "title": "Facts",
+            "type": "array"
+          }
+        },
+        "required": [
+          "facts"
+        ],
+        "title": "ModelOutput",
+        "type": "object"
+      },
+      "ModelQuote": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "After",
+            "type": "string"
+          },
+          "before": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Before",
+            "type": "string"
+          },
+          "document_id": {
+            "format": "uuid",
+            "title": "Document Id",
+            "type": "string"
+          },
+          "page_number": {
+            "minimum": 1,
+            "title": "Page Number",
+            "type": "integer"
+          },
+          "quote": {
+            "maxLength": 30000,
+            "minLength": 1,
+            "title": "Quote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_id",
+          "page_number",
+          "quote"
+        ],
+        "title": "ModelQuote",
         "type": "object"
       },
       "PacketDeleteResponse": {
@@ -1250,6 +1487,32 @@
           "display_name"
         ],
         "title": "SessionUser",
+        "type": "object"
+      },
+      "TokenUsage": {
+        "properties": {
+          "completion_tokens": {
+            "minimum": 0,
+            "title": "Completion Tokens",
+            "type": "integer"
+          },
+          "prompt_tokens": {
+            "minimum": 0,
+            "title": "Prompt Tokens",
+            "type": "integer"
+          },
+          "total_tokens": {
+            "minimum": 0,
+            "title": "Total Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "prompt_tokens",
+          "completion_tokens",
+          "total_tokens"
+        ],
+        "title": "TokenUsage",
         "type": "object"
       },
       "UpdatePacketInput": {
