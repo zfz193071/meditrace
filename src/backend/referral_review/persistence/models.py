@@ -361,3 +361,15 @@ usage_adjustments = sa.Table("rr_usage_adjustments", metadata,
     sa.Column("delta_microusd", sa.BigInteger, nullable=False), timestamp("created_at", created=True),
     sa.UniqueConstraint("reservation_id", "adjustment_key"),
     sa.CheckConstraint("actual_microusd >= 0", name="amount"))
+
+# Durable reviewer history, including every replaced handoff draft.
+review_events = sa.Table("rr_review_events", metadata,
+    uid(primary=True), uid("packet_id"), uid("revision_id"), uid("run_id", nullable=True), uid("actor_id"),
+    sa.Column("review_version", sa.Integer, nullable=False), sa.Column("kind", sa.String(20), nullable=False),
+    sa.Column("content", sa.JSON, nullable=False), timestamp("created_at", created=True),
+    fk("packet_id actor_id", "rr_packets.id rr_packets.owner_id"),
+    fk("revision_id packet_id", "rr_revisions.id rr_revisions.packet_id"),
+    fk("run_id packet_id revision_id", "rr_runs.id rr_runs.packet_id rr_runs.revision_id"),
+    sa.UniqueConstraint("packet_id", "review_version"),
+    sa.CheckConstraint("review_version > 0", name="version"), state("kind", "resolution draft confirmation"),
+    sa.Index("ix_rr_review_events_packet_created_id", "packet_id", "created_at", "id"))

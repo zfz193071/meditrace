@@ -14,6 +14,8 @@ from .identity.service import DATABASE_FAILURES, configured_identity
 from .identity.authorization import protect_request
 from .documents import configured_documents
 from .documents.routes import document_router
+from .reviews import Reviews
+from .reviews.routes import review_router
 from .runs import Runs
 from .runs.routes import run_router
 from .usage import Usage
@@ -47,6 +49,8 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     app.state.packets = Packets(identity) if identity is not None else None
     app.state.usage = Usage(identity) if identity is not None else None
     app.state.runs = Runs(identity) if identity is not None else None
+    app.state.reviews = Reviews(identity) if identity is not None else None
+    app.include_router(review_router())
     app.include_router(run_router())
     app.include_router(usage_router())
     app.include_router(auth_router(identity))
@@ -60,7 +64,7 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
             await run_in_threadpool(protect_request, request)
             response = await call_next(request)
         except ApiError as exc:
-            response = error_response(request, exc.code, current_revision=exc.current_revision)
+            response = error_response(request, exc.code, current_revision=exc.current_revision, current_review_version=exc.current_review_version)
         except DATABASE_FAILURES:
             response = error_response(request, ErrorCode.SERVICE_NOT_READY)
         except Exception:

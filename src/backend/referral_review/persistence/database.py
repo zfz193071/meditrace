@@ -41,7 +41,7 @@ def create_engine(url: str, *, schema: str | None = None) -> sa.Engine:
 
         @sa.event.listens_for(engine, "begin")
         def begin_sqlite(connection):
-            connection.exec_driver_sql("BEGIN")
+            connection.exec_driver_sql("BEGIN IMMEDIATE" if connection.get_execution_options().get("sqlite_immediate") else "BEGIN")
     return engine
 
 

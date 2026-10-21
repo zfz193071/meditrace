@@ -12,6 +12,9 @@ from .schemas import ErrorCode, ErrorDetail, ErrorEnvelope
 
 logger = logging.getLogger("meditrace.referral")
 ERRORS = {
+    ErrorCode.REVIEW_CONFLICT: (409, "Review changed; refresh before saving."),
+    ErrorCode.STALE_RUN: (409, "A succeeded run for the current revision is required."),
+    ErrorCode.OPEN_FINDINGS: (409, "Open findings must be reviewed before confirmation."),
     ErrorCode.SOURCE_CHANGED: (409, "Source revision changed; create a run for the current revision."),
     ErrorCode.CHECKLIST_UNSUPPORTED: (422, "Checklist version is unsupported."),
     ErrorCode.PARSE_COVERAGE_INCOMPLETE: (422, "All revision documents must be successfully parsed."),
@@ -45,17 +48,18 @@ ERRORS = {
 
 
 class ApiError(Exception):
-    def __init__(self, code: ErrorCode, *, current_revision: int | None = None):
+    def __init__(self, code: ErrorCode, *, current_revision: int | None = None, current_review_version: int | None = None):
         self.code = code
         self.current_revision = current_revision
+        self.current_review_version = current_review_version
         super().__init__(code.value)
 
 
-def error_response(request: Request, code: ErrorCode, *, current_revision: int | None = None) -> JSONResponse:
+def error_response(request: Request, code: ErrorCode, *, current_revision: int | None = None, current_review_version: int | None = None) -> JSONResponse:
     status, message = ERRORS[code]
     request_id = getattr(request.state, "request_id", uuid4())
     body = ErrorEnvelope(error=ErrorDetail(code=code, message=message,
-        current_revision=current_revision), request_id=request_id)
+        current_revision=current_revision, current_review_version=current_review_version), request_id=request_id)
     return JSONResponse(body.model_dump(mode="json", exclude_none=True), status_code=status, headers={
         "X-Request-ID": str(request_id), "Cache-Control": "private, no-store",
     })
@@ -64,7 +68,7 @@ def error_response(request: Request, code: ErrorCode, *, current_revision: int |
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(ApiError)
     async def domain_error(request: Request, exc: ApiError):
-        return error_response(request, exc.code, current_revision=exc.current_revision)
+        return error_response(request, exc.code, current_revision=exc.current_revision, current_review_version=exc.current_review_version)
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request: Request, _exc: RequestValidationError):

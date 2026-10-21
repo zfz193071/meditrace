@@ -143,6 +143,23 @@ export interface paths {
         patch: operations["update_packet"];
         trace?: never;
     };
+    "/packets/{packet_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Review */
+        post: operations["confirm_review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/packets/{packet_id}/documents": {
         parameters: {
             query?: never;
@@ -229,6 +246,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/packets/{packet_id}/handoff-draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Handoff Draft */
+        get: operations["get_handoff_draft"];
+        /** Save Handoff Draft */
+        put: operations["save_handoff_draft"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/packets/{packet_id}/review-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Review History */
+        get: operations["list_review_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/packets/{packet_id}/revisions": {
         parameters: {
             query?: never;
@@ -274,6 +326,23 @@ export interface paths {
         put?: never;
         /** Create */
         post: operations["create_run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/packets/{packet_id}/snapshots/{snapshot_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Review Snapshot */
+        get: operations["get_review_snapshot"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -342,6 +411,23 @@ export interface paths {
         put?: never;
         /** Execute */
         post: operations["execute_run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runs/{run_id}/findings/{finding_id}/resolutions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve Finding */
+        post: operations["resolve_finding"];
         delete?: never;
         options?: never;
         head?: never;
@@ -473,6 +559,23 @@ export interface components {
              */
             revision_id: string;
         };
+        /** ConfirmInput */
+        ConfirmInput: {
+            /** Expected Review Version */
+            expected_review_version: number;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "assisted" | "manual";
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+            /** Run Id */
+            run_id?: string | null;
+        };
         /** CreatePacketInput */
         CreatePacketInput: {
             /**
@@ -569,10 +672,12 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "SOURCE_CHANGED" | "CHECKLIST_UNSUPPORTED" | "PARSE_COVERAGE_INCOMPLETE" | "MODEL_INPUT_LIMIT" | "MEMBERSHIP_REQUIRED" | "QUOTA_EXHAUSTED" | "BUDGET_EXHAUSTED" | "RUN_ACTIVE" | "RATE_LIMITED" | "USAGE_CONFLICT" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
+        ErrorCode: "REVIEW_CONFLICT" | "STALE_RUN" | "OPEN_FINDINGS" | "SOURCE_CHANGED" | "CHECKLIST_UNSUPPORTED" | "PARSE_COVERAGE_INCOMPLETE" | "MODEL_INPUT_LIMIT" | "MEMBERSHIP_REQUIRED" | "QUOTA_EXHAUSTED" | "BUDGET_EXHAUSTED" | "RUN_ACTIVE" | "RATE_LIMITED" | "USAGE_CONFLICT" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
         /** ErrorDetail */
         ErrorDetail: {
             code: components["schemas"]["ErrorCode"];
+            /** Current Review Version */
+            current_review_version?: number | null;
             /** Current Revision */
             current_revision?: number | null;
             /** Message */
@@ -718,6 +823,30 @@ export interface components {
             message: string;
             /** Rule Id */
             rule_id: string;
+        };
+        /** HandoffDraftInput */
+        HandoffDraftInput: {
+            /** Expected Review Version */
+            expected_review_version: number;
+            /** Expected Revision */
+            expected_revision: number;
+            /** Fields */
+            fields: {
+                [key: string]: string;
+            };
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "assisted" | "manual";
+            /** Run Id */
+            run_id?: string | null;
+        };
+        /** HandoffDraftResponse */
+        HandoffDraftResponse: {
+            draft: components["schemas"]["ReviewEvent"] | null;
+            /** Stale */
+            stale: boolean;
         };
         /** InputLimits */
         InputLimits: {
@@ -985,6 +1114,73 @@ export interface components {
              */
             status: "ready" | "not_ready";
         };
+        /** ResolutionInput */
+        ResolutionInput: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "resolve" | "dismiss" | "defer" | "reopen";
+            /** Corrected Value */
+            corrected_value?: string | null;
+            /** Expected Review Version */
+            expected_review_version: number;
+            /** Linked Evidence Ids */
+            linked_evidence_ids?: string[];
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+        };
+        /** ReviewEvent */
+        ReviewEvent: {
+            /**
+             * Actor Id
+             * Format: uuid
+             */
+            actor_id: string;
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "resolution" | "draft" | "confirmation";
+            /**
+             * Packet Id
+             * Format: uuid
+             */
+            packet_id: string;
+            /** Review Version */
+            review_version: number;
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+            /** Run Id */
+            run_id: string | null;
+        };
+        /** ReviewHistory */
+        ReviewHistory: {
+            /** Items */
+            items: components["schemas"]["ReviewEvent"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
         /**
          * ReviewResult
          * @description A completed result, not a pending job; no invented execution endpoints in MT-01.
@@ -1177,6 +1373,48 @@ export interface components {
              * Format: uuid
              */
             id: string;
+        };
+        /** SnapshotResponse */
+        SnapshotResponse: {
+            /**
+             * Confirmed At
+             * Format: date-time
+             */
+            confirmed_at: string;
+            /**
+             * Confirmed By
+             * Format: uuid
+             */
+            confirmed_by: string;
+            /** Has Unresolved */
+            has_unresolved: boolean;
+            /** Historical */
+            historical: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Packet Id
+             * Format: uuid
+             */
+            packet_id: string;
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            /** Payload Hash */
+            payload_hash: string;
+            /** Review Version */
+            review_version: number;
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+            /** Run Id */
+            run_id: string | null;
         };
         /** TokenUsage */
         TokenUsage: {
@@ -2034,6 +2272,88 @@ export interface operations {
             };
         };
     };
+    confirm_review: {
+        parameters: {
+            query?: never;
+            header: {
+                "idempotency-key": string;
+            };
+            path: {
+                packet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SnapshotResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     upload_document: {
         parameters: {
             query?: never;
@@ -2537,6 +2857,243 @@ export interface operations {
             };
         };
     };
+    get_handoff_draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoffDraftResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    save_handoff_draft: {
+        parameters: {
+            query?: never;
+            header: {
+                "idempotency-key": string;
+            };
+            path: {
+                packet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandoffDraftInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewEvent"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    list_review_history: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                packet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewHistory"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     save_packet_revision: {
         parameters: {
             query?: never;
@@ -2720,6 +3277,83 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_review_snapshot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: string;
+                snapshot_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SnapshotResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -3035,6 +3669,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    resolve_finding: {
+        parameters: {
+            query?: never;
+            header: {
+                "idempotency-key": string;
+            };
+            path: {
+                finding_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolutionInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewEvent"];
                 };
             };
             /** @description Unauthorized */

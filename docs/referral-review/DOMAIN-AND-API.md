@@ -198,3 +198,14 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 删除不撤回用户已经下载的文件。数据库供应商备份与恢复副本不承诺同步立即清除，交付说明必须写明当前实际保留政策。固定示例为公共合成素材，不受个人资料删除影响。
 
 维护调度定为 GitHub Actions 每日 03:17 UTC 和 workflow_dispatch，使用仓库 secret 中的站点地址及专用 Bearer 凭据调用 POST maintenance。单次最多 200 项／45 秒，返回 cursor 与 backlog；工作流最多连续调用 10 批，失败或仍有积压则失败退出并通过 Actions 通知，不无限循环。每批可重入，凭据不出现在命令输出。计划任务可能延迟，24 小时为清理目标而非供应商 SLA；到期读取拒绝不依赖调度成功。
+
+
+### MT-12 审核接口细化
+
+- 审核 `mode` 为 `assisted` 或 `manual`。assisted 必须提交当前资料版本的 succeeded `run_id`；manual 的 run_id 必须省略或为 null，不能绑定旧批次或伪造自动核对。审核操作无需会员，不触发模型和费用预留。
+- PUT handoff-draft 在上述字段外接受 `run_id?`，`fields` 为字段名到纯文本值的映射（最多 40 项，每项 4,000 字符）；来源标记由服务器生成，每项都是 `Reviewer supplied`。这是整份草稿替换，每次修改都追加保留历史。新增 GET handoff-draft 返回最近草稿及其绑定的 revision/run 和资料是否过期，不能将旧 run 的草稿当成新 run 的内容。
+- resolution 返回追加的审核事件（含 actor、reason、关联证据、处理后状态及 review_version），人工 corrected_value 仅是覆盖层；重新打开或后续处理以最新决定为准，不删除旧决定。关联证据必须来自同一个 run。
+- resolution、draft 和 confirm 均原子递增 review_version；冲突返回 409/REVIEW_CONFLICT 和 current_review_version。确认本身占用一个版本，避免两个 tab 重复确认同一审核版本。相同幂等 key 重放原事件／快照资源，不再次递增；读取快照时 historical 仍按当前资料及审核版本计算。
+- review-history 包含 resolution／draft／confirmation，按 created_at、id 倒序分页（同时间用 id 稳定排序），返回审核版本供重建顺序；cursor 带签名并绑定资料包，limit 为 1—50。历史记录不允许 UPDATE。
+- 快照固定保存原始 result、当前 run 的最新 decisions、finding_states、相同 revision/run 的 handoff、身份警示及确认者／时间。未处理事项阻止 assisted 确认；manual 显示 `Not automatically checked`。身份差异只有 resolve 才移除顶部 `Identity unresolved`，dismiss 仍保留该警示；defer 产生 `Reviewed — unresolved items remain`。
+- payload_hash 为 payload 经过 UTF-8 JSON（sort_keys=True、ensure_ascii=True、分隔符逗号／冒号、不含空格）后的 SHA-256。historical 是响应派生字段，不写回 payload，不影响哈希。新批次不复制旧决定或旧草稿。

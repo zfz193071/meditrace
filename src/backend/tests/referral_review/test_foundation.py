@@ -186,5 +186,8 @@ def test_schema_generation_is_deterministic_and_does_not_depend_on_environment(m
         "/packets/{packet_id}/revisions", "/packets/{packet_id}/revisions/{revision_number}",
         "/packets/{packet_id}/runs", "/runs/{run_id}", "/runs/{run_id}/execute",
         "/runs/{run_id}/cancel", "/runs/{run_id}/reconcile",
+        "/runs/{run_id}/findings/{finding_id}/resolutions",
+        "/packets/{packet_id}/handoff-draft", "/packets/{packet_id}/confirm",
+        "/packets/{packet_id}/snapshots/{snapshot_id}", "/packets/{packet_id}/review-history",
     }
     assert "secret-sentinel" not in json.dumps(baseline)

@@ -21,6 +21,9 @@ class Contract(BaseModel):
 
 
 class ErrorCode(StrEnum):
+    REVIEW_CONFLICT = "REVIEW_CONFLICT"
+    STALE_RUN = "STALE_RUN"
+    OPEN_FINDINGS = "OPEN_FINDINGS"
     SOURCE_CHANGED = "SOURCE_CHANGED"
     CHECKLIST_UNSUPPORTED = "CHECKLIST_UNSUPPORTED"
     PARSE_COVERAGE_INCOMPLETE = "PARSE_COVERAGE_INCOMPLETE"
@@ -57,6 +60,7 @@ class ErrorDetail(Contract):
     message: str
     retryable: bool = False
     current_revision: int | None = None
+    current_review_version: int | None = None
 
 
 class ErrorEnvelope(Contract):
