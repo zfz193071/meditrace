@@ -81,6 +81,7 @@ oauth_states = sa.Table("rr_oauth_states", metadata,
 
 packets = sa.Table("rr_packets", metadata,
     uid(primary=True), uid("owner_id", reference="rr_users.id"), sa.Column("title", sa.String(200), nullable=False),
+    timestamp("synthetic_ack_at", nullable=True),
     sa.Column("current_revision", sa.Integer, nullable=False, server_default="0"),
     sa.Column("review_version", sa.Integer, nullable=False, server_default="0"),
     timestamp("created_at", created=True), timestamp("updated_at", created=True), timestamp("expires_at"),
@@ -89,6 +90,16 @@ packets = sa.Table("rr_packets", metadata,
     sa.CheckConstraint("expires_at > created_at", name="expiry"),
     sa.Index("ix_rr_packets_owner_created_id", "owner_id", "created_at", "id"),
     sa.Index("ix_rr_packets_expiry", "expires_at", "deleted_at"))
+
+packet_drafts = sa.Table("rr_packet_drafts", metadata,
+    uid("packet_id", primary=True, reference="rr_packets.id"),
+    sa.Column("selected_document_ids", sa.JSON, nullable=False),
+    sa.Column("last_location", sa.String(32), nullable=False),
+    sa.Column("base_revision", sa.Integer, nullable=False),
+    sa.Column("draft_version", sa.Integer, nullable=False),
+    timestamp("updated_at", created=True),
+    sa.CheckConstraint("base_revision >= 0 AND draft_version >= 0", name="versions"),
+    state("last_location", "documents review handoff"))
 
 documents = sa.Table("rr_documents", metadata,
     uid(primary=True), uid("packet_id"), uid("owner_id"),

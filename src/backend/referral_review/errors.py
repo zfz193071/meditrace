@@ -26,21 +26,27 @@ ERRORS = {
     ErrorCode.STORAGE_LIMIT: (409, "Storage capacity is exhausted."),
     ErrorCode.DOCUMENT_LIMIT: (409, "Document capacity is exhausted."),
     ErrorCode.STORAGE_UNAVAILABLE: (503, "Private storage is unavailable."),
-    ErrorCode.IDEMPOTENCY_CONFLICT: (409, "Upload key is in use or belongs to different input."),
+    ErrorCode.IDEMPOTENCY_CONFLICT: (409, "Request key is in use or belongs to different input."),
+    ErrorCode.PACKET_LIMIT: (409, "Packet capacity is exhausted."),
+    ErrorCode.PACKET_INPUT_LIMIT: (409, "Combined packet input exceeds the limit."),
+    ErrorCode.REVISION_CONFLICT: (409, "Packet revision changed; refresh before saving."),
+    ErrorCode.DRAFT_CONFLICT: (409, "Saved draft changed; refresh before saving."),
 }
 
 
 class ApiError(Exception):
-    def __init__(self, code: ErrorCode):
+    def __init__(self, code: ErrorCode, *, current_revision: int | None = None):
         self.code = code
+        self.current_revision = current_revision
         super().__init__(code.value)
 
 
-def error_response(request: Request, code: ErrorCode) -> JSONResponse:
+def error_response(request: Request, code: ErrorCode, *, current_revision: int | None = None) -> JSONResponse:
     status, message = ERRORS[code]
     request_id = getattr(request.state, "request_id", uuid4())
-    body = ErrorEnvelope(error=ErrorDetail(code=code, message=message), request_id=request_id)
-    return JSONResponse(body.model_dump(mode="json"), status_code=status, headers={
+    body = ErrorEnvelope(error=ErrorDetail(code=code, message=message,
+        current_revision=current_revision), request_id=request_id)
+    return JSONResponse(body.model_dump(mode="json", exclude_none=True), status_code=status, headers={
         "X-Request-ID": str(request_id), "Cache-Control": "private, no-store",
     })
 
@@ -48,7 +54,7 @@ def error_response(request: Request, code: ErrorCode) -> JSONResponse:
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(ApiError)
     async def domain_error(request: Request, exc: ApiError):
-        return error_response(request, exc.code)
+        return error_response(request, exc.code, current_revision=exc.current_revision)
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request: Request, _exc: RequestValidationError):

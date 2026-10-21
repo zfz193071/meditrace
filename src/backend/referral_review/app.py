@@ -14,6 +14,8 @@ from .identity.service import DATABASE_FAILURES, configured_identity
 from .identity.authorization import protect_request
 from .documents import configured_documents
 from .documents.routes import document_router
+from .packets import Packets
+from .packets.routes import packet_router
 from starlette.concurrency import run_in_threadpool
 
 
@@ -22,7 +24,7 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     app = FastAPI(
         title="MediTrace Referral Review API",
         version=CONTRACT_VERSION,
-        description="Referral identity and private document storage. Parsing, packet, review, model and payment workflows are not complete yet.",
+        description="Referral identity, private documents and packet revisions. Review, model and payment workflows are not complete yet.",
         servers=[{"url": "/api/v1"}],
         docs_url=None, redoc_url=None,
         responses={
@@ -38,8 +40,10 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     identity = identity if identity is not None else configured_identity(config)
     app.state.identity = identity
     app.state.documents = documents if documents is not None else configured_documents(config, identity)
+    app.state.packets = Packets(identity) if identity is not None else None
     app.include_router(auth_router(identity))
     app.include_router(document_router())
+    app.include_router(packet_router())
 
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):
@@ -48,7 +52,7 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
             await run_in_threadpool(protect_request, request)
             response = await call_next(request)
         except ApiError as exc:
-            response = error_response(request, exc.code)
+            response = error_response(request, exc.code, current_revision=exc.current_revision)
         except DATABASE_FAILURES:
             response = error_response(request, ErrorCode.SERVICE_NOT_READY)
         except Exception:

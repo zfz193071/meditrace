@@ -6,8 +6,8 @@ from alembic import command
 from alembic.config import Config
 import sqlalchemy as sa
 
-HEAD = "rr_0002"
-REVIEWED_REVISIONS = frozenset({"rr_0001", HEAD})
+HEAD = "rr_0003"
+REVIEWED_REVISIONS = frozenset({"rr_0001", "rr_0002", HEAD})
 VERSION_TABLE = "rr_alembic_version"
 SCRIPTS = Path(__file__).resolve().parents[2] / "migrations_referral"
 
@@ -48,7 +48,7 @@ def upgrade(connection, target: str) -> None:
     if connection.dialect.name == "postgresql":
         connection.execute(sa.text("SELECT pg_advisory_xact_lock(72831001)"))
     current = current_revision(connection)
-    if current not in (None, "rr_0001", target) or (current == HEAD and target != HEAD):
+    if current not in (None, *REVIEWED_REVISIONS) or (current is not None and current > target):
         raise MigrationRequired("Unknown schema version; refusing automatic change")
     if current is None:
         # Do not adopt pre-existing unmanaged rr_* tables as a successful migration.

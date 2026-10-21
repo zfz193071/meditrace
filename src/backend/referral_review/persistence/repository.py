@@ -56,10 +56,12 @@ def save_revision(connection, *, owner_id: UUID, packet_id: UUID,
     MT-07; this primitive cannot bypass ownership or persist a partial revision.
     """
     require_transaction(connection)
-    if not document_ids or len(set(document_ids)) != len(document_ids):
+    if len(set(document_ids)) != len(document_ids):
         raise InvalidReference("Revision requires distinct documents")
     with connection.begin_nested():
         owned_packet(connection, owner_id, packet_id, now, lock=True)
+        if not document_ids and expected_revision == 0:
+            raise InvalidReference("Initial revision requires a document")
         docs = connection.execute(sa.select(m.documents).where(
             m.documents.c.id.in_(document_ids), m.documents.c.packet_id == packet_id,
             m.documents.c.owner_id == owner_id, m.documents.c.deleted_at.is_(None),
@@ -78,8 +80,9 @@ def save_revision(connection, *, owner_id: UUID, packet_id: UUID,
         revision_id = uuid4()
         connection.execute(m.revisions.insert().values(id=revision_id, packet_id=packet_id,
                            revision_number=expected_revision + 1, manifest_hash=digest, created_at=now))
-        connection.execute(m.revision_documents.insert(), [dict(revision_id=revision_id, document_id=doc_id,
-                           packet_id=packet_id, ordinal=index) for index, doc_id in enumerate(document_ids)])
+        if document_ids:
+            connection.execute(m.revision_documents.insert(), [dict(revision_id=revision_id, document_id=doc_id,
+                               packet_id=packet_id, ordinal=index) for index, doc_id in enumerate(document_ids)])
         return revision_id
 
 

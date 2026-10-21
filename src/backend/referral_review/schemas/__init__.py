@@ -36,12 +36,17 @@ class ErrorCode(StrEnum):
     DOCUMENT_LIMIT = "DOCUMENT_LIMIT"
     STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"
     IDEMPOTENCY_CONFLICT = "IDEMPOTENCY_CONFLICT"
+    PACKET_LIMIT = "PACKET_LIMIT"
+    PACKET_INPUT_LIMIT = "PACKET_INPUT_LIMIT"
+    REVISION_CONFLICT = "REVISION_CONFLICT"
+    DRAFT_CONFLICT = "DRAFT_CONFLICT"
 
 
 class ErrorDetail(Contract):
     code: ErrorCode
     message: str
     retryable: bool = False
+    current_revision: int | None = None
 
 
 class ErrorEnvelope(Contract):
@@ -122,6 +127,84 @@ class DocumentPageResponse(Contract):
     text_hash: Sha256
     parse_quality: Literal["ready", "empty", "unreadable", "failed"]
     parser_version: str
+
+
+class CreatePacketInput(Contract):
+    title: str = Field(min_length=1, max_length=200)
+    synthetic_data_ack: Literal[True]
+
+
+class UpdatePacketInput(Contract):
+    title: str = Field(min_length=1, max_length=200)
+
+
+class PacketResponse(Contract):
+    id: UUID
+    title: str
+    state: Literal["empty", "collecting", "ready"]
+    current_revision: int = Field(ge=0)
+    review_version: int = Field(ge=0)
+    synthetic_data_ack: bool
+    created_at: UTCDateTime
+    updated_at: UTCDateTime
+    expires_at: UTCDateTime
+
+
+class PacketListResponse(Contract):
+    items: list[PacketResponse]
+    next_cursor: str | None
+
+
+class PacketDraftResponse(Contract):
+    packet_id: UUID
+    selected_document_ids: list[UUID]
+    last_location: Literal["documents", "review", "handoff"]
+    base_revision: int = Field(ge=0)
+    draft_version: int = Field(ge=0)
+    updated_at: UTCDateTime
+
+
+class SavePacketDraftInput(Contract):
+    expected_draft_version: int = Field(ge=0)
+    base_revision: int = Field(ge=0)
+    selected_document_ids: list[UUID] = Field(max_length=5)
+    last_location: Literal["documents", "review", "handoff"]
+
+
+class PacketDetailResponse(PacketResponse):
+    current_document_ids: list[UUID]
+    documents: list[DocumentResponse]
+    draft: PacketDraftResponse
+
+
+class SaveRevisionInput(Contract):
+    expected_revision: int = Field(ge=0)
+    document_ids: list[UUID] = Field(max_length=5)
+
+
+class RevisionDocumentResponse(Contract):
+    id: UUID
+    kind: Literal["pdf", "text"]
+    filename: str
+    sha256: Sha256
+    parser_version: str
+    page_count: int | None
+    byte_size: int
+
+
+class RevisionResponse(Contract):
+    id: UUID
+    packet_id: UUID
+    revision_number: int = Field(ge=1)
+    manifest_hash: Sha256
+    documents: list[RevisionDocumentResponse]
+    is_current: bool
+    created_at: UTCDateTime
+
+
+class PacketDeleteResponse(Contract):
+    id: UUID
+    status: Literal["pending_cleanup"] = "pending_cleanup"
 
 
 class Evidence(Contract):

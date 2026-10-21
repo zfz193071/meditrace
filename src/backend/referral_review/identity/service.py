@@ -160,12 +160,8 @@ class Identity:
                 m.sessions.c.token_hash == hashed(token), m.sessions.c.revoked_at.is_(None),
             ).values(revoked_at=self.clock()))
 
-    def require_owner(self, connection, token: str | None, packet_id: UUID):
-        """Call in the SAME transaction as the protected read/write.
-
-        Locks user then session then packet; future child queries must constrain
-        their packet_id to the returned packet, never trust a caller's owner ID.
-        """
+    def require_user(self, connection, token: str | None):
+        """Authenticate and lock the user/session in the caller's transaction."""
         require_transaction(connection)
         if not token or not TOKEN_PATTERN.fullmatch(token):
             raise ApiError(ErrorCode.AUTH_REQUIRED)
@@ -182,8 +178,13 @@ class Identity:
         session = connection.execute(sa.select(m.sessions.c.id).where(condition).with_for_update()).first()
         if user is None or session is None:
             raise ApiError(ErrorCode.AUTH_REQUIRED)
+        return user_id
+
+    def require_owner(self, connection, token: str | None, packet_id: UUID):
+        """Lock user, session and packet; never trust a caller's owner ID."""
+        user_id = self.require_user(connection, token)
         try:
-            return owned_packet(connection, user_id, packet_id, now, lock=True)
+            return owned_packet(connection, user_id, packet_id, self.clock(), lock=True)
         except NotFound:
             raise ApiError(ErrorCode.NOT_FOUND) from None
 

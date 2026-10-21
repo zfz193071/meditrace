@@ -1,6 +1,6 @@
 # 私有原件存储与补偿
 
-MT-05 实现原件存储，MT-06 已接入 PDF／文字按页解析；资料包创建／版本由 MT-07 提供。当前工作区尚不可完成导入流程。capabilities 继续为 false，readiness 继续为 503。
+MT-05 实现原件存储，MT-06 已接入 PDF／文字按页解析，MT-07 已接入资料包创建和版本后端接口。当前工作区 UI 尚不可完成导入流程。capabilities 继续为 false，readiness 继续为 503。
 
 ## 配置
 
