@@ -897,6 +897,7 @@ dependencies = [
     { name = "ipfshttpclient" },
     { name = "psycopg2-binary" },
     { name = "pydantic" },
+    { name = "pypdf" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "requests" },
@@ -909,7 +910,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "pip-audit" },
-    { name = "pypdf" },
     { name = "pypdfium2" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -927,6 +927,7 @@ requires-dist = [
     { name = "ipfshttpclient", specifier = "==0.8.0a2" },
     { name = "psycopg2-binary", specifier = ">=2.9.13,<3" },
     { name = "pydantic", specifier = ">=2.13,<3" },
+    { name = "pypdf", specifier = "==6.21.1" },
     { name = "python-dotenv", specifier = ">=1.2,<2" },
     { name = "python-multipart", specifier = ">=0.0.22,<1" },
     { name = "requests", specifier = ">=2.32,<3" },
@@ -939,7 +940,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "pip-audit", specifier = ">=2.10,<3" },
-    { name = "pypdf", specifier = ">=6,<7" },
     { name = "pypdfium2", specifier = ">=5,<6" },
     { name = "pytest", specifier = ">=9.1,<10" },
     { name = "pytest-asyncio", specifier = ">=1.4,<2" },

@@ -15,7 +15,7 @@ from starlette.formparsers import MultiPartException, MultiPartParser
 
 from ..errors import ApiError
 from ..identity.service import DATABASE_FAILURES
-from ..schemas import DocumentResponse, ErrorCode, ErrorEnvelope, TextDocumentInput
+from ..schemas import DocumentPageResponse, DocumentResponse, ErrorCode, ErrorEnvelope, TextDocumentInput
 from .storage import MAX_BYTES, StorageUnavailable
 
 
@@ -136,6 +136,14 @@ def document_router():
     def get_document(request: Request, packet_id: UUID, document_id: UUID):
         documents, token = service(request)
         return documents.get(token, packet_id, document_id)
+
+    @router.get("/{document_id}/pages/{page_number}", response_model=DocumentPageResponse,
+                operation_id="get_document_page")
+    def get_document_page(request: Request, packet_id: UUID, document_id: UUID, page_number: int):
+        documents, token = service(request)
+        if page_number < 1:
+            raise ApiError(ErrorCode.NOT_FOUND)
+        return documents.get_page(token, packet_id, document_id, page_number)
 
     @router.get("/{document_id}/original", response_class=Response, operation_id="download_document",
         responses={200: {"content": {"application/pdf": {}, "text/plain": {}}}})

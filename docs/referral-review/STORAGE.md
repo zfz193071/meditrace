@@ -1,6 +1,6 @@
 # 私有原件存储与补偿
 
-MT-05 实现原件存储；PDF 页解析由 MT-06 接入，资料包创建／版本由 MT-07 提供。当前工作区尚不可完成导入流程。capabilities 继续为 false，readiness 继续为 503。
+MT-05 实现原件存储，MT-06 已接入 PDF／文字按页解析；资料包创建／版本由 MT-07 提供。当前工作区尚不可完成导入流程。capabilities 继续为 false，readiness 继续为 503。
 
 ## 配置
 
@@ -17,17 +17,17 @@ MT-05 实现原件存储；PDF 页解析由 MT-06 接入，资料包创建／版
 
 ## 接口
 
-- `POST /api/v1/packets/{pid}/documents`：Origin、CSRF、服务端会话和 `Idempotency-Key` 必需；key 是 8—128 位字母、数字、`_` 或 `-`。接收唯一 `file` 字段的 multipart PDF，或 `{text,filename?}` JSON；不接受 owner、URL 或对象路径。当前返回 201 与 `parse_status=parsing`，只是保存原件，MT-06 尚未提供解析结果或后台任务。
+- `POST /api/v1/packets/{pid}/documents`：Origin、CSRF、服务端会话和 `Idempotency-Key` 必需；key 是 8—128 位字母、数字、`_` 或 `-`。接收唯一 `file` 字段的 multipart PDF，或 `{text,filename?}` JSON；不接受 owner、URL 或对象路径。当前同步解析后返回 201 与 `parse_status=ready` 或 `rejected`；拒绝时包含 `parse_error_code` 和可定位的 `parse_error_page`，原件及实际字节配额仍已保存。
 - `GET /api/v1/packets/{pid}/documents/{did}`：该资料包下的元数据；无对象键／供应商地址。
 - `GET /api/v1/packets/{pid}/documents/{did}/original`：权限校验后代理二进制；校验实际字节和 SHA-256，I/O 后再次检查归属／到期，使用 attachment、private/no-store、nosniff 和 sandbox 响应头。
 
-PDF 按实际接收字节限制整请求（2 MiB + 16 KiB multipart 开销）及文件（2 MiB）。只信服务端计数，不信 Content-Length；有声明时还核对实际长度。限定 MIME 和 `%PDF-` 头，拒绝压缩包和不支持类型；加密、扫描、损坏 PDF 等深入解析在 MT-06 验证。文本最多 10,000 Unicode code points，保留 Unicode 原文；JSON 传输也有固定上限，支持转义后的非 BMP 字符。
+PDF 按实际接收字节限制整请求（2 MiB + 16 KiB multipart 开销）及文件（2 MiB）。只信服务端计数，不信 Content-Length；有声明时还核对实际长度。限定 MIME 和 `%PDF-` 头，拒绝压缩包和不支持类型；加密、扫描、损坏 PDF 由隔离解析器拒绝。文本最多 10,000 Unicode code points，保留 Unicode 原文；JSON 传输也有固定上限，支持转义后的非 BMP 字符。
 
 文件名拒绝路径分隔、URL、转义路径和控制字符；对象键仅使用服务端 UUID 与随机数。下载只接受 document ID，不接受对象键或重定向。相同 key 相同内容／文件名复用 Document，不重复写对象或扣配额；同 key 不同输入／仍在上传／此前失败返回 409，失败后用新 key 新建 Document。对象本体不可覆盖。
 
 ## 失败恢复
 
-预留事务同时写 Document、reservation、幂等记录和 10 分钟后到期的 cleanup intent。存储调用在事务外进行，完成事务再结算字节和取消 intent；解析状态仍待 MT-06。数据库提交回执丢失时先检查已提交状态，不误删成功原件。
+预留事务同时写 Document、reservation、幂等记录和 10 分钟后到期的 cleanup intent。存储调用在事务外进行，完成事务结算字节并取消 intent；解析结果在另一个原子事务中写入，断点重放会继续解析。数据库提交回执丢失时先检查已提交状态，不误删成功原件。
 
 接收／存储／结算失败后屏蔽失败文件，并尝试删除确定的对象键；只有删除被确认（或确定未调用写入）才释放额度。删除失败保留 `cleanup_pending`；数据库不可用时原始 intent 留存。崩溃遗留预留在 lease 到期后可显式补偿，补偿不删除 `stored` 文件，也不在 GET 中触发。每个清理任务达到 10 次尝试后停止，等待操作者检查；单次调用最多选择 200 项，45 秒后不再启动新项，当前单项网络操作还可能继续至超时。
 

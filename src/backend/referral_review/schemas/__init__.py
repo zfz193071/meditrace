@@ -109,7 +109,19 @@ class DocumentResponse(Contract):
     sha256: Sha256
     parse_status: Literal["uploading", "parsing", "ready", "rejected", "failed"]
     parser_version: str | None
+    page_count: int | None = Field(default=None, ge=1)
+    parse_error_code: str | None = None
+    parse_error_page: int | None = Field(default=None, ge=1)
     created_at: UTCDateTime
+
+
+class DocumentPageResponse(Contract):
+    document_id: UUID
+    page_number: int = Field(ge=1)
+    normalized_text: str
+    text_hash: Sha256
+    parse_quality: Literal["ready", "empty", "unreadable", "failed"]
+    parser_version: str
 
 
 class Evidence(Contract):

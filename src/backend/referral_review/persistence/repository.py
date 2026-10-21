@@ -106,9 +106,11 @@ def add_evidence(connection, *, owner_id: UUID, run_id: UUID, evidence, now: dat
     if run is None:
         raise NotFound("Run not found")
     owned_packet(connection, owner_id, run["packet_id"], now)
-    page = connection.execute(sa.select(m.document_pages).join(m.revision_documents,
+    page = connection.execute(sa.select(m.document_pages).join(m.documents,
+        m.documents.c.id == m.document_pages.c.document_id).join(m.revision_documents,
         m.document_pages.c.document_id == m.revision_documents.c.document_id).where(
         m.revision_documents.c.revision_id == run["revision_id"],
+        m.documents.c.parse_status == "ready",
         m.document_pages.c.document_id == evidence.document_id,
         m.document_pages.c.page_number == evidence.page_number)).mappings().first()
     if (page is None or page["parse_quality"] != "ready" or page["text_hash"] != evidence.text_hash

@@ -1,0 +1,9 @@
+{
+  "source": "李😀é\r\nAé 😀 Aé",
+  "normalized": "李😀é\nAé 😀 Aé",
+  "quote": "Aé",
+  "before": "\n",
+  "start_cp": 4,
+  "end_cp": 6,
+  "text_hash": "9d801af227b27030a430d761a71393efa936b4a3a2d1bab12cdc2763506d63b1"
+}

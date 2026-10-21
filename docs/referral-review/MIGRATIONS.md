@@ -1,6 +1,6 @@
 # Referral Review 数据迁移手册
 
-适用：MT-02 新领域表。初始版本 `rr_0001` 创建 33 张 `rr_` 业务／关联表，并使用独立 `rr_alembic_version`。旧 conversations、messages 等表不参与迁移。当前 SQLite 与 PostgreSQL SQL 编译检查通过，真实 PostgreSQL 验收尚未执行；完成前不要把本迁移用于生产发布。
+适用：MT-02 新领域表及 MT-06 解析字段。初始版本 `rr_0001` 创建 33 张 `rr_` 业务／关联表；追加版本 `rr_0002` 为 Document 加入页数和解析错误字段，并更新 ready 内容不可变触发器。二者使用独立 `rr_alembic_version`。旧 conversations、messages 等表不参与迁移。真实 PostgreSQL 验收尚未执行；完成前不要把本迁移用于生产发布。
 
 ## 数据模型与事务接口
 
@@ -35,11 +35,11 @@
 
 ## 显式追加迁移
 
-冻结迁移文件：`src/backend/migrations_referral/versions/rr_0001_create_isolated_referral_domain.py`。已应用的版本不能改写，后续变更新增 revision，并更新审查 allowlist／版本检查；不对旧迁移执行自动 downgrade。
+冻结迁移文件：`src/backend/migrations_referral/versions/rr_0001_create_isolated_referral_domain.py`；MT-06 仅追加 `rr_0002_document_parse_details.py`。已应用的版本不能改写，后续变更新增 revision，并更新审查 allowlist／版本检查；不对旧迁移执行自动 downgrade。
 
 应用启动不导入该迁移文件、不建新表。原 main.py 的旧启动逻辑仍由 MT-21 退役；本次未改动旧启动逻辑或旧数据库数据。readiness 仍是基础版 503，真实数据库／清单就绪聚合属于 MT-19。
 
-迁移命令在 `src/backend` 下用 `./.venv/bin/python` 执行。默认只读取版本，必须给出 `--apply --target rr_0001` 才写库。`upgrade` 共享调用方事务；PostgreSQL 额外获取事务级 advisory lock，防止同库同时执行两个部署迁移。未知版本或没有版本记录但已有 rr_ 表时直接拒绝，不猜测／接管现有结构。
+迁移命令在 `src/backend` 下用 `./.venv/bin/python` 执行。默认只读取版本，必须给出 `--apply --target rr_0002` 才升级到当前版本；已有 `rr_0001` 数据库可追加升级。`upgrade` 共享调用方事务；PostgreSQL 额外获取事务级 advisory lock，防止同库同时执行两个部署迁移。未知版本或没有版本记录但已有 rr_ 表时直接拒绝，不猜测／接管现有结构。
 
 ## 独立测试库与清理
 
@@ -65,7 +65,7 @@ PYTHON_DOTENV_DISABLED=1 src/backend/.venv/bin/python -m pytest -q \
 
 ./.venv/bin/python -m referral_review.persistence.migrate \
   --database-env TEST_DATABASE_URL --schema rr_test_REPLACE_WITH_RECEIPT_VALUE \
-  --target rr_0001 --apply
+  --target rr_0002 --apply
 
 # 重复执行相同命令仅核对版本，不重复创建表。
 # 完成检查后，仅删除该 receipt 对应的临时 schema；其中测试数据不可恢复。
@@ -84,7 +84,7 @@ receipt 只含随机 schema、marker 和不含密码的数据库标识指纹，�
 # src/backend；DATABASE_URL 由安全环境注入
 ./.venv/bin/python -m referral_review.persistence.migrate --database-env DATABASE_URL
 ./.venv/bin/python -m referral_review.persistence.migrate \
-  --database-env DATABASE_URL --target rr_0001 --apply --confirm-production
+  --database-env DATABASE_URL --target rr_0002 --apply --confirm-production
 ```
 
 第二条命令仍只执行 allowlist 的追加版本，不会运行旧 migrations 目录中的 SQL。事务内 SQL 失败回滚；如果连接在提交确认时丢失，先重新只读检查版本，不假定服务端必然回滚。未知状态停止后人工检查，禁止自动 stamp 修饰失败。成功后应用回滚仅切回兼容代码，不能删除新表／新数据。Alembic downgrade 明确拒绝执行。现有 deploy-vercel.sh 未接入该迁移，自动发布迁移集成在 MT-21/24。

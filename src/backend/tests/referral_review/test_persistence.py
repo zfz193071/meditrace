@@ -351,6 +351,26 @@ def test_sqlite_memory_database_survives_separate_units_of_work():
         engine.dispose()
 
 
+def test_rr_0001_upgrade_preserves_ready_document_and_protects_new_fields(empty_engine):
+    owner, packet, document = uuid4(), uuid4(), uuid4()
+    with transaction(empty_engine) as c:
+        upgrade(c, "rr_0001")
+        c.execute(m.users.insert().values(id=owner, github_subject=str(owner),
+                                           display_name="Migration user", created_at=NOW))
+        c.execute(m.packets.insert().values(id=packet, owner_id=owner, title="Migration packet",
+            created_at=NOW, updated_at=NOW, expires_at=NOW + timedelta(days=7)))
+        c.execute(m.documents.insert().values(id=document, packet_id=packet, owner_id=owner,
+            kind="text", filename="old.txt", sha256="a" * 64, storage_key=f"test/{document}",
+            byte_size=1, parse_status="ready", parser_version="text-v1", created_at=NOW))
+    with transaction(empty_engine) as c:
+        upgrade(c, HEAD)
+        row = c.execute(sa.select(m.documents).where(m.documents.c.id == document)).mappings().one()
+        assert row["page_count"] is None and row["parse_status"] == "ready"
+    with pytest.raises(sa.exc.IntegrityError):
+        with transaction(empty_engine) as c:
+            c.execute(m.documents.update().where(m.documents.c.id == document).values(page_count=1))
+
+
 def test_ownership_receipt_recorded_before_database_connection(monkeypatch):
     from referral_review.persistence import test_database
     records = []

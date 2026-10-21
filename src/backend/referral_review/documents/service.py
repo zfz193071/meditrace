@@ -20,7 +20,8 @@ from ..errors import ApiError
 from ..identity.service import DATABASE_FAILURES
 from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
-from ..schemas import DocumentResponse, ErrorCode
+from ..schemas import DocumentPageResponse, DocumentResponse, ErrorCode
+from .parser import MAX_DOCUMENT_CODEPOINTS, MAX_PAGES, parse_pdf, parse_text, rejected
 from .storage import LocalStore, MAX_BYTES, PrivateBlobStore, StorageUnavailable, object_key
 
 ACCOUNT_BYTES = 100 * 1024 * 1024
@@ -79,6 +80,30 @@ class Documents:
         with self.engine.begin() as conn:
             return public_document(self._get(conn, token, packet_id, document_id))
 
+    def get_page(self, token, packet_id, document_id, page_number):
+        with self.engine.begin() as conn:
+            document = self._get(conn, token, packet_id, document_id)
+            if document["parse_status"] not in ("ready", "rejected"):
+                raise ApiError(ErrorCode.NOT_FOUND)
+            page = conn.execute(sa.select(m.document_pages).where(
+                m.document_pages.c.document_id == document_id,
+                m.document_pages.c.page_number == page_number)).mappings().first()
+            if page is None:
+                raise ApiError(ErrorCode.NOT_FOUND)
+            return DocumentPageResponse(**page, parser_version=document["parser_version"])
+
+    @staticmethod
+    def _active_document_filter(packet):
+        packet_id = packet["id"]
+        in_history = sa.exists().where(m.revision_documents.c.document_id == m.documents.c.id)
+        in_current = sa.exists(sa.select(m.revision_documents.c.document_id).join(
+            m.revisions, m.revision_documents.c.revision_id == m.revisions.c.id).where(
+            m.revision_documents.c.document_id == m.documents.c.id,
+            m.revisions.c.packet_id == packet_id,
+            m.revisions.c.revision_number == packet["current_revision"]))
+        return (m.documents.c.packet_id == packet_id, m.documents.c.deleted_at.is_(None),
+                sa.or_(~in_history, in_current))
+
     def begin(self, token, packet_id, kind, idempotency_key):
         if not re.fullmatch(r"[A-Za-z0-9_-]{8,128}", idempotency_key or ""):
             raise ApiError(ErrorCode.SCHEMA_INVALID)
@@ -106,16 +131,9 @@ class Documents:
                 conn.execute(live.where(m.storage_reservations.c.owner_id == owner_id)).scalar_one() >= ACCOUNT_FILES):
                 raise ApiError(ErrorCode.DOCUMENT_LIMIT)
             # Historical revision members keep storage quota but not active-file slots.
-            in_history = sa.exists().where(m.revision_documents.c.document_id == m.documents.c.id)
-            in_current = sa.exists(sa.select(m.revision_documents.c.document_id).join(
-                m.revisions, m.revision_documents.c.revision_id == m.revisions.c.id).where(
-                    m.revision_documents.c.document_id == m.documents.c.id,
-                    m.revisions.c.packet_id == packet_id,
-                    m.revisions.c.revision_number == packet["current_revision"]))
             active_count = conn.execute(sa.select(sa.func.count()).select_from(m.documents).where(
-                m.documents.c.packet_id == packet_id, m.documents.c.deleted_at.is_(None),
                 m.documents.c.parse_status.in_(("uploading", "parsing", "ready")),
-                sa.or_(~in_history, in_current))).scalar_one()
+                *self._active_document_filter(packet))).scalar_one()
             if active_count >= 5:
                 raise ApiError(ErrorCode.DOCUMENT_LIMIT)
             reserved = MAX_BYTES if kind == "pdf" else 40_000
@@ -154,7 +172,9 @@ class Documents:
                     m.idempotency.c.resource_id == upload.document_id)).scalar_one()
                 if prior != digest:
                     raise ApiError(ErrorCode.IDEMPOTENCY_CONFLICT)
-                return public_document(row)
+                if row["parse_status"] != "parsing":
+                    return public_document(row)
+            return self._parse_and_save(token, upload, kind, body)
         with self.engine.begin() as conn:
             self._get(conn, token, upload.packet_id, upload.document_id)
             reservation = conn.execute(sa.select(m.storage_reservations).where(
@@ -163,7 +183,51 @@ class Documents:
                 raise ApiError(ErrorCode.STORAGE_UNAVAILABLE)
         self.store.write(upload.key, body, "application/pdf" if kind == "pdf" else "text/plain; charset=utf-8")
         # A commit failure is ambiguous: abort() first checks committed state.
-        return self._settle(token, upload, filename, kind, body, digest)
+        self._settle(token, upload, filename, kind, body, digest)
+        return self._parse_and_save(token, upload, kind, body)
+
+    def _parse_and_save(self, token, upload, kind, body):
+        try:
+            parsed = parse_text(body) if kind == "text" else parse_pdf(body)
+        except Exception:
+            parsed = rejected("PARSER_UNAVAILABLE", parser_version="text-v1" if kind == "text" else "pypdf-6.21.1/text-v1")
+        with self.engine.begin() as conn:
+            packet = self.identity.require_owner(conn, token, upload.packet_id)
+            row = conn.execute(sa.select(m.documents).where(m.documents.c.id == upload.document_id,
+                m.documents.c.deleted_at.is_(None)).with_for_update()).mappings().first()
+            if row is None:
+                raise ApiError(ErrorCode.NOT_FOUND)
+            if row["parse_status"] != "parsing":
+                return public_document(row)
+            if parsed.status == "ready":
+                # Packet ownership lock serializes upload completion across instances.
+                active = sa.select(m.documents.c.page_count, m.documents.c.id).where(
+                    m.documents.c.parse_status == "ready", m.documents.c.id != upload.document_id,
+                    *self._active_document_filter(packet))
+                existing = conn.execute(active).all()
+                page_total = 0
+                text_total = 0
+                for count, did in existing:
+                    pages = conn.execute(sa.select(
+                        m.document_pages.c.normalized_text).where(
+                        m.document_pages.c.document_id == did)).scalars().all()
+                    page_total += count if count is not None else len(pages)
+                    text_total += sum(len(value) for value in pages)
+                if page_total + (parsed.page_count or 0) > MAX_PAGES:
+                    parsed = rejected("PACKET_PAGE_LIMIT", parser_version=parsed.parser_version,
+                                      page_count=parsed.page_count)
+                elif text_total + sum(len(page.normalized_text) for page in parsed.pages) > MAX_DOCUMENT_CODEPOINTS:
+                    parsed = rejected("PACKET_TEXT_LIMIT", parser_version=parsed.parser_version,
+                                      page_count=parsed.page_count)
+            for page in parsed.pages:
+                conn.execute(m.document_pages.insert().values(document_id=upload.document_id,
+                    page_number=page.page_number, normalized_text=page.normalized_text,
+                    text_hash=page.text_hash, parse_quality=page.parse_quality))
+            updated = conn.execute(m.documents.update().where(m.documents.c.id == upload.document_id).values(
+                parse_status=parsed.status, parser_version=parsed.parser_version,
+                page_count=parsed.page_count, parse_error_code=parsed.issue_code,
+                parse_error_page=parsed.issue_page).returning(m.documents)).mappings().one()
+            return public_document(updated)
 
     def _settle(self, token, upload, filename, kind, body, digest):
         with self.engine.begin() as conn:

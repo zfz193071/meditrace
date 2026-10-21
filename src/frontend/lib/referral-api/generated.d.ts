@@ -140,6 +140,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/packets/{packet_id}/documents/{document_id}/pages/{page_number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Document Page */
+        get: operations["get_document_page"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/readiness": {
         parameters: {
             query?: never;
@@ -226,6 +243,27 @@ export interface components {
              */
             workspace_available: false;
         };
+        /** DocumentPageResponse */
+        DocumentPageResponse: {
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Normalized Text */
+            normalized_text: string;
+            /** Page Number */
+            page_number: number;
+            /**
+             * Parse Quality
+             * @enum {string}
+             */
+            parse_quality: "ready" | "empty" | "unreadable" | "failed";
+            /** Parser Version */
+            parser_version: string;
+            /** Text Hash */
+            text_hash: string;
+        };
         /** DocumentResponse */
         DocumentResponse: {
             /** Byte Size */
@@ -252,6 +290,12 @@ export interface components {
              * Format: uuid
              */
             packet_id: string;
+            /** Page Count */
+            page_count?: number | null;
+            /** Parse Error Code */
+            parse_error_code?: string | null;
+            /** Parse Error Page */
+            parse_error_page?: number | null;
             /**
              * Parse Status
              * @enum {string}
@@ -1079,6 +1123,84 @@ export interface operations {
                 content: {
                     "application/pdf": unknown;
                     "text/plain": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_document_page: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+                packet_id: string;
+                page_number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentPageResponse"];
                 };
             };
             /** @description Unauthorized */

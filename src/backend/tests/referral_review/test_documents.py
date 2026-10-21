@@ -14,7 +14,7 @@ from referral_review.documents.storage import LocalStore, MAX_BYTES, StorageUnav
 from referral_review.persistence import models as m
 from test_identity import auth_client, sign_in
 
-PDF = b"%PDF-1.7\nSynthetic fixture; parser validation belongs to MT-06.\n%%EOF\n"
+PDF = b"%PDF-1.7\nSynthetic malformed fixture.\n%%EOF\n"
 
 
 @pytest.fixture
@@ -51,7 +51,9 @@ def test_pdf_boundary_private_download_integrity_and_metadata(docs):
     data = response.json()
     assert data["byte_size"] == MAX_BYTES
     assert data["sha256"] == hashlib.sha256(body).hexdigest()
-    assert data["parse_status"] == "parsing" and data["parser_version"] is None
+    assert data["parse_status"] == "rejected"
+    assert data["parser_version"] == "pypdf-6.21.1/text-v1"
+    assert data["parse_error_code"] == "PDF_DAMAGED"
     assert "storage_key" not in data and "owner_id" not in data
     client, documents, packet_id, *_ = docs
     original = client.get(f"/packets/{packet_id}/documents/{data['id']}/original")
@@ -112,6 +114,41 @@ def test_no_length_chunked_input_and_unicode_text_limit(docs):
     assert streamed.status_code == 201, streamed.text
 
 
+def test_text_page_is_normalized_addressable_and_packet_limit_is_atomic(docs):
+    client, documents, pid, headers, *_ = docs
+    def upload(text):
+        return client.post(f"/packets/{pid}/documents", json={"text": text},
+                           headers=headers | {"Idempotency-Key": uuid4().hex})
+    first = upload("李😀é\r\nAé")
+    assert first.status_code == 201 and first.json()["parse_status"] == "ready"
+    did = first.json()["id"]
+    page = client.get(f"/packets/{pid}/documents/{did}/pages/1")
+    assert page.status_code == 200
+    assert page.json()["normalized_text"] == "李😀é\nAé"
+    assert page.json()["text_hash"] == hashlib.sha256("李😀é\nAé".encode()).hexdigest()
+    assert client.get(f"/packets/{pid}/documents/{did}/pages/2").status_code == 404
+    for _ in range(2):
+        assert upload("A" * 10_000).json()["parse_status"] == "ready"
+    rejected = upload("B" * 10_000)
+    assert rejected.status_code == 201
+    assert rejected.json()["parse_status"] == "rejected"
+    assert rejected.json()["parse_error_code"] == "PACKET_TEXT_LIMIT"
+    with documents.engine.begin() as conn:
+        assert conn.execute(sa.select(sa.func.count()).select_from(m.document_pages)).scalar_one() == 3
+    assert client.get(f"/packets/{pid}/documents/{did}/pages/1").status_code == 200
+
+
+def test_pdf_page_route_and_unreadable_page_fail_closed(docs):
+    client, _, pid, *_ = docs
+    root = Path(__file__).resolve().parents[4] / "fixtures/referral-review"
+    good = send(docs, (root / "test/test-14/sources/document-2.pdf").read_bytes()).json()
+    assert good["parse_status"] == "ready" and good["page_count"] == 2
+    assert client.get(f"/packets/{pid}/documents/{good['id']}/pages/2").json()["parse_quality"] == "ready"
+    scan = send(docs, (root / "dev/dev-10/sources/document-2.pdf").read_bytes()).json()
+    assert scan["parse_status"] == "rejected" and scan["parse_error_page"] == 1
+    assert client.get(f"/packets/{pid}/documents/{scan['id']}/pages/1").json()["parse_quality"] == "unreadable"
+
+
 def test_idempotency_reuses_document_and_rejects_changed_payload(docs):
     first = send(docs, key="repeat-key").json()
     second = send(docs, key="repeat-key")
@@ -149,7 +186,7 @@ def test_cross_account_unknown_deleted_expired_and_anonymous_are_hidden(docs):
     assert client.get(url + "/original").status_code == 401
     transport.subject = 67890
     sign_in(client)
-    for suffix in ("", "/original"):
+    for suffix in ("", "/original", "/pages/1"):
         denied = client.get(url + suffix)
         missing = client.get(f"/packets/{uuid4()}/documents/{uuid4()}" + suffix)
         assert denied.status_code == missing.status_code == 404
