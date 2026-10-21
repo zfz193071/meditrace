@@ -30,6 +30,12 @@ class ErrorCode(StrEnum):
     SERVICE_NOT_READY = "SERVICE_NOT_READY"
     INTERNAL_ERROR = "INTERNAL_ERROR"
     OAUTH_FAILED = "OAUTH_FAILED"
+    FILE_UNSUPPORTED = "FILE_UNSUPPORTED"
+    FILE_TOO_LARGE = "FILE_TOO_LARGE"
+    STORAGE_LIMIT = "STORAGE_LIMIT"
+    DOCUMENT_LIMIT = "DOCUMENT_LIMIT"
+    STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE"
+    IDEMPOTENCY_CONFLICT = "IDEMPOTENCY_CONFLICT"
 
 
 class ErrorDetail(Contract):
@@ -87,6 +93,23 @@ class SessionResponse(Contract):
     csrf_token: str | None = None
     expires_at: UTCDateTime | None = None
     login_available: bool = False
+
+
+class TextDocumentInput(Contract):
+    text: str = Field(min_length=1, max_length=10_000)
+    filename: str = Field(default="pasted-text.txt", min_length=1, max_length=255)
+
+
+class DocumentResponse(Contract):
+    id: UUID
+    packet_id: UUID
+    kind: Literal["pdf", "text"]
+    filename: str
+    byte_size: int = Field(ge=0)
+    sha256: Sha256
+    parse_status: Literal["uploading", "parsing", "ready", "rejected", "failed"]
+    parser_version: str | None
+    created_at: UTCDateTime
 
 
 class Evidence(Contract):

@@ -47,7 +47,11 @@ anyio==4.15.1 \
     --hash=sha256:9f28306018cbd6d329e64a36d58256edff76dd996fe423bc957326e578b82a94
     # via
     #   httpx
+    #   httpx2
     #   starlette
+    #   vercel-blob
+    #   vercel-internal-core
+    #   vercel-oidc
     #   watchfiles
 async-generator==1.10 \
     --hash=sha256:01c7bf666359b4967d2cda0000cc2e4af16a0ae098cbffcb8472fb9e8ad6585b \
@@ -108,9 +112,9 @@ blake3==1.0.11 \
     --hash=sha256:ea66216cbe8264615e94812fce253be5c60b75575f74b89edaee0be376aba764 \
     --hash=sha256:fdb80a774cb0a440fcb62c9f64a64662c740c5bca985f78e70a3aa787264cc41
     # via py-multihash
-certifi==2026.10.18 \
-    --hash=sha256:73191c47aaa79da394e8fee2dbc2ec827432cab56311122c9e47abf79e390f62 \
-    --hash=sha256:b9995d97b64d0431a5af837d8ca8cd6238104d1f319f04bd93ea43124d6c861e
+certifi==2026.10.19 \
+    --hash=sha256:035c1e85572b141bf1c3a3eff0e33a8eb74917522f2559075ff8d2fea780a1ae \
+    --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b
     # via
     #   httpcore
     #   httpx
@@ -363,6 +367,7 @@ h11==0.16.0 \
     --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
     # via
     #   httpcore
+    #   httpcore2
     #   uvicorn
 hexbytes==2.0.0 \
     --hash=sha256:01312fcd5c57e8a8d2d7dd3274dcf84ea50422aff2abcc2d9fd89ad6a32498e5 \
@@ -375,6 +380,10 @@ httpcore==1.0.9 \
     --hash=sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55 \
     --hash=sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8
     # via httpx
+httpcore2==2.15.1 ; sys_platform != 'emscripten' \
+    --hash=sha256:730f603058c260a3288378217b464713350c23e3b8fe8bba753701054032d98a \
+    --hash=sha256:a94b6b3e6260e1a3f035915408d3dcd7dc8e844c2b544b642e227cf98a747af0
+    # via httpx2
 httptools==0.9.0 \
     --hash=sha256:29b0d823e3c1e7cd1093a5dc889245db693ef13ada624cd66e2262421ef38867 \
     --hash=sha256:36fac804b8cfd6b935ae64f71349f833d2b6298404626d017a2c57bb942bc643 \
@@ -395,12 +404,24 @@ httpx==0.28.1 \
     --hash=sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc \
     --hash=sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad
     # via meditrace-backend
+httpx2==2.15.1 \
+    --hash=sha256:75841cd83d16b417f7d6da8f2089ce8120806efdbf96af37d46c5129c49015be \
+    --hash=sha256:ff75485308fbe441e75b1218546e4e78d884df41e1a9741c1f79335ed8fcfef7
+    # via
+    #   vercel-blob
+    #   vercel-internal-core
+    #   vercel-oidc
+httpx2-jsfetch==1.0 ; sys_platform == 'emscripten' \
+    --hash=sha256:70a0e3eabfef7cce5ad9c629f7d01ca05e418f586646f4ddf14782e4c1454c60 \
+    --hash=sha256:cb916b707601e69a07721aabc8f3f6659be3a6893bc1ff5c6f9e02241df2da32
+    # via httpx2
 idna==3.20 \
     --hash=sha256:a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44 \
     --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
     # via
     #   anyio
     #   httpx
+    #   httpx2
     #   multiaddr
     #   requests
     #   trio
@@ -637,6 +658,7 @@ pydantic==2.14.1 \
     #   eth-utils
     #   fastapi
     #   meditrace-backend
+    #   vercel-blob
     #   web3
 pydantic-core==2.50.1 \
     --hash=sha256:132529c83901437ff642f585216831bf5fd7a91df66829907e155192ead62498 \
@@ -777,6 +799,12 @@ trio-typing==0.10.0 \
     --hash=sha256:065ee684296d52a8ab0e2374666301aec36ee5747ac0e7a61f230250f8907ac3 \
     --hash=sha256:6d0e7ec9d837a2fe03591031a172533fbf4a1a95baf369edebfc51d5a49f0264
     # via multiaddr
+truststore==0.10.5 ; sys_platform != 'emscripten' \
+    --hash=sha256:30d36967ccaded5cbb38d602c433f53600036c79d502f4533a49b60a03bbefcd \
+    --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c
+    # via
+    #   httpcore2
+    #   httpx2
 typing-extensions==4.16.0 \
     --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8 \
     --hash=sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5
@@ -787,6 +815,7 @@ typing-extensions==4.16.0 \
     #   anyio
     #   eth-typing
     #   fastapi
+    #   httpx2
     #   opentelemetry-api
     #   pydantic
     #   pydantic-core
@@ -823,6 +852,22 @@ varint==1.0.2 \
     #   multiaddr
     #   py-multicodec
     #   py-multihash
+vercel-blob==0.5.0 \
+    --hash=sha256:0e42ceba8f0aa51aeb67fa1c86dc3ba4a4a078326bd2272c09580a9756231acb \
+    --hash=sha256:12168f22d2497916574d67ac955d99a0c7ed6d4291b988a51416e15d07d282ed
+    # via meditrace-backend
+vercel-headers==0.7.2 \
+    --hash=sha256:26dcb0016b5c553e638385e532cb8557f071e247b46f2575d5737e48718dc8c6 \
+    --hash=sha256:f5255da014032b357a3f18769bd19ff675b0ee3e4fc355c6bbd574dfc674222d
+    # via vercel-oidc
+vercel-internal-core==0.2.2 \
+    --hash=sha256:581b02309ec8d6367134c3ecabba5d8169a902677458e228f544dc88dfa05a6b \
+    --hash=sha256:cf20141dd5cb67cdf0892d4f96a4b25dc7cf26469c72c00f26f6fc504c945e6e
+    # via vercel-blob
+vercel-oidc==0.10.0 \
+    --hash=sha256:24310f5ce5db05455bcac82ff6cb0cb254b28af93dacb526cc375a9403aca6ee \
+    --hash=sha256:abc8317317482e542834ab35883e8c4a0f9a1baea554898e3f041ca037f90bec
+    # via vercel-blob
 watchfiles==1.3.0 \
     --hash=sha256:000b9688fc8133037a8b075c8ebf98f32844ff8964dda61e85c1db547dafc441 \
     --hash=sha256:025b108f2d5cc2799cb941f79380df3e8b22bfb589c218e801767fe78d598c95 \

@@ -25,6 +25,9 @@ class Settings(BaseModel):
     github_callback_url: str | None = Field(None, alias="RR_GITHUB_CALLBACK_URL")
     session_encryption_key: SecretStr | None = Field(None, alias="RR_SESSION_ENCRYPTION_KEY", repr=False)
     blob_token: SecretStr | None = Field(None, alias="BLOB_READ_WRITE_TOKEN", repr=False)
+    storage_backend: Literal["disabled", "local", "vercel"] = Field("disabled", alias="RR_STORAGE_BACKEND")
+    private_storage_dir: str | None = Field(None, alias="RR_PRIVATE_STORAGE_DIR", repr=False)
+    storage_global_bytes: int = Field(1024**3, ge=0, alias="RR_STORAGE_GLOBAL_BYTES")
     stripe_secret_key: SecretStr | None = Field(None, alias="RR_STRIPE_SECRET_KEY", repr=False)
     stripe_webhook_secret: SecretStr | None = Field(None, alias="RR_STRIPE_WEBHOOK_SECRET", repr=False)
     stripe_price_id: str | None = Field(None, alias="RR_STRIPE_PRICE_ID", repr=False)
@@ -74,6 +77,11 @@ class Settings(BaseModel):
 
     @model_validator(mode="after")
     def secure_origins(self):
+        if self.storage_backend == "local":
+            if self.environment == "production" or not self.private_storage_dir:
+                raise ValueError("Local storage requires a private directory and a non-production environment")
+        if self.storage_backend == "vercel" and not self.blob_token:
+            raise ValueError("Private Blob requires a server token")
         if self.site_origin and urlsplit(self.site_origin).path:
             raise ValueError("RR_SITE_ORIGIN must not contain a path")
         if self.github_callback_url:

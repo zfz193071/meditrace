@@ -82,6 +82,83 @@
         "title": "Capabilities",
         "type": "object"
       },
+      "DocumentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "byte_size": {
+            "minimum": 0.0,
+            "title": "Byte Size",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "pdf",
+              "text"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "packet_id": {
+            "format": "uuid",
+            "title": "Packet Id",
+            "type": "string"
+          },
+          "parse_status": {
+            "enum": [
+              "uploading",
+              "parsing",
+              "ready",
+              "rejected",
+              "failed"
+            ],
+            "title": "Parse Status",
+            "type": "string"
+          },
+          "parser_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parser Version"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "packet_id",
+          "kind",
+          "filename",
+          "byte_size",
+          "sha256",
+          "parse_status",
+          "parser_version",
+          "created_at"
+        ],
+        "title": "DocumentResponse",
+        "type": "object"
+      },
       "ErrorCode": {
         "enum": [
           "AUTH_REQUIRED",
@@ -92,7 +169,13 @@
           "REAL_AI_NOT_ALLOWED",
           "SERVICE_NOT_READY",
           "INTERNAL_ERROR",
-          "OAUTH_FAILED"
+          "OAUTH_FAILED",
+          "FILE_UNSUPPORTED",
+          "FILE_TOO_LARGE",
+          "STORAGE_LIMIT",
+          "DOCUMENT_LIMIT",
+          "STORAGE_UNAVAILABLE",
+          "IDEMPOTENCY_CONFLICT"
         ],
         "title": "ErrorCode",
         "type": "string"
@@ -624,7 +707,7 @@
     }
   },
   "info": {
-    "description": "Referral identity foundation. Packet, review, model and payment workflows are not implemented yet.",
+    "description": "Referral identity and private document storage. Parsing, packet, review, model and payment workflows are not complete yet.",
     "title": "MediTrace Referral Review API",
     "version": "0.1.0"
   },
@@ -1009,6 +1092,367 @@
           }
         },
         "summary": "Capabilities"
+      }
+    },
+    "/packets/{packet_id}/documents": {
+      "post": {
+        "operationId": "upload_document",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Packet Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "filename": {
+                    "default": "pasted-text.txt",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "title": "Filename",
+                    "type": "string"
+                  },
+                  "text": {
+                    "maxLength": 10000,
+                    "minLength": 1,
+                    "title": "Text",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "title": "TextDocumentInput",
+                "type": "object"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Capacity or idempotency conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Input too large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Upload Document"
+      }
+    },
+    "/packets/{packet_id}/documents/{document_id}": {
+      "get": {
+        "operationId": "get_document",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Packet Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Get Document"
+      }
+    },
+    "/packets/{packet_id}/documents/{document_id}/original": {
+      "get": {
+        "operationId": "download_document",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Packet Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {},
+              "text/plain": {}
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Download Document"
       }
     },
     "/readiness": {

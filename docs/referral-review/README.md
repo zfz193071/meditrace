@@ -1,6 +1,6 @@
 # MediTrace Referral Review Copilot — V1 开发基线
 
-日期：2026-10-20。状态：MT-01 工程基线已完成；MT-02 等待 PostgreSQL 验收；MT-03 等待操作者标注复核；MT-04 认证代码与离线测试已实施，等待前置验收和真实 OAuth；MT-05—24 尚未开始，完整产品未交付。基础配置见 [CONFIGURATION](CONFIGURATION.md)，数据迁移见 [MIGRATIONS](MIGRATIONS.md)，验收结果见 [MT-01 证据](MT-01-EVIDENCE.md)／[MT-02 证据](MT-02-EVIDENCE.md)／[MT-03 证据](MT-03-EVIDENCE.md)／[MT-04 证据](MT-04-EVIDENCE.md)。
+日期：2026-10-21。状态：MT-01 工程基线已完成；MT-02 等待 PostgreSQL 验收；MT-03 等待操作者标注复核；MT-04 认证代码与离线测试已实施，等待前置验收和真实 OAuth；MT-05 私有存储代码已实施，等待前置验收、PostgreSQL 并发和真实 Private Blob；MT-06—24 尚未开始，完整产品未交付。基础配置见 [CONFIGURATION](CONFIGURATION.md)，数据迁移见 [MIGRATIONS](MIGRATIONS.md)，验收结果见 [MT-01 证据](MT-01-EVIDENCE.md)／[MT-02 证据](MT-02-EVIDENCE.md)／[MT-03 证据](MT-03-EVIDENCE.md)／[MT-04 证据](MT-04-EVIDENCE.md)／[MT-05 证据](MT-05-EVIDENCE.md)。
 
 目标：交付一个可以公开用于 AI 应用／全栈求职的英文产品，完成“资料导入 → 缺失与差异核对 → 证据定位 → 人工处理 → 交接导出”。全部 24 张工单及发布门槛通过，才称为本版项目开发完成。
 
@@ -26,6 +26,8 @@
 工单当前状态以各文件 front matter 为准：MT-01 为 `DONE`，MT-02 为 `BLOCKED`（待 PostgreSQL 实测），MT-03 为 `BLOCKED`（待实际人工标注复核），其余为 `TODO`。编号是稳定的本地工单编号，并非已创建的 GitHub Issue 编号。可将各文件正文原样作为远程 Issue 描述，创建后再回填链接；当前未发布远程工单。
 
 MT-04 已交错实施代码和离线验证；按下方关闭规则，前置 MT-02 未完成，状态仍保留 `TODO`，不代表代码尚未编写。真实 GitHub OAuth 也是该票独立的待验收项。
+
+MT-05 也按交错实施推进，前置 MT-04 未完成，状态保留 `TODO`。上传接口目前仅保存原件并返回 `parsing`；MT-06 尚未接入解析，不存在后台解析任务，不能将此中间状态记为 `201 ready` 的最终验收。
 
 | 工单 | 交付内容 | 前置工单 | 覆盖需求 |
 | --- | --- | --- | --- |

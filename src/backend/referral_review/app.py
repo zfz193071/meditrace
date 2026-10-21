@@ -12,15 +12,17 @@ from .schemas import Capabilities, ErrorCode, ErrorEnvelope, ReadinessResponse
 from .identity.routes import auth_router
 from .identity.service import DATABASE_FAILURES, configured_identity
 from .identity.authorization import protect_request
+from .documents import configured_documents
+from .documents.routes import document_router
 from starlette.concurrency import run_in_threadpool
 
 
-def create_app(settings: Settings | None = None, *, identity=None) -> FastAPI:
+def create_app(settings: Settings | None = None, *, identity=None, documents=None) -> FastAPI:
     config = settings if settings is not None else load_settings()
     app = FastAPI(
         title="MediTrace Referral Review API",
         version=CONTRACT_VERSION,
-        description="Referral identity foundation. Packet, review, model and payment workflows are not implemented yet.",
+        description="Referral identity and private document storage. Parsing, packet, review, model and payment workflows are not complete yet.",
         servers=[{"url": "/api/v1"}],
         docs_url=None, redoc_url=None,
         responses={
@@ -35,7 +37,9 @@ def create_app(settings: Settings | None = None, *, identity=None) -> FastAPI:
     install_error_handlers(app)
     identity = identity if identity is not None else configured_identity(config)
     app.state.identity = identity
+    app.state.documents = documents if documents is not None else configured_documents(config, identity)
     app.include_router(auth_router(identity))
+    app.include_router(document_router())
 
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):

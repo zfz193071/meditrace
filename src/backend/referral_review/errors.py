@@ -21,6 +21,12 @@ ERRORS = {
     ErrorCode.SERVICE_NOT_READY: (503, "Service is not ready."),
     ErrorCode.INTERNAL_ERROR: (500, "An internal error occurred."),
     ErrorCode.OAUTH_FAILED: (400, "Sign-in could not be completed."),
+    ErrorCode.FILE_UNSUPPORTED: (422, "Upload one text PDF or paste supported text."),
+    ErrorCode.FILE_TOO_LARGE: (413, "Document exceeds the input limit."),
+    ErrorCode.STORAGE_LIMIT: (409, "Storage capacity is exhausted."),
+    ErrorCode.DOCUMENT_LIMIT: (409, "Document capacity is exhausted."),
+    ErrorCode.STORAGE_UNAVAILABLE: (503, "Private storage is unavailable."),
+    ErrorCode.IDEMPOTENCY_CONFLICT: (409, "Upload key is in use or belongs to different input."),
 }
 
 

@@ -20,6 +20,7 @@ dependencies = [
   # Legacy routes remain until MT-21. No new chain or IPFS functionality.
   "web3>=8,<9",
   "ipfshttpclient==0.8.0a2",
+  "vercel-blob>=0.5.0,<0.6",
 ]
 
 [dependency-groups]

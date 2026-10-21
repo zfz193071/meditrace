@@ -29,6 +29,9 @@ MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-M
 | `RR_GITHUB_CALLBACK_URL` | 未设置；若设置必须等于 origin + `/api/v1/auth/github/callback` | MT-04 |
 | `RR_SESSION_ENCRYPTION_KEY` | 未设置；启用认证时必须为 Fernet key，即 32 个随机字节的 URL-safe Base64 编码，不能使用普通口令 | MT-04 OAuth verifier 加密 |
 | `BLOB_READ_WRITE_TOKEN` | 未设置，秘密 | MT-05 |
+| `RR_STORAGE_BACKEND` | disabled；允许 local / vercel；生产禁止 local；vercel 必须配私有 store 的 token | MT-05 |
+| `RR_PRIVATE_STORAGE_DIR` | 未设置；local 必填绝对路径；不在仓库或 public 下；私有目录 0700、对象 0600 | MT-05 |
+| `RR_STORAGE_GLOBAL_BYTES` | 1073741824（1 GiB）；非负整数；0 禁止新上传，仍可读和清理 | MT-05 |
 | `RR_STRIPE_SECRET_KEY` | 未设置；只接受 `sk_test_` / `rk_test_` 前缀；后续仍需校验 webhook 的 livemode | MT-17 |
 | `RR_STRIPE_WEBHOOK_SECRET` | 未设置，秘密 | MT-17 |
 | `RR_STRIPE_PRICE_ID` | 未设置，服务端固定测试商品 | MT-17 |
@@ -50,6 +53,8 @@ MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-M
 前端 build-time：Node 22、pnpm 10.34.7；旧 `NEXT_PUBLIC_BACKEND_URL` 只供旧页面使用。新客户端固定同源 `/api/v1`，无公开密钥／名单配置。开发时 Next.js 将此路径代理到 `127.0.0.1:8000`；生产不生成此代理，沿用根 `vercel.json` 的 Services rewrite。`.env.example` 是模板，复制前请确认不会覆盖现有 `.env`；配置模块本身不主动读取文件，旧 `main.py` 加载环境后挂载新模块，CI 使用 `PYTHON_DOTENV_DISABLED=1` 避免本地密钥影响测试。
 
 认证的启用条件、Cookie、归属 Interface 和手动 GitHub 验收步骤见 [认证手册](AUTHENTICATION.md)。身份配置不会自动迁移数据库、授予会员或放开真实 AI。
+
+MT-05 的上传、存储配置、补偿操作及真实供应商验证见 [私有存储手册](STORAGE.md)。存储默认禁用，没有公开桶或本地自动回退。配置成功不代表 MT-06 解析、MT-07 资料包流程或 MT-14 上传 UI 已实现。
 
 ## 安装和生成（仓库根目录）
 
