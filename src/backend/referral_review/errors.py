@@ -20,6 +20,7 @@ ERRORS = {
     ErrorCode.REAL_AI_NOT_ALLOWED: (403, "Real AI execution is unavailable."),
     ErrorCode.SERVICE_NOT_READY: (503, "Service is not ready."),
     ErrorCode.INTERNAL_ERROR: (500, "An internal error occurred."),
+    ErrorCode.OAUTH_FAILED: (400, "Sign-in could not be completed."),
 }
 
 

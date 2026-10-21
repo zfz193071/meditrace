@@ -29,6 +29,7 @@ class ErrorCode(StrEnum):
     REAL_AI_NOT_ALLOWED = "REAL_AI_NOT_ALLOWED"
     SERVICE_NOT_READY = "SERVICE_NOT_READY"
     INTERNAL_ERROR = "INTERNAL_ERROR"
+    OAUTH_FAILED = "OAUTH_FAILED"
 
 
 class ErrorDetail(Contract):
@@ -74,6 +75,18 @@ class ReadinessResponse(Contract):
     schema_version: str | None
     checklist_version: str | None
     checks: dict[str, Literal["ready", "not_checked", "not_implemented", "unavailable"]]
+
+
+class SessionUser(Contract):
+    id: UUID
+    display_name: str
+
+
+class SessionResponse(Contract):
+    user: SessionUser | None = None
+    csrf_token: str | None = None
+    expires_at: UTCDateTime | None = None
+    login_available: bool = False
 
 
 class Evidence(Contract):

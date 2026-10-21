@@ -120,7 +120,8 @@ def test_legacy_entrypoint_mounts_foundation_without_starting_services():
 def test_validation_and_unexpected_errors_do_not_leak_inputs_or_exception(caplog):
     app = create_app(Settings())
 
-    @app.post("/test-evidence")
+    # Validation-only probe is read-only; registered mutations now require CSRF.
+    @app.get("/test-evidence")
     def accept_evidence(evidence: Evidence):
         return evidence
 
@@ -130,7 +131,7 @@ def test_validation_and_unexpected_errors_do_not_leak_inputs_or_exception(caplog
 
     # Default raise_server_exceptions=True proves errors do not escape to ASGI logs.
     with TestClient(app) as client:
-        invalid = client.post("/test-evidence", json={"quote": "secret-sentinel"})
+        invalid = client.request("GET", "/test-evidence", json={"quote": "secret-sentinel"})
         assert invalid.status_code == 422
         assert invalid.json()["error"]["code"] == "SCHEMA_INVALID"
         failed = client.get("/test-failure")
@@ -174,5 +175,8 @@ def test_schema_generation_is_deterministic_and_does_not_depend_on_environment(m
     monkeypatch.setenv("RR_MODE", "invalid-sentinel")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "secret-sentinel")
     assert artifacts() == baseline
-    assert set(baseline["openapi.json"]["paths"]) == {"/capabilities", "/readiness"}
+    assert set(baseline["openapi.json"]["paths"]) == {
+        "/capabilities", "/readiness", "/auth/session", "/auth/github/start",
+        "/auth/github/callback", "/auth/logout",
+    }
     assert "secret-sentinel" not in json.dumps(baseline)

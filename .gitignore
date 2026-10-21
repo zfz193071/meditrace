@@ -77,3 +77,4 @@ src/backend/*.db
 .pytest_cache/
 .uv-cache/
 .scratch/referral-pdf-qa/
+.scratch/rr-cargo/

@@ -1,13 +1,13 @@
 # Referral Review 配置与工程操作
 
-MT-01 实现范围：默认安全的配置、契约和只读基础路由。尚未实现登录、资料包、示例内容、模型执行及付款。`/api/v1/capabilities` 明确列出各能力为 false；`/api/v1/readiness` 返回 503 / not_ready，不能用于宣称 V1 已可上线。完整示例属于 MT-03/16，就绪检查属于 MT-02/03/19。
+当前已实现基础配置、契约、持久化、合成资产和 MT-04 认证代码。认证默认禁用，真实 GitHub 往返尚待配置验收；资料包业务、完整示例页面、模型执行及付款仍未实现。`/api/v1/capabilities` 明确列出各能力为 false；`/api/v1/readiness` 返回 503 / not_ready，不能用于宣称 V1 已可上线。完整示例属于 MT-03/16，就绪检查属于 MT-02/03/19。
 
 MT-02 已添加领域持久化与显式追加迁移，但尚待 PostgreSQL 实测。独立测试库和迁移操作见 [迁移手册](MIGRATIONS.md)；这些改动不会自动连接或升级生产数据库。
 
 ## 配置模式
 
 - `bundled_demo`：默认模式，不要求密钥，不允许真实执行。固定合成示例后续打包，不能自动接收并持久化访客输入。
-- `sandbox`：后续接入登录和 Stripe test 权益后，只能使用 Fake／Replay；绝不静默回退并伪装为真实模型结果。
+- `sandbox`：可配置 GitHub 登录；Stripe test 权益尚未实现，后续模型执行只能使用 Fake／Replay，绝不静默回退并伪装为真实模型结果。
 - `invited_real`：只是配置意图。真实执行还必须有邀请账号、会员、共享预算及并发预留（MT-04/10/11），不能仅凭开关或配置验证成功放行。
 
 MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-Member` 不被信任；未知 `RR_*` 配置（含 fake identity / dev grant）直接拒绝。配置错误不回显输入；即使完整填写真实配置，capabilities 的真实执行能力仍为 false。
@@ -27,7 +27,7 @@ MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-M
 | `RR_GITHUB_CLIENT_ID` | 未设置 | MT-04 |
 | `RR_GITHUB_CLIENT_SECRET` | 未设置，秘密 | MT-04 |
 | `RR_GITHUB_CALLBACK_URL` | 未设置；若设置必须等于 origin + `/api/v1/auth/github/callback` | MT-04 |
-| `RR_SESSION_ENCRYPTION_KEY` | 未设置；若设置至少 32 字符的高熵秘密；实际加密编码约束由 MT-04 固定 | MT-04 OAuth verifier 加密 |
+| `RR_SESSION_ENCRYPTION_KEY` | 未设置；启用认证时必须为 Fernet key，即 32 个随机字节的 URL-safe Base64 编码，不能使用普通口令 | MT-04 OAuth verifier 加密 |
 | `BLOB_READ_WRITE_TOKEN` | 未设置，秘密 | MT-05 |
 | `RR_STRIPE_SECRET_KEY` | 未设置；只接受 `sk_test_` / `rk_test_` 前缀；后续仍需校验 webhook 的 livemode | MT-17 |
 | `RR_STRIPE_WEBHOOK_SECRET` | 未设置，秘密 | MT-17 |
@@ -48,6 +48,8 @@ MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-M
 `VERCEL=1` 或 `VERCEL_ENV=preview/production` 是平台注入的 runtime 信号，不是应用身份凭据。`Settings.require_real_ai_configuration()` 仅检查配置完整性，不替代账号鉴权、会员、余额或事务预留。1 USD = 1,000,000 micro-USD；这里不提供会自动启用消费的价格／预算示例。
 
 前端 build-time：Node 22、pnpm 10.34.7；旧 `NEXT_PUBLIC_BACKEND_URL` 只供旧页面使用。新客户端固定同源 `/api/v1`，无公开密钥／名单配置。开发时 Next.js 将此路径代理到 `127.0.0.1:8000`；生产不生成此代理，沿用根 `vercel.json` 的 Services rewrite。`.env.example` 是模板，复制前请确认不会覆盖现有 `.env`；配置模块本身不主动读取文件，旧 `main.py` 加载环境后挂载新模块，CI 使用 `PYTHON_DOTENV_DISABLED=1` 避免本地密钥影响测试。
+
+认证的启用条件、Cookie、归属 Interface 和手动 GitHub 验收步骤见 [认证手册](AUTHENTICATION.md)。身份配置不会自动迁移数据库、授予会员或放开真实 AI。
 
 ## 安装和生成（仓库根目录）
 

@@ -9,7 +9,7 @@ from sqlalchemy.pool import NullPool, StaticPool
 
 def create_engine(url: str, *, schema: str | None = None) -> sa.Engine:
     parsed = make_url(url)
-    if parsed.drivername == "postgres":
+    if parsed.drivername in ("postgres", "postgresql"):
         parsed = parsed.set(drivername="postgresql+psycopg2")
     if parsed.get_backend_name() not in ("postgresql", "sqlite"):
         raise ValueError("Only PostgreSQL and SQLite are supported")

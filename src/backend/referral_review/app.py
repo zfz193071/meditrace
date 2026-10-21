@@ -7,31 +7,46 @@ from fastapi.responses import JSONResponse
 
 from . import CONTRACT_VERSION
 from .config import Settings, load_settings
-from .errors import error_response, install_error_handlers, logger
+from .errors import ApiError, error_response, install_error_handlers, logger
 from .schemas import Capabilities, ErrorCode, ErrorEnvelope, ReadinessResponse
+from .identity.routes import auth_router
+from .identity.service import DATABASE_FAILURES, configured_identity
+from .identity.authorization import protect_request
+from starlette.concurrency import run_in_threadpool
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, *, identity=None) -> FastAPI:
     config = settings if settings is not None else load_settings()
     app = FastAPI(
         title="MediTrace Referral Review API",
         version=CONTRACT_VERSION,
-        description="MT-01 foundation. Business workflows are not implemented yet.",
+        description="Referral identity foundation. Packet, review, model and payment workflows are not implemented yet.",
         servers=[{"url": "/api/v1"}],
         docs_url=None, redoc_url=None,
         responses={
             404: {"model": ErrorEnvelope},
+            401: {"model": ErrorEnvelope},
+            403: {"model": ErrorEnvelope},
             422: {"model": ErrorEnvelope},
             500: {"model": ErrorEnvelope},
+            503: {"model": ErrorEnvelope},
         },
     )
     install_error_handlers(app)
+    identity = identity if identity is not None else configured_identity(config)
+    app.state.identity = identity
+    app.include_router(auth_router(identity))
 
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):
         request.state.request_id = uuid4()  # Never trust an arbitrary inbound logging identifier.
         try:
+            await run_in_threadpool(protect_request, request)
             response = await call_next(request)
+        except ApiError as exc:
+            response = error_response(request, exc.code)
+        except DATABASE_FAILURES:
+            response = error_response(request, ErrorCode.SERVICE_NOT_READY)
         except Exception:
             # Catch before ServerErrorMiddleware re-raises to the ASGI server,
             # where a provider exception could otherwise enter a traceback log.
@@ -40,6 +55,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         response.headers["X-Request-ID"] = str(request.state.request_id)
         response.headers["Cache-Control"] = "private, no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "no-referrer"
         return response
 
     @app.get("/capabilities", response_model=Capabilities, operation_id="get_capabilities")
