@@ -12,6 +12,10 @@ from .schemas import ErrorCode, ErrorDetail, ErrorEnvelope
 
 logger = logging.getLogger("meditrace.referral")
 ERRORS = {
+    ErrorCode.SOURCE_CHANGED: (409, "Source revision changed; create a run for the current revision."),
+    ErrorCode.CHECKLIST_UNSUPPORTED: (422, "Checklist version is unsupported."),
+    ErrorCode.PARSE_COVERAGE_INCOMPLETE: (422, "All revision documents must be successfully parsed."),
+    ErrorCode.MODEL_INPUT_LIMIT: (413, "Complete model request exceeds the safe input limit."),
     ErrorCode.MEMBERSHIP_REQUIRED: (403, "An active test membership is required."),
     ErrorCode.QUOTA_EXHAUSTED: (409, "Membership quota is exhausted."),
     ErrorCode.BUDGET_EXHAUSTED: (409, "AI budget is unavailable."),

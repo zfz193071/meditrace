@@ -21,6 +21,10 @@ class Contract(BaseModel):
 
 
 class ErrorCode(StrEnum):
+    SOURCE_CHANGED = "SOURCE_CHANGED"
+    CHECKLIST_UNSUPPORTED = "CHECKLIST_UNSUPPORTED"
+    PARSE_COVERAGE_INCOMPLETE = "PARSE_COVERAGE_INCOMPLETE"
+    MODEL_INPUT_LIMIT = "MODEL_INPUT_LIMIT"
     MEMBERSHIP_REQUIRED = "MEMBERSHIP_REQUIRED"
     QUOTA_EXHAUSTED = "QUOTA_EXHAUSTED"
     BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
@@ -313,3 +317,29 @@ class MembershipResponse(Contract):
     remaining: int = Field(ge=0)
     reserved: int = Field(ge=0)
     real_ai_allowed: bool
+
+
+class CreateRunInput(Contract):
+    revision_id: UUID
+    checklist_version: str = Field(min_length=1, max_length=100)
+
+
+class RunResponse(Contract):
+    id: UUID
+    packet_id: UUID
+    revision_id: UUID
+    state: RunState
+    mode: Literal["fake", "real", "replay", "precomputed"]
+    stale: bool
+    phase: Literal["pending", "reserved", "dispatched", "complete", "failed", "unknown", "cancelled"]
+    checklist_version: str
+    prompt_version: str
+    schema_version: str
+    model_requested: str | None
+    model_reported: str | None
+    created_at: UTCDateTime
+    finished_at: UTCDateTime | None
+    lease_expires_at: UTCDateTime | None
+    error_code: str | None
+    usage: dict[str, int] | None
+    result: ReviewResult | None = None

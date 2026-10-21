@@ -1,6 +1,6 @@
 # MediTrace Referral Review Copilot — V1 开发基线
 
-日期：2026-10-21。状态：MT-01 工程基线已完成；MT-02 等待 PostgreSQL 验收；MT-03 等待操作者标注复核；MT-04 认证代码与离线测试已实施，等待前置验收和真实 OAuth；MT-05 私有存储代码已实施，等待前置验收、PostgreSQL 并发和真实 Private Blob；MT-06 解析代码与离线测试已实施，等待前置验收及 PostgreSQL 验证；MT-07 资料包后端代码与离线测试已实施，等待前置验收及 PostgreSQL 并发验证；MT-08 结构化提取与 Adapter 已实施，等待前置验收；MT-09 确定性清单已实施，等待前置验收；MT-10 费用预留与限流已实施，等待前置验收及 PostgreSQL 竞争验证；MT-11—24 尚未开始，完整产品未交付。基础配置见 [CONFIGURATION](CONFIGURATION.md)，数据迁移见 [MIGRATIONS](MIGRATIONS.md)，验收结果见 [MT-01 证据](MT-01-EVIDENCE.md)／[MT-02 证据](MT-02-EVIDENCE.md)／[MT-03 证据](MT-03-EVIDENCE.md)／[MT-04 证据](MT-04-EVIDENCE.md)／[MT-05 证据](MT-05-EVIDENCE.md)／[MT-06 证据](MT-06-EVIDENCE.md)／[MT-07 证据](MT-07-EVIDENCE.md)／[MT-08 证据](MT-08-EVIDENCE.md)／[MT-09 证据](MT-09-EVIDENCE.md)／[MT-10 证据](MT-10-EVIDENCE.md)。
+日期：2026-10-21。状态：MT-01 工程基线已完成；MT-02 等待 PostgreSQL 验收；MT-03 等待操作者标注复核；MT-04 认证代码与离线测试已实施，等待前置验收和真实 OAuth；MT-05 私有存储代码已实施，等待前置验收、PostgreSQL 并发和真实 Private Blob；MT-06 解析代码与离线测试已实施，等待前置验收及 PostgreSQL 验证；MT-07 资料包后端代码与离线测试已实施，等待前置验收及 PostgreSQL 并发验证；MT-08 结构化提取与 Adapter 已实施，等待前置验收；MT-09 确定性清单已实施，等待前置验收；MT-10 费用预留与限流已实施，等待前置验收及 PostgreSQL 竞争验证；MT-11 批次执行与恢复已实施，等待前置验收及 PostgreSQL 竞争验证；MT-12—24 尚未开始，完整产品未交付。基础配置见 [CONFIGURATION](CONFIGURATION.md)，数据迁移见 [MIGRATIONS](MIGRATIONS.md)，验收结果见 [MT-01 证据](MT-01-EVIDENCE.md)／[MT-02 证据](MT-02-EVIDENCE.md)／[MT-03 证据](MT-03-EVIDENCE.md)／[MT-04 证据](MT-04-EVIDENCE.md)／[MT-05 证据](MT-05-EVIDENCE.md)／[MT-06 证据](MT-06-EVIDENCE.md)／[MT-07 证据](MT-07-EVIDENCE.md)／[MT-08 证据](MT-08-EVIDENCE.md)／[MT-09 证据](MT-09-EVIDENCE.md)／[MT-10 证据](MT-10-EVIDENCE.md)／[MT-11 证据](MT-11-EVIDENCE.md)。
 
 目标：交付一个可以公开用于 AI 应用／全栈求职的英文产品，完成“资料导入 → 缺失与差异核对 → 证据定位 → 人工处理 → 交接导出”。全部 24 张工单及发布门槛通过，才称为本版项目开发完成。
 
@@ -63,6 +63,8 @@ MT-08 已提供 Fake／DeepSeek 共用提取契约、严格证据验证及 Mock 
 MT-09 已提供 C01—C08 纯函数规则、版本覆盖校验、稳定 Finding 指纹与开发集离线回归；前置 MT-08 未完成，状态保留 `TODO`。
 
 MT-10 已实施会员查询、原子次数／预算／并发预留、结算与未知费用恢复、共享限流及追加迁移；MT-02／04 未完成，状态保留 `TODO`，PostgreSQL 多进程竞争仍待实测。
+
+MT-11 已接入创建／执行／查询／取消／恢复接口，结果与账本原子提交，GET 不派发；前置验收及真实 PostgreSQL 竞争未完成，状态保留 `TODO`。
 
 ## 里程碑
 

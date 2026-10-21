@@ -1,6 +1,6 @@
 """Pure extraction orchestration. Caller must authorize revision and reserve usage first.
 
-No routes call this module until MT-10/11 supply membership/budget/dispatch controls.
+The runs module supplies membership, budget, dispatch CAS and recovery controls.
 """
 import json
 import re
@@ -89,14 +89,10 @@ async def extract(revision: ExtractionRevision, model_config, adapter: ModelAdap
         revision = ExtractionRevision.model_validate(revision.model_dump(mode="json"))
     except (ValueError, AttributeError):
         raise ExtractionError("EXTRACTION_INPUT_INVALID") from None
-    if type(max_output_tokens) is not int or not 1 <= max_output_tokens <= 6000:
-        raise ExtractionError("MODEL_INPUT_LIMIT")
     if adapter.mode == "real":
         model_config.require_real_ai_configuration()
     model_id = model_config.model_id if adapter.mode == "real" else "fake-extraction-v1"
-    request = build_request(revision, model_id, max_output_tokens)
-    if len(json.dumps(request, ensure_ascii=False).encode("utf-8")) + FRAME_TOKEN_ALLOWANCE > MAX_INPUT_TOKENS:
-        raise ExtractionError("MODEL_INPUT_LIMIT")
+    request, _ = prepare_request(revision, model_id, max_output_tokens)
     reply = await adapter.complete(request)
     try:
         if len(reply.content.encode("utf-8")) > 128_000:
@@ -107,3 +103,14 @@ async def extract(revision: ExtractionRevision, model_config, adapter: ModelAdap
     return Extraction(revision_id=revision.revision_id, mode=adapter.mode,
         model_requested=model_id, model_reported=reply.model_reported,
         provider_request_id=reply.request_id, usage=reply.usage, facts=facts, evidence=evidence)
+
+
+def prepare_request(revision: ExtractionRevision, model_id: str, max_output_tokens=6000):
+    """Shared complete-request upper bound for preflight reservation and actual extraction."""
+    if type(max_output_tokens) is not int or not 1 <= max_output_tokens <= 6000:
+        raise ExtractionError("MODEL_INPUT_LIMIT")
+    request = build_request(revision, model_id, max_output_tokens)
+    bound = len(json.dumps(request, ensure_ascii=False).encode("utf-8")) + FRAME_TOKEN_ALLOWANCE
+    if bound > MAX_INPUT_TOKENS:
+        raise ExtractionError("MODEL_INPUT_LIMIT")
+    return request, bound

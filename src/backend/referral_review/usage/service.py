@@ -4,6 +4,7 @@ Lock order: user -> packet -> run -> membership -> global control -> budget keys
 -> slots. Rate attempts use a separate committed transaction. No provider calls.
 Reservation replay is NOT permission to dispatch again; MT-11 owns dispatch CAS.
 """
+from contextlib import nullcontext
 from datetime import timedelta, timezone
 import hashlib
 import json
@@ -16,7 +17,7 @@ from ..errors import ApiError
 from ..extraction.contracts import TokenUsage
 from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
-from ..persistence.repository import NotFound, owned_packet
+from ..persistence.repository import NotFound, owned_packet, require_transaction
 from ..schemas import ErrorCode, MembershipResponse
 from . import rates
 
@@ -93,19 +94,26 @@ class Usage:
             raise ApiError(ErrorCode.USAGE_CONFLICT)
         return dict(prior)
 
-    def reserve(self, owner, run_id, *, input_bound, output_limit=6000):
-        """Server-only input token upper bound from MT-08; client never supplies mode/prices/member."""
+    def reserve(self, owner, run_id, *, input_bound, output_limit=6000, connection=None):
+        """Server-only token bound; with a connection, caller commits attempts first.
+
+        Caller-owned transactions let MT-11 atomically reserve + claim or settle +
+        persist results. All exceptions must roll back the caller transaction.
+        """
         if (type(input_bound) is not int or not 0 < input_bound <= 16000
             or type(output_limit) is not int or not 0 < output_limit <= 6000):
             raise ApiError(ErrorCode.SCHEMA_INVALID)
-        # Failed budget/member/config attempts still consume shared attempt counters.
-        with self.engine.begin() as conn:
-            self._run(conn, owner, run_id, active=True)
-            prior = self._prior(conn, run_id)
-            if prior:
-                return self._replay(conn, prior, input_bound, output_limit)
-            rates.consume(conn, owner, "execute", self.clock())
-        with self.engine.begin() as conn:
+        if connection is not None:
+            require_transaction(connection)
+        if connection is None:
+            # Failed budget/member/config attempts still consume shared attempt counters.
+            with self.engine.begin() as conn:
+                self._run(conn, owner, run_id, active=True)
+                prior = self._prior(conn, run_id)
+                if prior:
+                    return self._replay(conn, prior, input_bound, output_limit)
+                rates.consume(conn, owner, "execute", self.clock())
+        with (nullcontext(connection) if connection is not None else self.engine.begin()) as conn:
             run = self._run(conn, owner, run_id, active=True)
             prior = self._prior(conn, run_id)
             if prior:
@@ -190,8 +198,10 @@ class Usage:
                     conn.execute(m.concurrency_slots.update().where(m.concurrency_slots.c.scope == scope,
                         m.concurrency_slots.c.slot_number == slot["slot_number"]).values(run_id=None, lease_expires_at=None))
 
-    def settle(self, owner, run_id, *, outcome, usage=None):
+    def settle(self, owner, run_id, *, outcome, usage=None, connection=None):
         """outcome is trusted orchestration state. Missing usage never implies a free call."""
+        if connection is not None:
+            require_transaction(connection)
         if outcome not in ("succeeded", "failed", "unknown", "cancelled"):
             raise ApiError(ErrorCode.SCHEMA_INVALID)
         if usage is not None:
@@ -200,7 +210,7 @@ class Usage:
             except ValueError:
                 raise ApiError(ErrorCode.SCHEMA_INVALID) from None
         digest = hashlib.sha256(json.dumps({"outcome": outcome, "usage": usage.model_dump() if usage else None}, sort_keys=True).encode()).hexdigest()
-        with self.engine.begin() as conn:
+        with (nullcontext(connection) if connection is not None else self.engine.begin()) as conn:
             run, reservation, detail, keys = self._locked_reservation(conn, owner, run_id)
             if reservation["state"] in ("settled", "released", "estimated_spent"):
                 if detail["settlement_hash"] != digest:

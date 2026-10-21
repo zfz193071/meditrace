@@ -14,6 +14,8 @@ from .identity.service import DATABASE_FAILURES, configured_identity
 from .identity.authorization import protect_request
 from .documents import configured_documents
 from .documents.routes import document_router
+from .runs import Runs
+from .runs.routes import run_router
 from .usage import Usage
 from .usage.routes import usage_router
 from .packets import Packets
@@ -44,6 +46,8 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     app.state.documents = documents if documents is not None else configured_documents(config, identity)
     app.state.packets = Packets(identity) if identity is not None else None
     app.state.usage = Usage(identity) if identity is not None else None
+    app.state.runs = Runs(identity) if identity is not None else None
+    app.include_router(run_router())
     app.include_router(usage_router())
     app.include_router(auth_router(identity))
     app.include_router(document_router())

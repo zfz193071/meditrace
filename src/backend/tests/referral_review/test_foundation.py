@@ -83,7 +83,8 @@ def test_complete_configuration_is_not_runtime_authorization():
         assert client.get("/capabilities").json()["mode"] == "invited_real"
         assert client.get("/capabilities").json()["real_ai_execution_available"] is False
         response = client.post(f"/runs/{uuid4()}/execute", headers={"X-User-ID": str(uuid4()), "X-Member": "true"})
-        assert response.status_code == 404
+        assert response.status_code == 401
+        assert response.json()["error"]["code"] == "AUTH_REQUIRED"
 
 
 def test_deployed_defaults_are_production():
@@ -183,5 +184,7 @@ def test_schema_generation_is_deterministic_and_does_not_depend_on_environment(m
         "/packets/{packet_id}/documents/{document_id}/pages/{page_number}",
         "/packets", "/packets/{packet_id}", "/packets/{packet_id}/draft",
         "/packets/{packet_id}/revisions", "/packets/{packet_id}/revisions/{revision_number}",
+        "/packets/{packet_id}/runs", "/runs/{run_id}", "/runs/{run_id}/execute",
+        "/runs/{run_id}/cancel", "/runs/{run_id}/reconcile",
     }
     assert "secret-sentinel" not in json.dumps(baseline)
