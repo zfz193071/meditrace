@@ -82,6 +82,104 @@
         "title": "Capabilities",
         "type": "object"
       },
+      "ChecklistEvaluation": {
+        "additionalProperties": false,
+        "properties": {
+          "assessments": {
+            "additionalProperties": {
+              "enum": [
+                "satisfied",
+                "missing",
+                "needs_clarification",
+                "needs_review",
+                "not_applicable"
+              ],
+              "type": "string"
+            },
+            "title": "Assessments",
+            "type": "object"
+          },
+          "checked_document_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Checked Document Ids",
+            "type": "array"
+          },
+          "checked_pages": {
+            "title": "Checked Pages",
+            "type": "integer"
+          },
+          "checklist_version": {
+            "default": "outpatient-referral-demo@1",
+            "title": "Checklist Version",
+            "type": "string"
+          },
+          "coverage": {
+            "title": "Coverage",
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "fingerprints": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "title": "Fingerprints",
+            "type": "object"
+          },
+          "revision_id": {
+            "format": "uuid",
+            "title": "Revision Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "revision_id",
+          "checked_document_ids",
+          "checked_pages",
+          "coverage",
+          "assessments",
+          "findings",
+          "fingerprints"
+        ],
+        "title": "ChecklistEvaluation",
+        "type": "object"
+      },
+      "ChecklistManifest": {
+        "additionalProperties": false,
+        "properties": {
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/ManifestDocument"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Documents",
+            "type": "array"
+          },
+          "revision_id": {
+            "format": "uuid",
+            "title": "Revision Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "revision_id",
+          "documents"
+        ],
+        "title": "ChecklistManifest",
+        "type": "object"
+      },
       "CreatePacketInput": {
         "additionalProperties": false,
         "properties": {
@@ -102,6 +200,31 @@
           "synthetic_data_ack"
         ],
         "title": "CreatePacketInput",
+        "type": "object"
+      },
+      "DifferenceCandidate": {
+        "additionalProperties": false,
+        "description": "Untrusted hint; never supplies a message, severity or medical conclusion.",
+        "properties": {
+          "fact_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Fact Ids",
+            "type": "array"
+          },
+          "field_key": {
+            "$ref": "#/components/schemas/FieldKey"
+          }
+        },
+        "required": [
+          "field_key",
+          "fact_ids"
+        ],
+        "title": "DifferenceCandidate",
         "type": "object"
       },
       "DocumentPageResponse": {
@@ -726,6 +849,62 @@
           }
         },
         "title": "InputLimits",
+        "type": "object"
+      },
+      "ManifestDocument": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "pdf",
+              "text"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "page_count": {
+            "minimum": 1,
+            "title": "Page Count",
+            "type": "integer"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentPageResponse"
+            },
+            "title": "Pages",
+            "type": "array"
+          },
+          "parse_status": {
+            "enum": [
+              "ready",
+              "uploading",
+              "parsing",
+              "rejected",
+              "failed"
+            ],
+            "title": "Parse Status",
+            "type": "string"
+          },
+          "title": {
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "parse_status",
+          "page_count",
+          "pages"
+        ],
+        "title": "ManifestDocument",
         "type": "object"
       },
       "ModelFact": {

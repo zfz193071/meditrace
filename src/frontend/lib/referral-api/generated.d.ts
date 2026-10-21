@@ -332,6 +332,45 @@ export interface components {
              */
             workspace_available: false;
         };
+        /** ChecklistEvaluation */
+        ChecklistEvaluation: {
+            /** Assessments */
+            assessments: {
+                [key: string]: "satisfied" | "missing" | "needs_clarification" | "needs_review" | "not_applicable";
+            };
+            /** Checked Document Ids */
+            checked_document_ids: string[];
+            /** Checked Pages */
+            checked_pages: number;
+            /**
+             * Checklist Version
+             * @default outpatient-referral-demo@1
+             */
+            checklist_version: string;
+            /** Coverage */
+            coverage: string;
+            /** Findings */
+            findings: components["schemas"]["Finding"][];
+            /** Fingerprints */
+            fingerprints: {
+                [key: string]: string;
+            };
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+        };
+        /** ChecklistManifest */
+        ChecklistManifest: {
+            /** Documents */
+            documents: components["schemas"]["ManifestDocument"][];
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+        };
         /** CreatePacketInput */
         CreatePacketInput: {
             /**
@@ -341,6 +380,15 @@ export interface components {
             synthetic_data_ack: true;
             /** Title */
             title: string;
+        };
+        /**
+         * DifferenceCandidate
+         * @description Untrusted hint; never supplies a message, severity or medical conclusion.
+         */
+        DifferenceCandidate: {
+            /** Fact Ids */
+            fact_ids: string[];
+            field_key: components["schemas"]["FieldKey"];
         };
         /** DocumentPageResponse */
         DocumentPageResponse: {
@@ -601,6 +649,30 @@ export interface components {
              * @default 10000
              */
             max_text_codepoints: number;
+        };
+        /** ManifestDocument */
+        ManifestDocument: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "pdf" | "text";
+            /** Page Count */
+            page_count: number;
+            /** Pages */
+            pages: components["schemas"]["DocumentPageResponse"][];
+            /**
+             * Parse Status
+             * @enum {string}
+             */
+            parse_status: "ready" | "uploading" | "parsing" | "rejected" | "failed";
+            /** Title */
+            title: string;
         };
         /** ModelFact */
         ModelFact: {
