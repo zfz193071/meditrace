@@ -339,3 +339,25 @@ cleanup_jobs = sa.Table("rr_cleanup_jobs", metadata,
     sa.CheckConstraint("attempt_count >= 0", name="attempts"),
     sa.CheckConstraint("object_key IS NOT NULL OR entity_id IS NOT NULL", name="target"),
     sa.Index("ix_rr_cleanup_due", "state", "next_attempt_at"))
+
+# Frozen reservation pricing and reconciliation metadata; no provider/source payloads.
+usage_details = sa.Table("rr_usage_details", metadata,
+    uid("reservation_id", primary=True, reference="rr_usage_reservations.id"),
+    sa.Column("mode", sa.String(10), nullable=False), sa.Column("model", sa.String(200), nullable=False),
+    sa.Column("input_bound", sa.Integer, nullable=False), sa.Column("output_limit", sa.Integer, nullable=False),
+    sa.Column("input_price", sa.BigInteger, nullable=False), sa.Column("output_price", sa.BigInteger, nullable=False),
+    sa.Column("outcome", sa.String(16)), timestamp("unknown_at", nullable=True), timestamp("settled_at", nullable=True),
+    sa.Column("settlement_hash", sa.String(64)),
+    state("mode", "fake real"),
+    sa.CheckConstraint("input_bound > 0 AND input_bound <= 16000 AND output_limit > 0 AND output_limit <= 6000 AND input_price >= 0 AND output_price >= 0", name="limits"))
+usage_controls = sa.Table("rr_usage_controls", metadata,
+    sa.Column("key", sa.String(30), primary_key=True),
+    sa.Column("halted", sa.Boolean, nullable=False, server_default=sa.false()),
+    sa.Column("reason", sa.String(80)))
+usage_adjustments = sa.Table("rr_usage_adjustments", metadata,
+    uid(primary=True), uid("reservation_id", reference="rr_usage_reservations.id"),
+    sa.Column("adjustment_key", sa.String(100), nullable=False),
+    sa.Column("actual_microusd", sa.BigInteger, nullable=False),
+    sa.Column("delta_microusd", sa.BigInteger, nullable=False), timestamp("created_at", created=True),
+    sa.UniqueConstraint("reservation_id", "adjustment_key"),
+    sa.CheckConstraint("actual_microusd >= 0", name="amount"))

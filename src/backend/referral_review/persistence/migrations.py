@@ -6,8 +6,8 @@ from alembic import command
 from alembic.config import Config
 import sqlalchemy as sa
 
-HEAD = "rr_0003"
-REVIEWED_REVISIONS = frozenset({"rr_0001", "rr_0002", HEAD})
+HEAD = "rr_0004"
+REVIEWED_REVISIONS = frozenset({"rr_0001", "rr_0002", "rr_0003", HEAD})
 VERSION_TABLE = "rr_alembic_version"
 SCRIPTS = Path(__file__).resolve().parents[2] / "migrations_referral"
 

@@ -389,6 +389,12 @@
       },
       "ErrorCode": {
         "enum": [
+          "MEMBERSHIP_REQUIRED",
+          "QUOTA_EXHAUSTED",
+          "BUDGET_EXHAUSTED",
+          "RUN_ACTIVE",
+          "RATE_LIMITED",
+          "USAGE_CONFLICT",
           "AUTH_REQUIRED",
           "FORBIDDEN",
           "NOT_FOUND",
@@ -905,6 +911,50 @@
           "pages"
         ],
         "title": "ManifestDocument",
+        "type": "object"
+      },
+      "MembershipResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "environment": {
+            "const": "test",
+            "default": "test",
+            "title": "Environment",
+            "type": "string"
+          },
+          "real_ai_allowed": {
+            "title": "Real Ai Allowed",
+            "type": "boolean"
+          },
+          "remaining": {
+            "minimum": 0.0,
+            "title": "Remaining",
+            "type": "integer"
+          },
+          "reserved": {
+            "minimum": 0.0,
+            "title": "Reserved",
+            "type": "integer"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          }
+        },
+        "required": [
+          "remaining",
+          "reserved",
+          "real_ai_allowed"
+        ],
+        "title": "MembershipResponse",
         "type": "object"
       },
       "ModelFact": {
@@ -2098,6 +2148,84 @@
           }
         },
         "summary": "Capabilities"
+      }
+    },
+    "/membership": {
+      "get": {
+        "operationId": "get_membership",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Membership"
       }
     },
     "/packets": {

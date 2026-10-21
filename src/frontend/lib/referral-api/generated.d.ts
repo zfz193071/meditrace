@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/membership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Membership */
+        get: operations["get_membership"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/packets": {
         parameters: {
             query?: never;
@@ -457,7 +474,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
+        ErrorCode: "MEMBERSHIP_REQUIRED" | "QUOTA_EXHAUSTED" | "BUDGET_EXHAUSTED" | "RUN_ACTIVE" | "RATE_LIMITED" | "USAGE_CONFLICT" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
         /** ErrorDetail */
         ErrorDetail: {
             code: components["schemas"]["ErrorCode"];
@@ -673,6 +690,23 @@ export interface components {
             parse_status: "ready" | "uploading" | "parsing" | "rejected" | "failed";
             /** Title */
             title: string;
+        };
+        /** MembershipResponse */
+        MembershipResponse: {
+            /**
+             * Environment
+             * @default test
+             * @constant
+             */
+            environment: "test";
+            /** Real Ai Allowed */
+            real_ai_allowed: boolean;
+            /** Remaining */
+            remaining: number;
+            /** Reserved */
+            reserved: number;
+            /** Valid Until */
+            valid_until?: string | null;
         };
         /** ModelFact */
         ModelFact: {
@@ -1323,6 +1357,80 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Capabilities"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_membership: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MembershipResponse"];
                 };
             };
             /** @description Unauthorized */

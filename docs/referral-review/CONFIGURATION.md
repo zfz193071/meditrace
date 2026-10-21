@@ -1,6 +1,6 @@
 # Referral Review 配置与工程操作
 
-当前已实现基础配置、契约、持久化、合成资产和 MT-04 认证代码。认证默认禁用，真实 GitHub 往返尚待配置验收；资料包业务、完整示例页面、模型执行及付款仍未实现。`/api/v1/capabilities` 明确列出各能力为 false；`/api/v1/readiness` 返回 503 / not_ready，不能用于宣称 V1 已可上线。完整示例属于 MT-03/16，就绪检查属于 MT-02/03/19。
+当前已实现基础配置、契约、持久化、合成资产和 MT-04 认证代码。认证默认禁用，真实 GitHub 往返尚待配置验收；资料包后端、提取／规则和费用账本代码已实施，完整示例页面、模型执行编排及付款仍未实现。`/api/v1/capabilities` 明确列出各能力为 false；`/api/v1/readiness` 返回 503 / not_ready，不能用于宣称 V1 已可上线。完整示例属于 MT-03/16，就绪检查属于 MT-02/03/19。
 
 MT-02 已添加领域持久化与显式追加迁移，但尚待 PostgreSQL 实测。独立测试库和迁移操作见 [迁移手册](MIGRATIONS.md)；这些改动不会自动连接或升级生产数据库。
 
@@ -93,3 +93,5 @@ src/backend/.venv/bin/pip-audit -r src/backend/requirements.txt --no-deps --disa
 没有 `TEST_DATABASE_URL` 时旧 PostgreSQL 集成测试明确 skip，不访问现有生产库。禁止运行不加筛选的旧模型测试，更不能自动在浏览器发送 AI 消息。本次基础测试只用 TestClient、合成字段和 mock fetch，不消耗模型 token。CI 执行同样的构建／测试／漂移检查，并阻止生产依赖高危漏洞。
 
 契约文件位于 `contracts/referral-review/`，TS 类型位于 `src/frontend/lib/referral-api/generated.d.ts`。只编辑 Pydantic 源文件；导出的 OpenAPI 额外携带尚未绑定业务端点的领域 components，不能据此认为业务路由已实现。UUID、带时区时间归一 UTC、证据 code-point 半开区间及引用完整性在基础层验证；源文件 hash／精确定位由 MT-06 验证。
+
+MT-10 的会员查询、共享限流、价格快照、双桶预留和熔断约束见 [费用账本证据](MT-10-EVIDENCE.md)。上传限流已接入；真实执行仍须 MT-11 编排，导出须 MT-13 接入。没有生产授予权益接口，不自动开启模型消费。

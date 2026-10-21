@@ -12,6 +12,12 @@ from .schemas import ErrorCode, ErrorDetail, ErrorEnvelope
 
 logger = logging.getLogger("meditrace.referral")
 ERRORS = {
+    ErrorCode.MEMBERSHIP_REQUIRED: (403, "An active test membership is required."),
+    ErrorCode.QUOTA_EXHAUSTED: (409, "Membership quota is exhausted."),
+    ErrorCode.BUDGET_EXHAUSTED: (409, "AI budget is unavailable."),
+    ErrorCode.RUN_ACTIVE: (409, "Concurrent execution capacity is exhausted."),
+    ErrorCode.RATE_LIMITED: (429, "Request rate limit reached."),
+    ErrorCode.USAGE_CONFLICT: (409, "Usage operation conflicts with its recorded state."),
     ErrorCode.AUTH_REQUIRED: (401, "Authentication required."),
     ErrorCode.FORBIDDEN: (403, "Access denied."),
     ErrorCode.NOT_FOUND: (404, "Resource not found."),

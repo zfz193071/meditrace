@@ -311,7 +311,7 @@ def test_postgres_migration_sql_compiles_without_legacy_or_destructive_ddl():
     context = MigrationContext.configure(dialect_name="postgresql", opts={"as_sql": True, "output_buffer": output})
     with Operations.context(context):
         for version in ("rr_0001_create_isolated_referral_domain.py",
-                        "rr_0002_document_parse_details.py", "rr_0003_packet_drafts.py"):
+                        "rr_0002_document_parse_details.py", "rr_0003_packet_drafts.py", "rr_0004_usage_ledger.py"):
             spec = importlib.util.spec_from_file_location(version.removesuffix(".py"), SCRIPTS / "versions" / version)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
@@ -416,3 +416,15 @@ def test_reservations_reject_noninteger_money_before_writing(amount):
             assert sa.inspect(c).get_table_names() == []
     finally:
         engine.dispose()
+
+
+def test_rr_0003_upgrade_preserves_existing_usage_rows(empty_engine):
+    with transaction(empty_engine) as conn:
+        upgrade(conn, "rr_0003")
+        graph = seed(conn)
+        reservation_id = reserve(conn, graph)
+        before = dict(conn.execute(sa.select(m.usage_reservations).where(m.usage_reservations.c.id == reservation_id)).mappings().one())
+        upgrade(conn, HEAD)
+        after = dict(conn.execute(sa.select(m.usage_reservations).where(m.usage_reservations.c.id == reservation_id)).mappings().one())
+        assert after == before
+        assert conn.execute(sa.select(sa.func.count()).select_from(m.usage_details)).scalar_one() == 0

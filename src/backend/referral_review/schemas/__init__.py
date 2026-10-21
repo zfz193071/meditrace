@@ -21,6 +21,12 @@ class Contract(BaseModel):
 
 
 class ErrorCode(StrEnum):
+    MEMBERSHIP_REQUIRED = "MEMBERSHIP_REQUIRED"
+    QUOTA_EXHAUSTED = "QUOTA_EXHAUSTED"
+    BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
+    RUN_ACTIVE = "RUN_ACTIVE"
+    RATE_LIMITED = "RATE_LIMITED"
+    USAGE_CONFLICT = "USAGE_CONFLICT"
     AUTH_REQUIRED = "AUTH_REQUIRED"
     FORBIDDEN = "FORBIDDEN"
     NOT_FOUND = "NOT_FOUND"
@@ -299,3 +305,11 @@ class ReviewResult(Contract):
 
 
 DOMAIN_CONTRACTS = (Evidence, Fact, Finding, ReviewResult, RunState)
+
+
+class MembershipResponse(Contract):
+    environment: Literal["test"] = "test"
+    valid_until: UTCDateTime | None = None
+    remaining: int = Field(ge=0)
+    reserved: int = Field(ge=0)
+    real_ai_allowed: bool

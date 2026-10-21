@@ -20,6 +20,7 @@ from ..errors import ApiError
 from ..identity.service import DATABASE_FAILURES
 from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
+from ..usage import rates
 from ..schemas import DocumentPageResponse, DocumentResponse, ErrorCode
 from .parser import MAX_DOCUMENT_CODEPOINTS, MAX_PAGES, parse_pdf, parse_text, rejected
 from .storage import LocalStore, MAX_BYTES, PrivateBlobStore, StorageUnavailable, object_key
@@ -107,6 +108,10 @@ class Documents:
     def begin(self, token, packet_id, kind, idempotency_key):
         if not re.fullmatch(r"[A-Za-z0-9_-]{8,128}", idempotency_key or ""):
             raise ApiError(ErrorCode.SCHEMA_INVALID)
+        with self.engine.begin() as conn:
+            require_current_schema(conn)
+            packet = self.identity.require_owner(conn, token, packet_id)
+            rates.consume(conn, packet["owner_id"], "upload", self.clock())
         with self.engine.begin() as conn:
             require_current_schema(conn)
             packet = self.identity.require_owner(conn, token, packet_id)

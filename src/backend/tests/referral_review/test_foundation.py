@@ -176,7 +176,7 @@ def test_schema_generation_is_deterministic_and_does_not_depend_on_environment(m
     monkeypatch.setenv("DEEPSEEK_API_KEY", "secret-sentinel")
     assert artifacts() == baseline
     assert set(baseline["openapi.json"]["paths"]) == {
-        "/capabilities", "/readiness", "/auth/session", "/auth/github/start",
+        "/capabilities", "/readiness", "/membership", "/auth/session", "/auth/github/start",
         "/auth/github/callback", "/auth/logout",
         "/packets/{packet_id}/documents", "/packets/{packet_id}/documents/{document_id}",
         "/packets/{packet_id}/documents/{document_id}/original",
