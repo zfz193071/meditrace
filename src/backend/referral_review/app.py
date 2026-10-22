@@ -20,6 +20,8 @@ from .reviews import Reviews
 from .reviews.routes import review_router
 from .runs import Runs
 from .runs.routes import run_router
+from .billing import Billing, configured as billing_configured
+from .billing.routes import billing_router
 from .usage import Usage
 from .usage.routes import usage_router
 from .packets import Packets
@@ -49,6 +51,8 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     app.state.identity = identity
     app.state.documents = documents if documents is not None else configured_documents(config, identity)
     app.state.packets = Packets(identity) if identity is not None else None
+    app.state.billing = Billing(identity) if identity is not None and billing_configured(config) else None
+    app.include_router(billing_router())
     app.state.usage = Usage(identity) if identity is not None else None
     app.state.runs = Runs(identity) if identity is not None else None
     app.state.reviews = Reviews(identity) if identity is not None else None
@@ -93,6 +97,7 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
                 pass
         return Capabilities(contract_version=CONTRACT_VERSION, mode=config.mode,
             real_ai_execution_available=real_configured,
+            payments_available=app.state.billing is not None,
             workspace_available=app.state.identity is not None and config.mode != "bundled_demo",
             sandbox_execution_available=app.state.runs is not None and config.mode != "bundled_demo")
 

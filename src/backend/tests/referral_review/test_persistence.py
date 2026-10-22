@@ -311,7 +311,7 @@ def test_postgres_migration_sql_compiles_without_legacy_or_destructive_ddl():
     context = MigrationContext.configure(dialect_name="postgresql", opts={"as_sql": True, "output_buffer": output})
     with Operations.context(context):
         for version in ("rr_0001_create_isolated_referral_domain.py",
-                        "rr_0002_document_parse_details.py", "rr_0003_packet_drafts.py", "rr_0004_usage_ledger.py", "rr_0005_review_history.py"):
+                        "rr_0002_document_parse_details.py", "rr_0003_packet_drafts.py", "rr_0004_usage_ledger.py", "rr_0005_review_history.py", "rr_0006_checkout_details.py"):
             spec = importlib.util.spec_from_file_location(version.removesuffix(".py"), SCRIPTS / "versions" / version)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)

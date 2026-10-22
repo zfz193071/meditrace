@@ -9,7 +9,7 @@ from ..errors import ApiError
 from ..schemas import ErrorCode
 from ..persistence import models as m
 
-LIMITS = {"execute": ((60, 3), (3600, 20)), "upload": ((60, 10), (3600, 50)),
+LIMITS = {"checkout": ((60, 5), (3600, 20)), "execute": ((60, 3), (3600, 20)), "upload": ((60, 10), (3600, 50)),
           "export": ((60, 10), (3600, 60))}
 
 

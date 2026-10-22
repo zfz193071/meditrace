@@ -37,6 +37,9 @@ def protect_request(request: Request):
     root = request.scope.get("root_path", "")
     if root and path.startswith(root + "/"):
         path = path[len(root):]
+    # These exact POST routes authenticate raw signatures / operator bearer in their handlers.
+    if request.method == "POST" and path in {"/billing/webhook", "/internal/maintenance"}:
+        return
     if (path not in {"/capabilities", "/readiness", "/auth/github/callback"}
         and origin and (identity is None or origin != [identity.settings.site_origin])):
         raise ApiError(ErrorCode.FORBIDDEN)

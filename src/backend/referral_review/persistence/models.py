@@ -373,3 +373,9 @@ review_events = sa.Table("rr_review_events", metadata,
     sa.UniqueConstraint("packet_id", "review_version"),
     sa.CheckConstraint("review_version > 0", name="version"), state("kind", "resolution draft confirmation"),
     sa.Index("ix_rr_review_events_packet_created_id", "packet_id", "created_at", "id"))
+
+# Minimal checkout recovery data, separated from immutable accounting identifiers.
+checkout_details = sa.Table("rr_checkout_details", metadata,
+    uid("order_id", primary=True, reference="rr_orders.id"),
+    sa.Column("return_path", sa.String(200), nullable=False),
+    sa.Column("checkout_url", sa.Text), timestamp("expires_at"))

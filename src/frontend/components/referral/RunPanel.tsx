@@ -78,6 +78,7 @@ export function RunPanel({ packetId, revision, initialRun, membership, caps, csr
   return <section className="rr-card" aria-labelledby="run-title"><h2 id="run-title">Optional automated check</h2>
     <p><strong>{!available ? "Unavailable" : caps.mode === "sandbox" ? "Fake / simulated mode" : "Invited mode - server verifies eligibility"}</strong></p>
     <p>Preparing a check does not call AI. Review the exact mode before starting. A successful check consumes one test credit; real mode may incur provider fees.</p>
+    {!memberActive && <p>{sourceDirty ? "Save your changes before opening test membership." : <a className="underline" href={`/account?return_path=${encodeURIComponent(`/workspace/packets/${packetId}`)}`}>Test membership / account</a>}</p>}
     <p>{membership ? `Test credits: ${membership.remaining} remaining, ${membership.reserved} reserved.` : "Membership could not be loaded. Manual work remains available."}</p>
     {!memberActive && <p>No active test credits. You can still prepare sources and complete a manual handoff.</p>}
     <a href="#manual-review">Continue manually - no AI call</a>

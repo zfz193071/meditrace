@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import BillingPanel from "./BillingPanel";
 import Link from "next/link";
 import { getSession, signOut, type Session } from "../../lib/referral-api";
 
-export default function IdentityPanel({ workspace = false, returnPath = "/workspace", loginError = "" }: {
-  workspace?: boolean; returnPath?: string; loginError?: string;
+export default function IdentityPanel({ workspace = false, returnPath = "/workspace", loginError = "", billingReturnPath }: {
+  workspace?: boolean; returnPath?: string; loginError?: string; billingReturnPath?: string;
 }) {
   const [session, setSession] = useState<Session | null>(null);
   const [error, setError] = useState(false);
@@ -93,6 +94,7 @@ export default function IdentityPanel({ workspace = false, returnPath = "/worksp
         {signedOut && <p role="status">You have signed out.</p>}
         {logoutError && <p role="alert">Sign-out could not be confirmed. Please retry.</p>}
         {session?.user && <>
+          {billingReturnPath && session.csrf_token && <BillingPanel key={session.user.id} csrf={session.csrf_token} returnPath={billingReturnPath} />}
           <p>Signed in as {session.user.display_name}</p>
           <p><a href="/workspace" className="text-teal-300 underline">Open your referral workspace</a></p>
           <button disabled={busy} onClick={logout} className="rounded border border-teal-300 px-5 py-3 disabled:opacity-50">

@@ -38,7 +38,8 @@ def hashed(value: str) -> str:
 
 
 def safe_return_path(value: str) -> str:
-    if value not in {"/workspace", "/account"} and not RETURN_PATTERN.fullmatch(value):
+    if (value not in {"/workspace", "/account"} and not RETURN_PATTERN.fullmatch(value)
+            and not re.fullmatch(r"/account/payment\?order=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", value)):
         raise ApiError(ErrorCode.SCHEMA_INVALID)
     return value
 

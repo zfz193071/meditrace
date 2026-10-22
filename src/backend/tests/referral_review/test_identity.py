@@ -168,10 +168,11 @@ def test_new_mutation_routes_are_csrf_protected_by_default_and_session_is_same_o
         "Origin": "https://referral.example.test", "X-CSRF-Token": csrf,
     }).json() == {"accepted": True}
     # Webhook-looking URLs do not acquire a blanket exemption.
-    @client.app.post("/billing/webhook")
+    @client.app.post("/billing/webhook/other")
     def placeholder_webhook():
         return {"accepted": True}
-    assert client.post("/billing/webhook").status_code == 403
+    assert client.post("/billing/webhook/other").status_code == 403
+    assert client.post("/billing/webhook").status_code == 503  # exact route: billing disabled, never a placeholder grant
 
 
 @pytest.mark.parametrize("path", [

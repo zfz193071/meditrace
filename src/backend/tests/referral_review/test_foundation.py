@@ -179,6 +179,7 @@ def test_schema_generation_is_deterministic_and_does_not_depend_on_environment(m
     assert set(baseline["openapi.json"]["paths"]) == {
         "/capabilities", "/readiness", "/membership", "/auth/session", "/auth/github/start",
         "/auth/github/callback", "/auth/logout",
+        "/billing/checkout", "/billing/orders/{order_id}", "/billing/webhook", "/internal/maintenance",
         "/packets/{packet_id}/documents", "/packets/{packet_id}/documents/{document_id}",
         "/packets/{packet_id}/documents/{document_id}/original",
         "/packets/{packet_id}/documents/{document_id}/pages/{page_number}",

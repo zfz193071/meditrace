@@ -22,6 +22,9 @@ export type ReviewHistory = Schema["ReviewHistory"];
 export type HandoffDraft = Schema["HandoffDraftResponse"];
 
 const messages: Partial<Record<Schema["ErrorCode"], string>> = {
+  BILLING_DISABLED: "Test payments are not configured yet.",
+  PAYMENT_PENDING: "Payment could not be confirmed yet. Retry with the same order; do not make another payment.",
+  MEMBERSHIP_ACTIVE: "Your membership is still active. It cannot be extended or repurchased.",
   AUTH_REQUIRED: "Your session ended. Sign in again; saved material is retained until its expiry.",
   FORBIDDEN: "Access could not be verified. Refresh your session before trying again.",
   NOT_FOUND: "This material is unavailable, deleted or expired.",
@@ -81,6 +84,8 @@ function mutation<T>(path: string, method: string, body: unknown, csrf: string, 
 export const workspaceApi = {
   session: () => request<Session>("/auth/session"),
   capabilities: () => request<Capabilities>("/capabilities"),
+  checkout: (returnPath: string, csrf: string, key: string) => mutation<Schema["OrderResponse"]>("/billing/checkout", "POST", { return_path: returnPath }, csrf, key),
+  order: (orderId: string) => request<Schema["OrderResponse"]>(`/billing/orders/${id(orderId)}`),
   membership: () => request<Membership>("/membership"),
   list: (cursor?: string) => request<PacketList>(`/packets${cursor ? `?cursor=${id(cursor)}` : ""}`),
   create: (body: Schema["CreatePacketInput"], csrf: string, key: string) => mutation<Schema["PacketResponse"]>("/packets", "POST", body, csrf, key),

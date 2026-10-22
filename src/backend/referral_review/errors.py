@@ -12,6 +12,10 @@ from .schemas import ErrorCode, ErrorDetail, ErrorEnvelope
 
 logger = logging.getLogger("meditrace.referral")
 ERRORS = {
+    ErrorCode.BILLING_DISABLED: (503, "Test payments are not configured."),
+    ErrorCode.PAYMENT_PENDING: (503, "Payment status is pending; retry safely with the same key."),
+    ErrorCode.EVENT_REJECTED: (400, "Payment event was rejected."),
+    ErrorCode.MEMBERSHIP_ACTIVE: (409, "An active membership cannot be extended or repurchased."),
     ErrorCode.EXPORT_TOO_LARGE: (413, "Complete export exceeds the response or page limit; content was not truncated."),
     ErrorCode.EXPORT_UNSUPPORTED_TEXT: (422, "PDF cannot render every character safely; download the complete UTF-8 text instead."),
     ErrorCode.REVIEW_CONFLICT: (409, "Review changed; refresh before saving."),

@@ -1,13 +1,13 @@
 # Referral Review 配置与工程操作
 
-当前已实现基础配置、契约、持久化、合成资产和 MT-04 认证代码。认证默认禁用，真实 GitHub 往返尚待配置验收；资料包后端、提取／规则和费用账本代码已实施，MT-16 固定示例页面已实施，付款流程仍未实现；MT-11 模型执行编排已接入，但仅完成离线验证。MT-14 已实现工作区 UI；`/api/v1/capabilities` 根据认证接线、运行模式和真实配置报告工作区／模拟／真实执行能力，其他尚未交付能力仍为 false；`/api/v1/readiness` 返回 503 / not_ready，不能用于宣称 V1 已可上线。完整示例已由 MT-03/16 提供本地离线实现，外部验收仍待完成；就绪检查属于 MT-02/03/19。
+当前已实现基础配置、契约、持久化、合成资产和 MT-04 认证代码。认证默认禁用，真实 GitHub 往返尚待配置验收；资料包后端、提取／规则和费用账本代码已实施，MT-16 固定示例页面已实施，MT-17 测试付款代码已接入，真实 Stripe 往返待验收；MT-11 模型执行编排已接入，但仅完成离线验证。MT-14 已实现工作区 UI；`/api/v1/capabilities` 根据认证接线、运行模式和真实配置报告工作区／模拟／真实执行能力，其他尚未交付能力仍为 false；`/api/v1/readiness` 返回 503 / not_ready，不能用于宣称 V1 已可上线。完整示例已由 MT-03/16 提供本地离线实现，外部验收仍待完成；就绪检查属于 MT-02/03/19。
 
 MT-02 已添加领域持久化与显式追加迁移，但尚待 PostgreSQL 实测。独立测试库和迁移操作见 [迁移手册](MIGRATIONS.md)；这些改动不会自动连接或升级生产数据库。
 
 ## 配置模式
 
 - `bundled_demo`：默认模式，不要求密钥，不允许真实执行。固定合成示例已打包到 `/demo`，不能自动接收并持久化访客输入。
-- `sandbox`：可配置 GitHub 登录；Stripe test 权益尚未实现，后续模型执行只能使用 Fake／Replay，绝不静默回退并伪装为真实模型结果。
+- `sandbox`：可配置 GitHub 登录；Stripe test 会员已接入，模型执行只能使用 Fake／Replay，绝不静默回退并伪装为真实模型结果。
 - `invited_real`：只是配置意图。真实执行还必须有邀请账号、会员、共享预算及并发预留（MT-04/10/11），不能仅凭开关或配置验证成功放行。
 
 MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-Member` 不被信任；未知 `RR_*` 配置（含 fake identity / dev grant）直接拒绝。配置错误不回显输入；MT-14 起，真实配置通过校验且认证接线存在时，capabilities 可报告真实执行可用；这不是个人授权，创建和执行仍检查邀请、会员、额度、预算及限流。
@@ -32,7 +32,7 @@ MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-M
 | `RR_STORAGE_BACKEND` | disabled；允许 local / vercel；生产禁止 local；vercel 必须配私有 store 的 token | MT-05 |
 | `RR_PRIVATE_STORAGE_DIR` | 未设置；local 必填绝对路径；不在仓库或 public 下；私有目录 0700、对象 0600 | MT-05 |
 | `RR_STORAGE_GLOBAL_BYTES` | 1073741824（1 GiB）；非负整数；0 禁止新上传，仍可读和清理 | MT-05 |
-| `RR_STRIPE_SECRET_KEY` | 未设置；只接受 `sk_test_` / `rk_test_` 前缀；后续仍需校验 webhook 的 livemode | MT-17 |
+| `RR_STRIPE_SECRET_KEY` | 未设置；只接受 `sk_test_` / `rk_test_` 前缀；webhook、Price、Session、PaymentIntent 和 Charge 均校验 test mode | MT-17 |
 | `RR_STRIPE_WEBHOOK_SECRET` | 未设置，秘密 | MT-17 |
 | `RR_STRIPE_PRICE_ID` | 未设置，服务端固定测试商品 | MT-17 |
 | `RR_STRIPE_AMOUNT_MINOR` | 0；非负整数；真正启用 Checkout 前必须核对固定商品金额 | MT-17 |
@@ -97,3 +97,5 @@ src/backend/.venv/bin/pip-audit -r src/backend/requirements.txt --no-deps --disa
 MT-10 的会员查询、共享限流、价格快照、双桶预留和熔断约束见 [费用账本证据](MT-10-EVIDENCE.md)。上传限流已接入；真实执行仍须 MT-11 编排，导出须 MT-13 接入。没有生产授予权益接口，不自动开启模型消费。
 
 MT-11 已接入有持久状态的批次执行接口，调用语义、Idempotency-Key、原子结算、超时与模拟模式边界见 [执行验收记录](MT-11-EVIDENCE.md)。本轮不开启真实配置或服务；没有后台 worker。
+
+MT-17 的固定测试商品、回调验签、权益撤销和恢复步骤见 [测试支付手册](BILLING.md)；未配置支付时账户仍可登录，付款入口不可用。

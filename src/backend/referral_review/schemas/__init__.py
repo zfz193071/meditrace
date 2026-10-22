@@ -21,6 +21,10 @@ class Contract(BaseModel):
 
 
 class ErrorCode(StrEnum):
+    BILLING_DISABLED = "BILLING_DISABLED"
+    PAYMENT_PENDING = "PAYMENT_PENDING"
+    EVENT_REJECTED = "EVENT_REJECTED"
+    MEMBERSHIP_ACTIVE = "MEMBERSHIP_ACTIVE"
     EXPORT_TOO_LARGE = "EXPORT_TOO_LARGE"
     EXPORT_UNSUPPORTED_TEXT = "EXPORT_UNSUPPORTED_TEXT"
     REVIEW_CONFLICT = "REVIEW_CONFLICT"
@@ -92,7 +96,7 @@ class Capabilities(Contract):
     demo_cases_available: Literal[False] = False
     sandbox_execution_available: bool = False
     real_ai_execution_available: bool = False
-    payments_available: Literal[False] = False
+    payments_available: bool = False
     payment_environment: Literal["test"] = "test"
     limits: InputLimits = Field(default_factory=InputLimits)
 
@@ -349,3 +353,21 @@ class RunResponse(Contract):
     error_code: str | None
     usage: dict[str, int] | None
     result: ReviewResult | None = None
+
+
+class CheckoutInput(Contract):
+    return_path: str = Field("/account", max_length=200)
+
+
+class OrderResponse(Contract):
+    id: UUID
+    state: Literal["pending", "paid", "expired", "failed", "refunded", "revoked"]
+    environment: Literal["test"] = "test"
+    amount: int
+    currency: str
+    return_path: str
+    checkout_url: str | None = None
+
+
+class BillingEventResponse(Contract):
+    received: Literal[True] = True

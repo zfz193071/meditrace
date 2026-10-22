@@ -72,6 +72,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/billing/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Checkout */
+        post: operations["create_checkout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/orders/{order_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Order */
+        get: operations["get_order"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Webhook */
+        post: operations["billing_webhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/capabilities": {
         parameters: {
             query?: never;
@@ -83,6 +134,23 @@ export interface paths {
         get: operations["get_capabilities"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/internal/maintenance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Maintenance */
+        post: operations["run_maintenance"];
         delete?: never;
         options?: never;
         head?: never;
@@ -523,6 +591,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** BillingEventResponse */
+        BillingEventResponse: {
+            /**
+             * Received
+             * @default true
+             * @constant
+             */
+            received: true;
+        };
         /** Capabilities */
         Capabilities: {
             /** Contract Version */
@@ -554,9 +631,8 @@ export interface components {
             /**
              * Payments Available
              * @default false
-             * @constant
              */
-            payments_available: false;
+            payments_available: boolean;
             /**
              * Real Ai Execution Available
              * @default false
@@ -623,6 +699,14 @@ export interface components {
              * Format: uuid
              */
             revision_id: string;
+        };
+        /** CheckoutInput */
+        CheckoutInput: {
+            /**
+             * Return Path
+             * @default /account
+             */
+            return_path: string;
         };
         /** ConfirmInput */
         ConfirmInput: {
@@ -737,7 +821,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "EXPORT_TOO_LARGE" | "EXPORT_UNSUPPORTED_TEXT" | "REVIEW_CONFLICT" | "STALE_RUN" | "OPEN_FINDINGS" | "SOURCE_CHANGED" | "CHECKLIST_UNSUPPORTED" | "PARSE_COVERAGE_INCOMPLETE" | "MODEL_INPUT_LIMIT" | "MEMBERSHIP_REQUIRED" | "QUOTA_EXHAUSTED" | "BUDGET_EXHAUSTED" | "RUN_ACTIVE" | "RATE_LIMITED" | "USAGE_CONFLICT" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
+        ErrorCode: "BILLING_DISABLED" | "PAYMENT_PENDING" | "EVENT_REJECTED" | "MEMBERSHIP_ACTIVE" | "EXPORT_TOO_LARGE" | "EXPORT_UNSUPPORTED_TEXT" | "REVIEW_CONFLICT" | "STALE_RUN" | "OPEN_FINDINGS" | "SOURCE_CHANGED" | "CHECKLIST_UNSUPPORTED" | "PARSE_COVERAGE_INCOMPLETE" | "MODEL_INPUT_LIMIT" | "MEMBERSHIP_REQUIRED" | "QUOTA_EXHAUSTED" | "BUDGET_EXHAUSTED" | "RUN_ACTIVE" | "RATE_LIMITED" | "USAGE_CONFLICT" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "SCHEMA_INVALID" | "REAL_AI_NOT_ALLOWED" | "SERVICE_NOT_READY" | "INTERNAL_ERROR" | "OAUTH_FAILED" | "FILE_UNSUPPORTED" | "FILE_TOO_LARGE" | "STORAGE_LIMIT" | "DOCUMENT_LIMIT" | "STORAGE_UNAVAILABLE" | "IDEMPOTENCY_CONFLICT" | "PACKET_LIMIT" | "PACKET_INPUT_LIMIT" | "REVISION_CONFLICT" | "DRAFT_CONFLICT";
         /** ErrorDetail */
         ErrorDetail: {
             code: components["schemas"]["ErrorCode"];
@@ -1116,6 +1200,33 @@ export interface components {
             page_number: number;
             /** Quote */
             quote: string;
+        };
+        /** OrderResponse */
+        OrderResponse: {
+            /** Amount */
+            amount: number;
+            /** Checkout Url */
+            checkout_url?: string | null;
+            /** Currency */
+            currency: string;
+            /**
+             * Environment
+             * @default test
+             * @constant
+             */
+            environment: "test";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Return Path */
+            return_path: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "pending" | "paid" | "expired" | "failed" | "refunded" | "revoked";
         };
         /** PacketDeleteResponse */
         PacketDeleteResponse: {
@@ -1887,6 +1998,236 @@ export interface operations {
             };
         };
     };
+    create_checkout: {
+        parameters: {
+            query?: never;
+            header: {
+                "idempotency-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_order: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    billing_webhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingEventResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     get_capabilities: {
         parameters: {
             query?: never;
@@ -1903,6 +2244,80 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Capabilities"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    run_maintenance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Unauthorized */
