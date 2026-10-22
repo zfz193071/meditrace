@@ -22,6 +22,7 @@ window.fetch = async (url, init = {}) => {
  else if(url.endsWith('/capabilities')) value=caps;
  else if(url.endsWith('/membership')) value=membership;
  else if(url.endsWith('/runs/latest')) value=unknownRun;
+ else if(url.endsWith('/review-history')) value={items:[],next_cursor:null};
  else if(url.endsWith('/handoff-draft')) value={draft:null,stale:false};
  else if(url.endsWith('/revisions/1')) value=revision;
  else if(url.endsWith('/draft') && method==='PUT') { const input=JSON.parse(init.body); data.draft={...data.draft,...input,draft_version:data.draft.draft_version+1}; value=data.draft; }

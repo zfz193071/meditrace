@@ -502,6 +502,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/runs/{run_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Run Review State */
+        get: operations["get_run_review_state"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -871,6 +888,32 @@ export interface components {
             message: string;
             /** Rule Id */
             rule_id: string;
+        };
+        /** FindingDecision */
+        FindingDecision: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "resolve" | "dismiss" | "defer" | "reopen";
+            /** Corrected Value */
+            corrected_value: string | null;
+            /**
+             * Finding Id
+             * Format: uuid
+             */
+            finding_id: string;
+            /** Linked Evidence Ids */
+            linked_evidence_ids: string[];
+            /** Reason */
+            reason: string;
+            /** Review Version */
+            review_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "resolved" | "dismissed" | "unresolved";
         };
         /** HandoffDraftInput */
         HandoffDraftInput: {
@@ -1422,6 +1465,21 @@ export interface components {
             usage: {
                 [key: string]: number;
             } | null;
+        };
+        /** RunReviewState */
+        RunReviewState: {
+            /** Decisions */
+            decisions: components["schemas"]["FindingDecision"][];
+            /** Review Version */
+            review_version: number;
+            revision: components["schemas"]["RevisionResponse"];
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Stale */
+            stale: boolean;
         };
         /**
          * RunState
@@ -4161,6 +4219,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_run_review_state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunReviewState"];
                 };
             };
             /** @description Unauthorized */

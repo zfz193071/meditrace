@@ -2,7 +2,7 @@
 from typing import Annotated, Literal
 from uuid import UUID
 from pydantic import Field, model_validator
-from ..schemas import Contract, UTCDateTime, Sha256
+from ..schemas import Contract, UTCDateTime, Sha256, RevisionResponse
 
 ReviewMode = Literal["assisted", "manual"]
 Text = Annotated[str, Field(min_length=1, max_length=4000)]
@@ -86,3 +86,21 @@ class SnapshotResponse(Contract):
     payload_hash: Sha256
     has_unresolved: bool
     historical: bool
+
+
+class FindingDecision(Contract):
+    finding_id: UUID
+    status: Literal["open", "resolved", "dismissed", "unresolved"]
+    action: Literal["resolve", "dismiss", "defer", "reopen"]
+    reason: str
+    corrected_value: str | None
+    linked_evidence_ids: list[UUID]
+    review_version: int
+
+
+class RunReviewState(Contract):
+    run_id: UUID
+    revision: RevisionResponse
+    review_version: int
+    stale: bool
+    decisions: list[FindingDecision]

@@ -267,3 +267,40 @@ def test_tombstone_blocks_review_reads_and_writes(review):
     assert draft(r, 1).status_code == 404
     assert resolve(r, 1).status_code == 404
     assert r["client"].get(f"/packets/{r['pid']}/snapshots/{snap['id']}").status_code == 404
+
+
+def test_review_state_latest_decisions_and_historical_manifest_are_read_only(review):
+    r = review
+    path = f"/runs/{r['rid']}/review"
+    initial = r["client"].get(path)
+    assert initial.status_code == 200
+    assert initial.json()["decisions"] == []
+    assert initial.json()["revision"]["id"] == r["revision"]
+    assert resolve(r, action="defer", reason="Check identity").status_code == 201
+    assert resolve(r, 1, "resolve", corrected_value="Reviewed name", linked_evidence_ids=[r["eid"]]).status_code == 201
+    state = r["client"].get(path).json()
+    assert state["review_version"] == 2 and not state["stale"]
+    assert len(state["decisions"]) == 1
+    assert state["decisions"][0]["status"] == "resolved"
+    assert state["decisions"][0]["corrected_value"] == "Reviewed name"
+    assert r["client"].get(path).json() == state
+    did = upload(r["workspace"], r["pid"], "New source")
+    assert save(r["workspace"], r["pid"], 1, [did]).status_code == 201
+    historical = r["client"].get(path).json()
+    assert historical["stale"] and not historical["revision"]["is_current"]
+    assert historical["revision"]["documents"][0]["id"] == r["did"]
+    assert historical["decisions"] == state["decisions"]
+    with r["identity"].engine.begin() as conn:
+        assert conn.execute(sa.select(sa.func.count()).select_from(m.usage_reservations)).scalar_one() == 0
+    assert r["client"].delete(f"/packets/{r['pid']}", headers=r["headers"] | {"Idempotency-Key": uuid4().hex}).status_code == 202
+    assert r["client"].get(path).status_code == 404
+
+
+def test_review_state_rejects_anonymous_and_other_owner(review):
+    r = review
+    path = f"/runs/{r['rid']}/review"
+    r["client"].cookies.clear()
+    assert r["client"].get(path).status_code == 401
+    r["transport"].subject = 54321
+    sign_in(r["client"])
+    assert r["client"].get(path).status_code == 404

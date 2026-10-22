@@ -1,0 +1,23 @@
+{
+  "width": 756,
+  "scrollWidth": 756,
+  "marks": [
+    "1980-04-03",
+    "1981-04-03"
+  ],
+  "body": "3. Review evidence and prepare handoff\n\nRun mode: fake · Source version 1 · Review version 0\n\nIdentity unresolved — verify the differing identity details. This warning remains in the handoff unless resolved.\n\nSaved decisions loaded. Any unsaved edit remains below for comparison.\n\nReload saved decisions\nItems (2)\nFilter by type\nAll types\nMissing information\nNeeds clarification\nIdentity mismatch\nStatement difference\nAttachment not found\nParsing quality\nFilter by status\nAll statuses\nopen\nresolved\ndismissed\nunresolved\nIdentity mismatch · patient.dob\nopen · C02\nMissing information · referrer.contact\nopen · C03\nIdentity mismatch\n\nThe two sources record different dates of birth. Verify identity before relying on either date.\n\nChecklist requirement: Date of birth recorded consistently · outpatient-referral-demo@1\n\nChecked successfully parsed sources in version 1: Synthetic referral letter.txt; Synthetic intake note.txt\n\npatient.dob: 1980-04-03\n\nstated\n\npatient.dob: 1981-04-03\n\nstated\n\nSynthetic referral letter.txt\n\nSource version 1 · Page 1 · Characters 63–73\n\nSynthetic referral letter\nPatient: Alex Example\nDate of birth: 1980-04-03\nReferral reason: specialist review.\n\n\nRead full normalized page\nDownload original text — page 1\n\nThe normalized text is the citation reference. Original files are downloaded, not embedded or executed.\n\nSynthetic intake note.txt\n\nSource version 1 · Page 1 · Characters 59–69\n\nSynthetic intake note\nPatient: Alex Example\nDate of birth: 1981-04-03\n<script>alert('synthetic')</script>\n\n\nRead full normalized page\nDownload original text — page 1\n\nThe normalized text is the citation reference. Original files are downloaded, not embedded or executed.\n\nHuman decision\n\nCorrections are reviewer supplied. They do not rewrite the original fact or create a source citation.\n\nAction\nResolve\nDismiss with reason\nKeep unresolved\nReopen\nReason (optional)\nReviewer supplied correction (optional)\nLink citation: Synthetic referral letter.txt · page 1\nLink citation: Synthetic intake note.txt · page 1\nSave decision\nAll extracted facts (2)\n\n2 open items. Every item must be resolved, dismissed or explicitly kept unresolved before confirmation. Reviewed does not mean complete.\n\nConfirm reviewed handoff",
+  "calls": [
+    "GET /api/v1/auth/session",
+    "GET /api/v1/capabilities",
+    "GET /api/v1/packets/11111111-1111-4111-8111-111111111111",
+    "GET /api/v1/packets/11111111-1111-4111-8111-111111111111/revisions/1",
+    "GET /api/v1/packets/11111111-1111-4111-8111-111111111111/runs/latest",
+    "GET /api/v1/membership",
+    "GET /api/v1/runs/66666666-6666-4666-8666-666666666666/review",
+    "GET /api/v1/packets/11111111-1111-4111-8111-111111111111/review-history",
+    "GET /api/v1/packets/11111111-1111-4111-8111-111111111111/handoff-draft",
+    "GET /api/v1/packets/11111111-1111-4111-8111-111111111111/documents/22222222-2222-4222-8222-222222222222/pages/1",
+    "GET /api/v1/packets/11111111-1111-4111-8111-111111111111/documents/77777777-7777-4777-8777-777777777777/pages/1"
+  ],
+  "storageEntries": 0
+}

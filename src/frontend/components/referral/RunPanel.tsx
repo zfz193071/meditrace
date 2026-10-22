@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { workspaceApi as api, errorMessage, operationKey, type Run, type Revision, type Membership, type Capabilities } from "../../lib/referral-api/workspace";
 
 const phaseText: Record<Run["phase"], string> = { pending: "Prepared - not started", reserved: "Capacity reserved", dispatched: "Request sent; waiting for result", complete: "Result saved", failed: "Check failed", unknown: "Outcome unknown", cancelled: "Check cancelled" };
-export function RunPanel({ packetId, revision, initialRun, membership, caps, csrf, sourceDirty, onError }: {
+export function RunPanel({ packetId, revision, initialRun, membership, caps, csrf, sourceDirty, onError, onRunChange }: {
   packetId: string; revision: Revision | null; initialRun: Run | null; membership: Membership | null;
-  caps: Capabilities; csrf: string; sourceDirty: boolean; onError: (e: unknown) => void;
+  caps: Capabilities; csrf: string; sourceDirty: boolean; onError: (e: unknown) => void; onRunChange?: (run: Run | null) => void;
 }) {
   const [run, setRun] = useState(initialRun);
+  useEffect(() => { onRunChange?.(run); }, [run, onRunChange]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);

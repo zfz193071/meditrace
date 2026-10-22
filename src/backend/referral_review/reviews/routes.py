@@ -4,7 +4,7 @@ from fastapi import APIRouter, Header, Request
 from ..errors import ApiError
 from ..schemas import ErrorCode
 from .contracts import (ConfirmInput, HandoffDraftInput, HandoffDraftResponse, ResolutionInput,
-    ReviewEvent, ReviewHistory, SnapshotResponse)
+    ReviewEvent, ReviewHistory, SnapshotResponse, RunReviewState)
 
 
 def review_router():
@@ -15,6 +15,11 @@ def review_router():
         if identity is None or reviews is None:
             raise ApiError(ErrorCode.AUTH_REQUIRED)
         return reviews, request.cookies.get(identity.session_cookie)
+
+    @router.get("/runs/{run_id}/review", response_model=RunReviewState, operation_id="get_run_review_state")
+    def get_run_review_state(request: Request, run_id: UUID):
+        reviews, token = service(request)
+        return reviews.state(token, run_id)
 
     @router.post("/runs/{run_id}/findings/{finding_id}/resolutions", response_model=ReviewEvent,
                  status_code=201, operation_id="resolve_finding")

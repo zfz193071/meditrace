@@ -18,6 +18,7 @@ beforeEach(() => {
   mock.session.mockResolvedValue(session); mock.capabilities.mockResolvedValue(caps);
   mock.packet.mockResolvedValue(packet); mock.revision.mockResolvedValue(revision); mock.latestRun.mockResolvedValue(null);
   mock.membership.mockResolvedValue(membership); mock.handoffDraft.mockResolvedValue({ draft: null, stale: false });
+  mock.history.mockResolvedValue({ items: [], next_cursor: null });
   mock.list.mockResolvedValue({ items: [], next_cursor: null });
 });
 

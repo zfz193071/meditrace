@@ -8,7 +8,7 @@ from ..packets.service import Packets, _hash
 from ..persistence import models as m
 from ..runs.results import load
 from ..schemas import ErrorCode
-from .contracts import ReviewEvent, ReviewHistory, HandoffDraftResponse, SnapshotResponse
+from .contracts import ReviewEvent, ReviewHistory, HandoffDraftResponse, SnapshotResponse, RunReviewState, FindingDecision
 
 STATUS = {"resolve": "resolved", "dismiss": "dismissed", "defer": "unresolved", "reopen": "open"}
 
@@ -204,6 +204,25 @@ class Reviews:
         with self.engine.begin() as conn:
             packet = self.packets._packet(conn, token, packet_id)
             return self._snapshot(conn, packet, snapshot_id)
+
+    def state(self, token, run_id):
+        # Same owner/packet lock order as writers; read an authoritative overlay
+        # without walking paginated history, and never dispatch a model.
+        with self.engine.begin() as conn:
+            owner = self.packets._user(conn, token)
+            run = conn.execute(sa.select(m.runs).where(m.runs.c.id == run_id,
+                m.runs.c.owner_id == owner)).mappings().first()
+            if run is None:
+                raise ApiError(ErrorCode.NOT_FOUND)
+            packet = self.packets._packet(conn, token, run["packet_id"])
+            number = conn.execute(sa.select(m.revisions.c.revision_number).where(
+                m.revisions.c.id == run["revision_id"], m.revisions.c.packet_id == packet["id"])).scalar_one()
+            revision = self.packets._revision(conn, packet, number)
+            decisions = [FindingDecision(**{key: event["content"][key] for key in
+                ("finding_id", "status", "action", "reason", "corrected_value", "linked_evidence_ids")},
+                review_version=event["review_version"]) for event in self._decisions(conn, run_id).values()]
+            return RunReviewState(run_id=run_id, revision=revision, review_version=packet["review_version"],
+                stale=not revision.is_current, decisions=decisions)
 
     def history(self, token, packet_id, cursor=None, limit=20):
         if not 1 <= limit <= 50:

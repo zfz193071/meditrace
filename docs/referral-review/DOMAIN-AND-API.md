@@ -151,6 +151,7 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 | POST `/packets/{pid}/runs` | `{revision_id,checklist_version}`；201 pending；同内容未完成批次复用 |
 | POST `/runs/{rid}/execute` | CAS、权限和费用校验；200 终态／202 已运行；首个请求在请求内执行 |
 | GET `/runs/{rid}` | state、stale、可见阶段、facts/findings、用量；无派发副作用 |
+| GET `/runs/{rid}/review` | 同事务读取该 run 的来源版本、当前 review_version、stale 及每项最新人工决定；owner 限定，无状态／费用变更 |
 | POST `/runs/{rid}/reconcile` | 超时 lease 核对；只恢复状态／账本，不重新调用模型 |
 | POST `/runs/{rid}/cancel` | 仅 pending 可取消，running 返回 409 |
 | POST `/runs/{rid}/findings/{fid}/resolutions` | `{expected_review_version,action,reason,corrected_value?,linked_evidence_ids?}` |
@@ -227,3 +228,8 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 - 原文只暂存在组件内存，显式导入才发送后端；选择草稿只保存文档 ID 与步骤，不写原文至 localStorage、URL 或分析事件。离开页面的未保存内容用 beforeunload 提醒；重新加载保存内容另有明确确认。
 - 恢复页面先读取当前版本与最新批次。pending 仍需显式启动；GET 轮询 4 秒间隔、最多 5 分钟，读取失败即暂停。执行请求上限 185 秒，失败只转状态查询，不自动重发 execute。
 - capabilities 是部署能力提示，不是用户费用授权；会员查询和后端执行校验仍是最终边界。手工草稿、确认及已确认导出不依赖 AI 额度，保持 reviewer supplied 标记。
+
+
+### MT-15 审核呈现
+
+页面按 run 的来源 manifest 校验文档成员与解析版本，核对页 hash、Unicode code point offsets 与 quote 后才高亮；历史引用不改用当前来源版本。人工决定通过带审核版本的独立请求保存，409 或不确定响应先保留编辑并暂停写入，用户读取最新决定对比后再显式保存。历史列表分页仅用于参考，不用于推断所有事项的当前状态；当前覆盖层由只读 `/runs/{rid}/review` 返回。原件只走同源鉴权下载，不把来源文本解析为 HTML 或可执行链接。

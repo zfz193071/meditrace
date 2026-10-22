@@ -13,6 +13,12 @@ export type Session = Schema["SessionResponse"];
 export type Draft = Schema["PacketDraftResponse"];
 export type Snapshot = Schema["SnapshotResponse"];
 export type ReviewEvent = Schema["ReviewEvent"];
+export type ReviewState = Schema["RunReviewState"];
+export type Evidence = Schema["Evidence"];
+export type Finding = Schema["Finding"];
+export type Page = Schema["DocumentPageResponse"];
+export type DecisionInput = Schema["ResolutionInput"];
+export type ReviewHistory = Schema["ReviewHistory"];
 export type HandoffDraft = Schema["HandoffDraftResponse"];
 
 const messages: Partial<Record<Schema["ErrorCode"], string>> = {
@@ -21,7 +27,7 @@ const messages: Partial<Record<Schema["ErrorCode"], string>> = {
   NOT_FOUND: "This material is unavailable, deleted or expired.",
   REVISION_CONFLICT: "The saved source version changed in another tab. Reload saved material before saving again.",
   DRAFT_CONFLICT: "The saved selection changed in another tab. Reload it before saving again.",
-  REVIEW_CONFLICT: "The review changed in another tab. Reload before saving your note.",
+  REVIEW_CONFLICT: "The review changed in another tab. Reload saved decisions before saving again.",
   FILE_TOO_LARGE: "This PDF exceeds 2 MiB. Choose a smaller document.",
   FILE_UNSUPPORTED: "Use a text PDF or paste text. Scans and unsupported files cannot be checked.",
   DOCUMENT_LIMIT: "The document limit has been reached.",
@@ -35,6 +41,7 @@ const messages: Partial<Record<Schema["ErrorCode"], string>> = {
   RATE_LIMITED: "Too many requests. Wait a minute, then check the saved state.",
   RUN_ACTIVE: "A check is already active. Query its status instead of starting another.",
   SOURCE_CHANGED: "Sources changed. Save and review the current source version.",
+  OPEN_FINDINGS: "Some review items are still open. Reload saved decisions and explicitly handle each item.",
   STALE_RUN: "This run belongs to an earlier source version.",
   SERVICE_NOT_READY: "The service is unavailable. Saved material has not been removed.",
 };
@@ -97,5 +104,10 @@ export const workspaceApi = {
   cancel: (rid: string, csrf: string) => mutation<Run>(`/runs/${id(rid)}/cancel`, "POST", undefined, csrf),
   handoffDraft: (pid: string) => request<HandoffDraft>(`/packets/${id(pid)}/handoff-draft`),
   saveManual: (pid: string, body: Schema["HandoffDraftInput"], csrf: string) => mutation<ReviewEvent>(`/packets/${id(pid)}/handoff-draft`, "PUT", body, csrf),
+  reviewState: (rid: string) => request<ReviewState>(`/runs/${id(rid)}/review`),
+  page: (pid: string, did: string, page: number) => request<Page>(`/packets/${id(pid)}/documents/${id(did)}/pages/${page}`),
+  resolve: (rid: string, fid: string, body: DecisionInput, csrf: string, key: string) => mutation<ReviewEvent>(`/runs/${id(rid)}/findings/${id(fid)}/resolutions`, "POST", body, csrf, key),
+  history: (pid: string, cursor?: string) => request<ReviewHistory>(`/packets/${id(pid)}/review-history${cursor ? `?cursor=${id(cursor)}` : ""}`),
+  handoff: (pid: string, sid: string) => request<Schema["HandoffView"]>(`/packets/${id(pid)}/snapshots/${id(sid)}/handoff`),
   confirm: (pid: string, body: Schema["ConfirmInput"], csrf: string) => mutation<Snapshot>(`/packets/${id(pid)}/confirm`, "POST", body, csrf),
 };

@@ -883,6 +883,74 @@
         "title": "Finding",
         "type": "object"
       },
+      "FindingDecision": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "resolve",
+              "dismiss",
+              "defer",
+              "reopen"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "corrected_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corrected Value"
+          },
+          "finding_id": {
+            "format": "uuid",
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "linked_evidence_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Linked Evidence Ids",
+            "type": "array"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "review_version": {
+            "title": "Review Version",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "resolved",
+              "dismissed",
+              "unresolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "finding_id",
+          "status",
+          "action",
+          "reason",
+          "corrected_value",
+          "linked_evidence_ids",
+          "review_version"
+        ],
+        "title": "FindingDecision",
+        "type": "object"
+      },
       "HandoffDraftInput": {
         "additionalProperties": false,
         "properties": {
@@ -2162,6 +2230,43 @@
           "usage"
         ],
         "title": "RunResponse",
+        "type": "object"
+      },
+      "RunReviewState": {
+        "additionalProperties": false,
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/FindingDecision"
+            },
+            "title": "Decisions",
+            "type": "array"
+          },
+          "review_version": {
+            "title": "Review Version",
+            "type": "integer"
+          },
+          "revision": {
+            "$ref": "#/components/schemas/RevisionResponse"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "run_id",
+          "revision",
+          "review_version",
+          "stale",
+          "decisions"
+        ],
+        "title": "RunReviewState",
         "type": "object"
       },
       "RunState": {
@@ -5808,6 +5913,96 @@
           }
         },
         "summary": "Reconcile"
+      }
+    },
+    "/runs/{run_id}/review": {
+      "get": {
+        "operationId": "get_run_review_state",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunReviewState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Get Run Review State"
       }
     }
   },

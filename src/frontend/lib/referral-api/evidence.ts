@@ -1,3 +1,28 @@
+import type { Evidence, Page, Revision } from "./workspace";
+
+// Offsets are Unicode code points, never UTF-16 indices or a quote search.
+export function evidenceSlice(evidence: Evidence, page: Page, revision: Revision) {
+  const doc = revision.documents.find(doc => doc.id === evidence.document_id);
+  const chars = Array.from(page.normalized_text);
+  if (!doc || doc.parser_version !== page.parser_version || page.parse_quality !== "ready" ||
+      page.document_id !== evidence.document_id || page.page_number !== evidence.page_number ||
+      page.text_hash !== evidence.text_hash || (doc.page_count === null || evidence.page_number > doc.page_count) ||
+      !Number.isInteger(evidence.start_cp) || !Number.isInteger(evidence.end_cp) ||
+      evidence.start_cp < 0 || evidence.end_cp <= evidence.start_cp || evidence.end_cp > chars.length ||
+      chars.slice(evidence.start_cp, evidence.end_cp).join("") !== evidence.quote) return null;
+  return { before: chars.slice(Math.max(0, evidence.start_cp - 180), evidence.start_cp).join(""),
+    quote: evidence.quote, after: chars.slice(evidence.end_cp, evidence.end_cp + 180).join("") };
+}
+
+export async function verifyPageHash(page: Page): Promise<boolean> {
+  const bytes = new TextEncoder().encode(page.normalized_text);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), value => value.toString(16).padStart(2, "0")).join("") === page.text_hash;
+}
+export function originalDocumentUrl(packetId: string, documentId: string) {
+  return `/api/v1/packets/${encodeURIComponent(packetId)}/documents/${encodeURIComponent(documentId)}/original`;
+}
+
 /** Frozen text-v1 rules. Offsets count Unicode code points, not UTF-16 units. */
 export function normalizeTextV1(value: string): string {
   return value.replace(/\r\n?/g, "\n").normalize("NFC");

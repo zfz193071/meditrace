@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { workspaceApi as api, errorMessage, operationKey, type Packet, type Revision, type Run, type Membership, type Document } from "../../lib/referral-api/workspace";
 import { type Access, expiryLabel, useUnsavedChanges } from "./WorkspaceGate";
 import { RunPanel } from "./RunPanel";
+import { ReviewWorkspace } from "./ReviewWorkspace";
 import { ManualDraft } from "./ManualDraft";
 
 const same = (a: string[], b: string[]) => a.length === b.length && a.every((value, i) => value === b[i]);
@@ -24,6 +25,7 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
   const [deleting, setDeleting] = useState(false);
   const [removed, setRemoved] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [reviewDirty, setReviewDirty] = useState(false);
   const [manualDirty, setManualDirty] = useState(false);
   const [restore, setRestore] = useState(0);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
@@ -31,7 +33,7 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
   const lock = useRef(false);
   const textKey = useRef<string | null>(null);
   const loadVersion = useRef(0);
-  const dirty = Boolean(manualDirty || text || (packet && title !== packet.title) || !same(selected, savedSelection));
+  const dirty = Boolean(reviewDirty || manualDirty || text || (packet && title !== packet.title) || !same(selected, savedSelection));
   useUnsavedChanges(dirty);
   const fail = useCallback((e: unknown) => { setError(errorMessage(e)); onError(e); }, [onError]);
   const load = useCallback(async (keepInput = false) => {
@@ -66,7 +68,7 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
     finally { lock.current = false; if (alive.current) { setBusy(false); setUploading(""); } }
   }
   async function reload() {
-    if (dirty && !window.confirm("Discard unsaved text and selection changes, and reload saved material?")) return;
+    if (dirty && !window.confirm("Discard unsaved source, manual note and review edits, and reload saved material?")) return;
     setError(""); setAttempt(0); await action(() => load());
   }
   function showResult(doc: Document) {
@@ -96,7 +98,7 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
   return <>
     <div className="rr-heading"><div><a href="/workspace">All packets</a><h1>{packet.title}</h1><p>{expiryLabel(packet.expires_at)} · Expires {new Date(packet.expires_at).toLocaleString()}</p></div><button disabled={busy} onClick={reload}>Reload saved material</button></div>
     {error && <p role="alert" className="rr-alert">{error}</p>}{notice && <p role="status" className="rr-notice">{notice}</p>}
-    {dirty && <p className="rr-alert">Unsaved changes. Save your selection or import pasted text before leaving.</p>}
+    {dirty && <p className="rr-alert">Unsaved changes. Save or discard your source, note or review edits before leaving.</p>}
     <details className="rr-card"><summary>Packet settings</summary><label htmlFor="rename-title">Packet title</label><input id="rename-title" maxLength={200} value={title} disabled={busy} onChange={e => setTitle(e.target.value)} />
       <div className="rr-actions"><button disabled={busy || !title.trim() || title === packet.title} onClick={() => action(async () => { const next = await api.rename(packetId, { title: title.trim() }, csrf); setPacket(p => p && { ...p, title: next.title }); setTitle(next.title); })}>Save title</button>
       <button disabled={busy} onClick={() => setDeleting(true)}>Delete packet</button></div>
@@ -125,12 +127,14 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
         const saved = await api.saveDraft(packetId, { expected_draft_version: packet.draft.draft_version, base_revision: packet.current_revision, selected_document_ids: selected, last_location: "documents" }, csrf);
         setPacket(p => p && { ...p, draft: saved }); setSavedSelection([...selected]); setNotice("Selection draft saved. It will restore after sign-in or a payment return. The source version has not changed.");
       })}>Save selection draft</button>
-      <button className="rr-primary" disabled={busy || manualDirty || !sourceDirty || !ready || pages > 25 || (!packet.current_revision && selected.length === 0)} onClick={() => action(async () => {
+      <button className="rr-primary" disabled={busy || manualDirty || reviewDirty || !sourceDirty || !ready || pages > 25 || (!packet.current_revision && selected.length === 0)} onClick={() => action(async () => {
         const next = await api.saveRevision(packetId, { expected_revision: packet.current_revision, document_ids: selected }, csrf);
         setRevision(next); setSavedSelection([...selected]); setNotice(`Source version ${next.revision_number} saved. Previous checks remain historical.`); await load(true);
       })}>Save source version</button></div>
     </section></div>
-    <RunPanel key={`${packetId}:${packet.current_revision}:${restore}`} packetId={packetId} revision={revision} initialRun={run} membership={member} caps={access.capabilities} csrf={csrf} sourceDirty={sourceDirty || busy} onError={onError} />
+    <RunPanel key={`${packetId}:${packet.current_revision}:${restore}`} packetId={packetId} revision={revision} initialRun={run} membership={member} caps={access.capabilities} csrf={csrf} sourceDirty={sourceDirty || busy || reviewDirty} onError={onError} onRunChange={setRun} />
+    <ReviewWorkspace key={`review:${packetId}:${packet.current_revision}:${restore}`} packet={packet} run={run} csrf={csrf} sourceDirty={sourceDirty || busy || manualDirty} onError={onError} onDirty={setReviewDirty} />
+    {reviewDirty && <p className="rr-notice">Save or discard review edits before changing the source version or starting another check.</p>}
     {manualDirty && <p className="rr-notice">Save your manual note before changing the source version.</p>}
     <ManualDraft onDirty={setManualDirty} key={`manual:${packetId}:${packet.current_revision}:${restore}`} packet={packet} revision={revision} {...access} />
   </>;
