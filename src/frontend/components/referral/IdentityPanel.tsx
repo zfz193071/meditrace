@@ -94,7 +94,7 @@ export default function IdentityPanel({ workspace = false, returnPath = "/worksp
         {logoutError && <p role="alert">Sign-out could not be confirmed. Please retry.</p>}
         {session?.user && <>
           <p>Signed in as {session.user.display_name}</p>
-          <p>Private packet editing is not available yet. No files are uploaded from this page.</p>
+          <p><a href="/workspace" className="text-teal-300 underline">Open your referral workspace</a></p>
           <button disabled={busy} onClick={logout} className="rounded border border-teal-300 px-5 py-3 disabled:opacity-50">
             {busy ? "Signing out…" : "Sign out"}
           </button>

@@ -45,13 +45,11 @@
             "type": "boolean"
           },
           "real_ai_execution_available": {
-            "const": false,
             "default": false,
             "title": "Real Ai Execution Available",
             "type": "boolean"
           },
           "sandbox_execution_available": {
-            "const": false,
             "default": false,
             "title": "Sandbox Execution Available",
             "type": "boolean"
@@ -69,7 +67,6 @@
             "type": "boolean"
           },
           "workspace_available": {
-            "const": false,
             "default": false,
             "title": "Workspace Available",
             "type": "boolean"
@@ -4800,6 +4797,104 @@
           }
         },
         "summary": "Create"
+      }
+    },
+    "/packets/{packet_id}/runs/latest": {
+      "get": {
+        "operationId": "get_latest_run",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Packet Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RunResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Latest Run"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Latest"
       }
     },
     "/packets/{packet_id}/snapshots/{snapshot_id}": {

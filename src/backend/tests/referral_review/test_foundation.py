@@ -184,6 +184,7 @@ def test_schema_generation_is_deterministic_and_does_not_depend_on_environment(m
         "/packets/{packet_id}/documents/{document_id}/pages/{page_number}",
         "/packets", "/packets/{packet_id}", "/packets/{packet_id}/draft",
         "/packets/{packet_id}/revisions", "/packets/{packet_id}/revisions/{revision_number}",
+        "/packets/{packet_id}/runs/latest",
         "/packets/{packet_id}/runs", "/runs/{run_id}", "/runs/{run_id}/execute",
         "/runs/{run_id}/cancel", "/runs/{run_id}/reconcile",
         "/runs/{run_id}/findings/{finding_id}/resolutions",

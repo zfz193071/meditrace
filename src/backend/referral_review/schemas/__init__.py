@@ -88,10 +88,10 @@ class Capabilities(Contract):
     synthetic_data_only: Literal[True] = True
     demo_mode_available: Literal[True] = True
     # Configuration alone cannot enable features whose secure workflows are not implemented.
-    workspace_available: Literal[False] = False
+    workspace_available: bool = False
     demo_cases_available: Literal[False] = False
-    sandbox_execution_available: Literal[False] = False
-    real_ai_execution_available: Literal[False] = False
+    sandbox_execution_available: bool = False
+    real_ai_execution_available: bool = False
     payments_available: Literal[False] = False
     payment_environment: Literal["test"] = "test"
     limits: InputLimits = Field(default_factory=InputLimits)

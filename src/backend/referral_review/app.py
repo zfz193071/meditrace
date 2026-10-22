@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from . import CONTRACT_VERSION
-from .config import Settings, load_settings
+from .config import ConfigurationError, Settings, load_settings
 from .errors import ApiError, error_response, install_error_handlers, logger
 from .schemas import Capabilities, ErrorCode, ErrorEnvelope, ReadinessResponse
 from .identity.routes import auth_router
@@ -84,7 +84,17 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
 
     @app.get("/capabilities", response_model=Capabilities, operation_id="get_capabilities")
     def capabilities():
-        return Capabilities(contract_version=CONTRACT_VERSION, mode=config.mode)
+        real_configured = False
+        if app.state.identity is not None:
+            try:
+                config.require_real_ai_configuration()
+                real_configured = True
+            except ConfigurationError:
+                pass
+        return Capabilities(contract_version=CONTRACT_VERSION, mode=config.mode,
+            real_ai_execution_available=real_configured,
+            workspace_available=app.state.identity is not None and config.mode != "bundled_demo",
+            sandbox_execution_available=app.state.runs is not None and config.mode != "bundled_demo")
 
     @app.get("/readiness", response_model=ReadinessResponse, responses={503: {"model": ReadinessResponse}}, operation_id="get_readiness")
     def readiness():

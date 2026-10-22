@@ -1,6 +1,2 @@
-import IdentityPanel from "../../components/referral/IdentityPanel";
-
-// This is an authentication shell, not MT-14's packet editor.
-export default function WorkspacePage() {
-  return <IdentityPanel workspace />;
-}
+import Workspace from "../../components/referral/Workspace";
+export default function WorkspacePage() { return <Workspace />; }

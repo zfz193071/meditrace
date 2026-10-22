@@ -21,6 +21,11 @@ def run_router():
         runs, token = service(request)
         return runs.create(token, packet_id, body, idempotency_key)
 
+    @router.get("/packets/{packet_id}/runs/latest", response_model=RunResponse | None, operation_id="get_latest_run")
+    def latest(request: Request, packet_id: UUID):
+        runs, token = service(request)
+        return runs.latest(token, packet_id)
+
     @router.get("/runs/{run_id}", response_model=RunResponse, operation_id="get_run")
     def get(request: Request, run_id: UUID):
         runs, token = service(request)

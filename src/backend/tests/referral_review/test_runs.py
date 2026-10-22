@@ -393,3 +393,33 @@ def test_deadline_during_commit_rolls_back_thread_work(review, monkeypatch):
     assert rows(r, m.facts) == []
     assert rows(r, m.memberships)[0]["consumed_units"] == 0
     assert r["adapter"].calls == 1
+
+
+def test_latest_run_restores_state_without_dispatch_and_scopes_owner(review):
+    r = review
+    path = f"/packets/{r['pid']}/runs/latest"
+    assert r["client"].get(path).json() is None
+    rid = new_run(r).json()["id"]
+    for _ in range(3):
+        response = r["client"].get(path)
+        assert response.status_code == 200 and response.json()["id"] == rid
+        assert response.json()["state"] == "pending"
+        assert response.headers["cache-control"] == "private, no-store"
+    assert r["adapter"].calls == 0 and rows(r, m.usage_reservations) == []
+    did = upload(r["workspace"], r["pid"], "Changed synthetic material")
+    assert save(r["workspace"], r["pid"], 1, [did]).status_code == 201
+    assert r["client"].get(path).json()["stale"] is True
+    r["workspace"][3].subject = 99998
+    sign_in(r["client"])
+    assert r["client"].get(path).status_code == 404
+    r["client"].cookies.clear()
+    assert r["client"].get(path).status_code == 401
+
+
+def test_workspace_capabilities_describe_routes_not_membership_grants(review):
+    r = review
+    caps = r["client"].get("/capabilities").json()
+    assert caps["workspace_available"] is True
+    assert caps["sandbox_execution_available"] is True
+    assert caps["real_ai_execution_available"] is False
+    assert r["adapter"].calls == 0

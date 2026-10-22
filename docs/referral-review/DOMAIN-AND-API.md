@@ -147,6 +147,7 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 | GET `/packets/{pid}/documents/{did}/original` | 同源鉴权二进制下载，no-store |
 | POST `/packets/{pid}/revisions` | `{expected_revision,document_ids}`；201 immutable revision；删除／替换通过新集合表示 |
 | GET `/packets/{pid}/revisions/{revision}` | 当时的 manifest 与有效状态 |
+| GET `/packets/{pid}/runs/latest` | 最新批次或 null；限定 owner 和未删除／未过期资料包；仅查询，不派发或恢复账本 |
 | POST `/packets/{pid}/runs` | `{revision_id,checklist_version}`；201 pending；同内容未完成批次复用 |
 | POST `/runs/{rid}/execute` | CAS、权限和费用校验；200 终态／202 已运行；首个请求在请求内执行 |
 | GET `/runs/{rid}` | state、stale、可见阶段、facts/findings、用量；无派发副作用 |
@@ -218,3 +219,11 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 - 屏幕、txt、PDF 保留来源陈述、人工修正、人工补充及未解决事项；来源文件以 snapshot 中 document UUID、页号、字符范围和原文识别，不向可变文件名查询补数据。
 - 历史提示为派生显示，快照 hash 不变；PDF 每页显示 Historical revision。渲染中历史状态变化返回 REVIEW_CONFLICT，重试后下载正确标记的历史版本。
 - 最大响应 4,000,000 bytes；PDF 上限 200 页和 500,000 输入字符。超限 EXPORT_TOO_LARGE（413），没有部分成功。缺字或未支持塑形的脚本返回 EXPORT_UNSUPPORTED_TEXT（422），提示改用完整 UTF-8 txt。
+
+
+### MT-14 工作区客户端边界
+
+- `/workspace` 和 `/workspace/packets/{id}` 使用生成的 OpenAPI 类型；资料候选上传、选择草稿、不可变来源版本是独立操作。
+- 原文只暂存在组件内存，显式导入才发送后端；选择草稿只保存文档 ID 与步骤，不写原文至 localStorage、URL 或分析事件。离开页面的未保存内容用 beforeunload 提醒；重新加载保存内容另有明确确认。
+- 恢复页面先读取当前版本与最新批次。pending 仍需显式启动；GET 轮询 4 秒间隔、最多 5 分钟，读取失败即暂停。执行请求上限 185 秒，失败只转状态查询，不自动重发 execute。
+- capabilities 是部署能力提示，不是用户费用授权；会员查询和后端执行校验仍是最终边界。手工草稿、确认及已确认导出不依赖 AI 额度，保持 reviewer supplied 标记。

@@ -126,6 +126,16 @@ class Runs:
             self.packets._record(conn, owner, f"run:create:{packet_id}", key, digest, row["id"])
             return self._public(conn, row, packet)
 
+    def latest(self, token, packet_id):
+        """Read-only refresh recovery, including stale/unknown runs; never dispatch."""
+        with self.engine.begin() as conn:
+            require_current_schema(conn)
+            packet = self.identity.require_owner(conn, token, packet_id)
+            row = conn.execute(sa.select(m.runs).where(m.runs.c.packet_id == packet_id,
+                m.runs.c.owner_id == packet["owner_id"]).order_by(
+                m.runs.c.created_at.desc(), m.runs.c.id.desc()).limit(1)).mappings().first()
+            return self._public(conn, row, packet) if row else None
+
     def get(self, token, rid):
         with self.engine.begin() as conn:
             row, packet = self._owned(conn, token, rid)
