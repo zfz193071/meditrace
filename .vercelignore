@@ -69,3 +69,7 @@ test_*.py
 .github/
 fixtures/referral-review/
 scripts/referral_fixture*.py
+
+# Offline evaluation sources and recordings; only the explicit public summary is shipped.
+evals/
+scripts/referral_evaluation*.py

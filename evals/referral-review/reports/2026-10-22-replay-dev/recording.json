@@ -1,0 +1,1299 @@
+{
+  "corpus_sha256": "7d4e1ef1217a5a9978a9725a122336151ea80d970798c8d8cc5d9bb36d6ba12f",
+  "origin": "fake",
+  "records": [
+    {
+      "elapsed_ms": 2657.315,
+      "execution_error": null,
+      "key": "dev-01",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Person D01"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Person D01"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\nDOB: 1980-06-15\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D01"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D01"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D01\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Contact: referrer-d01@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d01@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D01\nContact: referrer-d01@example.invalid\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D01\nContact: referrer-d01@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D01\nContact: referrer-d01@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Medications: No current medications."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Medications: No current medications."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D01\nContact: referrer-d01@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: No current medications.\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Allergies: No known allergies."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "No known allergies."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "attachment_reference",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D01\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D01\nContact: referrer-d01@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: No current medications.\nAllergies: No known allergies.\n",
+                "document_id": "70847318-dc87-54ff-a3fb-e9f742a0f923",
+                "page_number": 1,
+                "quote": "Attachment: Synthetic Echo Report A is attached."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Echo Report A is attached."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic intake note\n",
+                "document_id": "a2578df1-7982-58f9-b079-90082dd61e04",
+                "page_number": 1,
+                "quote": "DOB: 1981-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1981-06-15"
+          }
+        ]
+      },
+      "packet_sha256": "9fffe2abc3abcdb4f3857284e91b7744b76475024033595482c7698d5684a581"
+    },
+    {
+      "elapsed_ms": 2003.812,
+      "execution_error": null,
+      "key": "dev-02",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Person D02"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Person D02"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D02\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D02\nDOB: 1980-06-15\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D02"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D02"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D02\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D02\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "Contact: referrer-d02@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d02@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D02\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D02\nContact: referrer-d02@example.invalid\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D02\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D02\nContact: referrer-d02@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D02\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D02\nContact: referrer-d02@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "Medications: No current medications."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Medications: No current medications."
+          },
+          {
+            "assertion_status": "unknown",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D02\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D02\nContact: referrer-d02@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: No current medications.\n",
+                "document_id": "93140915-2343-57d5-b8f2-d855201d9ac7",
+                "page_number": 1,
+                "quote": "Allergies: Unknown; not confirmed at intake."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Unknown; not confirmed at intake."
+          }
+        ]
+      },
+      "packet_sha256": "f9febb7d633aff590adbc6870e874d59b53c34783d00d8c598deaead49c4761d"
+    },
+    {
+      "elapsed_ms": 3799.257,
+      "execution_error": null,
+      "key": "dev-03",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Person D03"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Person D03"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\nDOB: 1980-06-15\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D03"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D03"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D03\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Contact: referrer-d03@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d03@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D03\nContact: referrer-d03@example.invalid\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D03\nContact: referrer-d03@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D03\nContact: referrer-d03@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Medications: As of 2026-09-01: FictionalMed A 5 mg daily."
+              }
+            ],
+            "temporal_context": "2026-09-01",
+            "value_normalized": null,
+            "value_raw": "Medications: As of 2026-09-01: FictionalMed A 5 mg daily."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D03\nContact: referrer-d03@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: As of 2026-09-01: FictionalMed A 5 mg daily.\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Allergies: No known allergies."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "No known allergies."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "attachment_reference",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D03\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D03\nContact: referrer-d03@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: As of 2026-09-01: FictionalMed A 5 mg daily.\nAllergies: No known allergies.\n",
+                "document_id": "f47b52b1-138f-5596-a254-772413872639",
+                "page_number": 1,
+                "quote": "Attachment: Synthetic Follow-up Report D03 is attached."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Follow-up Report D03 is attached."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic Follow-up Report D03\n",
+                "document_id": "5ca2c2e6-8caa-5c3e-b012-23449cd5d967",
+                "page_number": 1,
+                "quote": "Medications: As of 2026-10-01: FictionalMed A 10 mg daily."
+              }
+            ],
+            "temporal_context": "2026-10-01",
+            "value_normalized": null,
+            "value_raw": "Medications: As of 2026-10-01: FictionalMed A 10 mg daily."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "report.description",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic Follow-up Report D03\nMedications: As of 2026-10-01: FictionalMed A 10 mg daily.\n",
+                "document_id": "5ca2c2e6-8caa-5c3e-b012-23449cd5d967",
+                "page_number": 1,
+                "quote": "Report: Synthetic Follow-up Report D03, dated 2026-10-01."
+              }
+            ],
+            "temporal_context": "2026-10-01",
+            "value_normalized": null,
+            "value_raw": "Report: Synthetic Follow-up Report D03, dated 2026-10-01."
+          }
+        ]
+      },
+      "packet_sha256": "b67dc7990959873846552ae3f8af3e8bb8ac5c56adc89705ed67b58996595d5f"
+    },
+    {
+      "elapsed_ms": 2.488,
+      "execution_error": null,
+      "key": "dev-04",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "b2b42a8d-d7d9-5216-b034-9c87787f0a99",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Person D04"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Person D04"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D04\n",
+                "document_id": "b2b42a8d-d7d9-5216-b034-9c87787f0a99",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D04\nDOB: 1980-06-15\n",
+                "document_id": "b2b42a8d-d7d9-5216-b034-9c87787f0a99",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D04"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D04"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D04\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D04\n",
+                "document_id": "b2b42a8d-d7d9-5216-b034-9c87787f0a99",
+                "page_number": 1,
+                "quote": "Contact: referrer-d04@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d04@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D04\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D04\nContact: referrer-d04@example.invalid\n",
+                "document_id": "b2b42a8d-d7d9-5216-b034-9c87787f0a99",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D04\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D04\nContact: referrer-d04@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "b2b42a8d-d7d9-5216-b034-9c87787f0a99",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D04\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D04\nContact: referrer-d04@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "b2b42a8d-d7d9-5216-b034-9c87787f0a99",
+                "page_number": 1,
+                "quote": "Medications: No current medications."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Medications: No current medications."
+          }
+        ]
+      },
+      "packet_sha256": "5146a1735551b0dc2579fcf37e0c26eaa7293c6b8a7fcb37cac63969afb74e74"
+    },
+    {
+      "elapsed_ms": 2.149,
+      "execution_error": null,
+      "key": "dev-05",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Person D05"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Person D05"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D05\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D05\nDOB: 1980-06-15\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D05"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D05"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D05\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D05\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "Contact: referrer-d05@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d05@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D05\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D05\nContact: referrer-d05@example.invalid\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D05\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D05\nContact: referrer-d05@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "unknown",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D05\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D05\nContact: referrer-d05@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "Medications: Unknown."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Medications: Unknown."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D05\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D05\nContact: referrer-d05@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: Unknown.\n",
+                "document_id": "b09af61d-21a2-5754-9c49-a93d1193890a",
+                "page_number": 1,
+                "quote": "Allergies: No known allergies."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "No known allergies."
+          }
+        ]
+      },
+      "packet_sha256": "58641f1bbdd7621e98672d4db5458e4d28d62eafaf5e27680c6309a90e0e6669"
+    },
+    {
+      "elapsed_ms": 4.734,
+      "execution_error": null,
+      "key": "dev-06",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Person D06"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Person D06"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D06\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D06\nDOB: 1980-06-15\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D06"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D06"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D06\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D06\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "Contact: referrer-d06@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d06@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D06\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D06\nContact: referrer-d06@example.invalid\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D06\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D06\nContact: referrer-d06@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D06\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D06\nContact: referrer-d06@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "Medications: As of 2026-10-01: currently taking FictionalMed B 2 mg daily."
+              }
+            ],
+            "temporal_context": "2026-10-01",
+            "value_normalized": null,
+            "value_raw": "Medications: As of 2026-10-01: currently taking FictionalMed B 2 mg daily."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D06\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D06\nContact: referrer-d06@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: As of 2026-10-01: currently taking FictionalMed B 2 mg daily.\n",
+                "document_id": "70dbdb07-46a0-5664-9a05-c047a037c433",
+                "page_number": 1,
+                "quote": "Allergies: No known allergies."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "No known allergies."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic reconciliation\n",
+                "document_id": "177a1e5d-ed38-5ea5-9317-1b2b1208a35a",
+                "page_number": 1,
+                "quote": "Medications: As of 2026-10-01: not taking FictionalMed B."
+              }
+            ],
+            "temporal_context": "2026-10-01",
+            "value_normalized": null,
+            "value_raw": "Medications: As of 2026-10-01: not taking FictionalMed B."
+          }
+        ]
+      },
+      "packet_sha256": "acc6b33fd902de2f807a427f881df61bc1a41d30f705e393c3f178579c99bd57"
+    },
+    {
+      "elapsed_ms": 1.799,
+      "execution_error": null,
+      "key": "dev-07",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D07"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D07"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nReferrer: Synthetic Referrer D07\n",
+                "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nReferrer: Synthetic Referrer D07\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nReferrer: Synthetic Referrer D07\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+                "page_number": 1,
+                "quote": "Medications: No current medications."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Medications: No current medications."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nReferrer: Synthetic Referrer D07\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: No current medications.\n",
+                "document_id": "324d759e-8ec4-5b99-bc53-00a2e9c84b08",
+                "page_number": 1,
+                "quote": "Allergies: No known allergies."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "No known allergies."
+          }
+        ]
+      },
+      "packet_sha256": "84df04e208720df81aca9ab17797e9d2b7e1bb9789abd8f16dddf428ec15774c"
+    },
+    {
+      "elapsed_ms": 3.557,
+      "execution_error": null,
+      "key": "dev-08",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Zoë Ångström 🧪"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Zoë Ångström 🧪"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\nDOB: 1980-06-15\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D08"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D08"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D08\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Contact: referrer-d08@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d08@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D08\nContact: referrer-d08@example.invalid\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D08\nContact: referrer-d08@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D08\nContact: referrer-d08@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Medications: FictionalMed C 25 µg daily."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Medications: FictionalMed C 25 µg daily."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D08\nContact: referrer-d08@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: FictionalMed C 25 µg daily.\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Allergies: No known allergies."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "No known allergies."
+          },
+          {
+            "assertion_status": "unknown",
+            "field_key": "allergies",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Zoë Ångström 🧪\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D08\nContact: referrer-d08@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\nMedications: FictionalMed C 25 µg daily.\nAllergies: No known allergies.\nHistorical template, not current allergy status:\n",
+                "document_id": "2c0ec729-a68a-5bf5-98ee-2ded15520871",
+                "page_number": 1,
+                "quote": "Allergies: Unknown."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Unknown."
+          }
+        ]
+      },
+      "packet_sha256": "0a85fa0ead1f3fcf775b5252886bd7a20888ba3493398ba7fc384dafe17ae799"
+    },
+    {
+      "elapsed_ms": 2.163,
+      "execution_error": null,
+      "key": "dev-09",
+      "output": {
+        "facts": [
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\n",
+                "document_id": "25bc2a02-1817-55f5-8e8b-4dfe6d85d968",
+                "page_number": 1,
+                "quote": "Patient: Synthetic Person D09"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Person D09"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "patient.dob",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D09\n",
+                "document_id": "25bc2a02-1817-55f5-8e8b-4dfe6d85d968",
+                "page_number": 1,
+                "quote": "DOB: 1980-06-15"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "1980-06-15"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.name",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D09\nDOB: 1980-06-15\n",
+                "document_id": "25bc2a02-1817-55f5-8e8b-4dfe6d85d968",
+                "page_number": 1,
+                "quote": "Referrer: Synthetic Referrer D09"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Referrer D09"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referrer.contact",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D09\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D09\n",
+                "document_id": "25bc2a02-1817-55f5-8e8b-4dfe6d85d968",
+                "page_number": 1,
+                "quote": "Contact: referrer-d09@example.invalid"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "referrer-d09@example.invalid"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "recipient",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D09\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D09\nContact: referrer-d09@example.invalid\n",
+                "document_id": "25bc2a02-1817-55f5-8e8b-4dfe6d85d968",
+                "page_number": 1,
+                "quote": "Recipient: Synthetic Outpatient Desk"
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Synthetic Outpatient Desk"
+          },
+          {
+            "assertion_status": "stated",
+            "field_key": "referral.reason",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D09\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D09\nContact: referrer-d09@example.invalid\nRecipient: Synthetic Outpatient Desk\n",
+                "document_id": "25bc2a02-1817-55f5-8e8b-4dfe6d85d968",
+                "page_number": 1,
+                "quote": "Reason: Review of the supplied fictional symptom history."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Review of the supplied fictional symptom history."
+          },
+          {
+            "assertion_status": "explicitly_none",
+            "field_key": "medications",
+            "sources": [
+              {
+                "after": "",
+                "before": "SYNTHETIC - fictional training material, not clinical guidance\nSynthetic referral\nPatient: Synthetic Person D09\nDOB: 1980-06-15\nReferrer: Synthetic Referrer D09\nContact: referrer-d09@example.invalid\nRecipient: Synthetic Outpatient Desk\nReason: Review of the supplied fictional symptom history.\n",
+                "document_id": "25bc2a02-1817-55f5-8e8b-4dfe6d85d968",
+                "page_number": 1,
+                "quote": "Medications: No current medications."
+              }
+            ],
+            "temporal_context": null,
+            "value_normalized": null,
+            "value_raw": "Medications: No current medications."
+          }
+        ]
+      },
+      "packet_sha256": "d031d0ab1ff4f10fc8bf34720871a6268b26a538cd8dea063063e35f73ba9d0d"
+    },
+    {
+      "elapsed_ms": 2585.446,
+      "execution_error": null,
+      "key": "dev-10",
+      "output": null,
+      "packet_sha256": "63c302fa0a1caea8896ff80315dfd626869a030639b6ce1af5ffeb2e7232d05d"
+    }
+  ],
+  "schema_version": "eval-recording-v1",
+  "split": "dev",
+  "versions": {
+    "checklist": "outpatient-referral-demo@1",
+    "evaluator": "offline-eval-v1",
+    "implementation_sha256": "1c5de6adbc352b08aa997f8f7784a024e8150d61a76ade27e4f097e6a5450cdc",
+    "model": "fake-extraction-v1",
+    "parser": "pypdf-6.21.1/text-v1",
+    "price_version": null,
+    "prompt": "referral-extract-v1",
+    "schema": "extraction-v1"
+  }
+}

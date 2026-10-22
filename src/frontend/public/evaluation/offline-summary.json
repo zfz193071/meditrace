@@ -1,0 +1,1011 @@
+{
+  "schema_version": "public-evaluation-v1",
+  "release_status": "BLOCKED",
+  "split": "dev",
+  "annotation_status": "provisional_operator_review_pending",
+  "reports": [
+    {
+      "provider": "baseline",
+      "origin": "baseline",
+      "summary": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 1,
+            "precision": {
+              "denominator": 8,
+              "numerator": 7,
+              "value": 0.875
+            },
+            "recall": {
+              "denominator": 7,
+              "numerator": 7,
+              "value": 1.0
+            },
+            "tp": 7
+          },
+          "attachment_reference": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "tp": 2
+          },
+          "medications": {
+            "fn": 4,
+            "fp": 4,
+            "precision": {
+              "denominator": 11,
+              "numerator": 7,
+              "value": 0.6363636363636364
+            },
+            "recall": {
+              "denominator": 11,
+              "numerator": 7,
+              "value": 0.6363636363636364
+            },
+            "tp": 7
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "tp": 8
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "tp": 8
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "report.description": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "attachment_unmatched": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "identity_mismatch": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "missing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 5,
+              "numerator": 5,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 5,
+              "numerator": 5,
+              "value": 1.0
+            },
+            "tp": 5
+          },
+          "statement_difference": {
+            "fn": 1,
+            "fp": 0,
+            "precision": {
+              "denominator": 0,
+              "numerator": 0,
+              "value": null
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "tp": 0
+          },
+          "unknown": {
+            "fn": 0,
+            "fp": 1,
+            "precision": {
+              "denominator": 3,
+              "numerator": 2,
+              "value": 0.6666666666666666
+            },
+            "recall": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "tp": 2
+          }
+        },
+        "citation_integrity": {
+          "denominator": 74,
+          "numerator": 74,
+          "value": 1.0
+        },
+        "critical_unannotated_facts": 5,
+        "facts": {
+          "fn": 4,
+          "fp": 5,
+          "precision": {
+            "denominator": 74,
+            "numerator": 69,
+            "value": 0.9324324324324325
+          },
+          "recall": {
+            "denominator": 73,
+            "numerator": 69,
+            "value": 0.9452054794520548
+          },
+          "tp": 69
+        },
+        "failed": 0,
+        "findings": {
+          "fn": 1,
+          "fp": 1,
+          "precision": {
+            "denominator": 10,
+            "numerator": 9,
+            "value": 0.9
+          },
+          "recall": {
+            "denominator": 10,
+            "numerator": 9,
+            "value": 0.9
+          },
+          "tp": 9
+        },
+        "human_verified_citation_support": null,
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 1,
+        "negative_identity_false_positives": 0,
+        "negative_packets": {
+          "denominator": 2,
+          "numerator": 1,
+          "value": 0.5
+        },
+        "packets_scored": 9,
+        "packets_total": 10,
+        "provisional_support": {
+          "denominator": 74,
+          "numerator": 69,
+          "value": 0.9324324324324325
+        },
+        "rejected": 1,
+        "successful": 9,
+        "unannotated_facts": 5,
+        "unsupported_citations": 5
+      },
+      "versions": {
+        "checklist": "outpatient-referral-demo@1",
+        "evaluator": "offline-eval-v1",
+        "implementation_sha256": "1c5de6adbc352b08aa997f8f7784a024e8150d61a76ade27e4f097e6a5450cdc",
+        "model": "line-prefix-baseline-v1",
+        "parser": "pypdf-6.21.1/text-v1",
+        "price_version": null,
+        "prompt": "referral-extract-v1",
+        "schema": "extraction-v1"
+      },
+      "commit": "0bfb26daef8a20fd707988a9bdcc8b18760d248d",
+      "working_tree_dirty": true,
+      "created_at": "2026-10-22T08:27:50.378309+00:00",
+      "corpus_sha256": "7d4e1ef1217a5a9978a9725a122336151ea80d970798c8d8cc5d9bb36d6ba12f",
+      "recording_sha256": "8a25951e553526367a0113ce8f7521c0f4788492bdd92abc1f6cb4d7d7d71285",
+      "offline_gates": {
+        "citation_integrity": true,
+        "finding_precision": true,
+        "finding_recall": true,
+        "minimum_clean_test_negatives": false,
+        "no_critical_annotation_mismatch": false,
+        "no_negative_identity_false_positives": true,
+        "no_unexpected_outcomes": true,
+        "provisional_fact_precision": false
+      }
+    },
+    {
+      "provider": "fake",
+      "origin": "fake",
+      "summary": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 1,
+            "precision": {
+              "denominator": 8,
+              "numerator": 7,
+              "value": 0.875
+            },
+            "recall": {
+              "denominator": 7,
+              "numerator": 7,
+              "value": 1.0
+            },
+            "tp": 7
+          },
+          "attachment_reference": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "tp": 2
+          },
+          "medications": {
+            "fn": 1,
+            "fp": 1,
+            "precision": {
+              "denominator": 11,
+              "numerator": 10,
+              "value": 0.9090909090909091
+            },
+            "recall": {
+              "denominator": 11,
+              "numerator": 10,
+              "value": 0.9090909090909091
+            },
+            "tp": 10
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "tp": 8
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "tp": 8
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "report.description": {
+            "fn": 1,
+            "fp": 1,
+            "precision": {
+              "denominator": 1,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "tp": 0
+          }
+        },
+        "by_kind": {
+          "attachment_unmatched": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "identity_mismatch": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "missing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 5,
+              "numerator": 5,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 5,
+              "numerator": 5,
+              "value": 1.0
+            },
+            "tp": 5
+          },
+          "statement_difference": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "unknown": {
+            "fn": 0,
+            "fp": 1,
+            "precision": {
+              "denominator": 3,
+              "numerator": 2,
+              "value": 0.6666666666666666
+            },
+            "recall": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "tp": 2
+          }
+        },
+        "citation_integrity": {
+          "denominator": 74,
+          "numerator": 74,
+          "value": 1.0
+        },
+        "critical_unannotated_facts": 3,
+        "facts": {
+          "fn": 2,
+          "fp": 3,
+          "precision": {
+            "denominator": 74,
+            "numerator": 71,
+            "value": 0.9594594594594594
+          },
+          "recall": {
+            "denominator": 73,
+            "numerator": 71,
+            "value": 0.9726027397260274
+          },
+          "tp": 71
+        },
+        "failed": 0,
+        "findings": {
+          "fn": 0,
+          "fp": 1,
+          "precision": {
+            "denominator": 11,
+            "numerator": 10,
+            "value": 0.9090909090909091
+          },
+          "recall": {
+            "denominator": 10,
+            "numerator": 10,
+            "value": 1.0
+          },
+          "tp": 10
+        },
+        "human_verified_citation_support": null,
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 1,
+        "negative_identity_false_positives": 0,
+        "negative_packets": {
+          "denominator": 2,
+          "numerator": 1,
+          "value": 0.5
+        },
+        "packets_scored": 9,
+        "packets_total": 10,
+        "provisional_support": {
+          "denominator": 74,
+          "numerator": 71,
+          "value": 0.9594594594594594
+        },
+        "rejected": 1,
+        "successful": 9,
+        "unannotated_facts": 3,
+        "unsupported_citations": 3
+      },
+      "versions": {
+        "checklist": "outpatient-referral-demo@1",
+        "evaluator": "offline-eval-v1",
+        "implementation_sha256": "1c5de6adbc352b08aa997f8f7784a024e8150d61a76ade27e4f097e6a5450cdc",
+        "model": "fake-extraction-v1",
+        "parser": "pypdf-6.21.1/text-v1",
+        "price_version": null,
+        "prompt": "referral-extract-v1",
+        "schema": "extraction-v1"
+      },
+      "commit": "0bfb26daef8a20fd707988a9bdcc8b18760d248d",
+      "working_tree_dirty": true,
+      "created_at": "2026-10-22T08:27:50.378267+00:00",
+      "corpus_sha256": "7d4e1ef1217a5a9978a9725a122336151ea80d970798c8d8cc5d9bb36d6ba12f",
+      "recording_sha256": "ec6cb959cc519d88b35c25e2a58d3100891598a931452c191cc69f474a3d2e57",
+      "offline_gates": {
+        "citation_integrity": true,
+        "finding_precision": true,
+        "finding_recall": true,
+        "minimum_clean_test_negatives": false,
+        "no_critical_annotation_mismatch": false,
+        "no_negative_identity_false_positives": true,
+        "no_unexpected_outcomes": true,
+        "provisional_fact_precision": true
+      }
+    },
+    {
+      "provider": "replay",
+      "origin": "fake",
+      "summary": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 1,
+            "precision": {
+              "denominator": 8,
+              "numerator": 7,
+              "value": 0.875
+            },
+            "recall": {
+              "denominator": 7,
+              "numerator": 7,
+              "value": 1.0
+            },
+            "tp": 7
+          },
+          "attachment_reference": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "tp": 2
+          },
+          "medications": {
+            "fn": 1,
+            "fp": 1,
+            "precision": {
+              "denominator": 11,
+              "numerator": 10,
+              "value": 0.9090909090909091
+            },
+            "recall": {
+              "denominator": 11,
+              "numerator": 10,
+              "value": 0.9090909090909091
+            },
+            "tp": 10
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "tp": 8
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 8,
+              "numerator": 8,
+              "value": 1.0
+            },
+            "tp": 8
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 9,
+              "numerator": 9,
+              "value": 1.0
+            },
+            "tp": 9
+          },
+          "report.description": {
+            "fn": 1,
+            "fp": 1,
+            "precision": {
+              "denominator": 1,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "tp": 0
+          }
+        },
+        "by_kind": {
+          "attachment_unmatched": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "identity_mismatch": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "missing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 5,
+              "numerator": 5,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 5,
+              "numerator": 5,
+              "value": 1.0
+            },
+            "tp": 5
+          },
+          "statement_difference": {
+            "fn": 0,
+            "fp": 0,
+            "precision": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "recall": {
+              "denominator": 1,
+              "numerator": 1,
+              "value": 1.0
+            },
+            "tp": 1
+          },
+          "unknown": {
+            "fn": 0,
+            "fp": 1,
+            "precision": {
+              "denominator": 3,
+              "numerator": 2,
+              "value": 0.6666666666666666
+            },
+            "recall": {
+              "denominator": 2,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "tp": 2
+          }
+        },
+        "citation_integrity": {
+          "denominator": 74,
+          "numerator": 74,
+          "value": 1.0
+        },
+        "critical_unannotated_facts": 3,
+        "facts": {
+          "fn": 2,
+          "fp": 3,
+          "precision": {
+            "denominator": 74,
+            "numerator": 71,
+            "value": 0.9594594594594594
+          },
+          "recall": {
+            "denominator": 73,
+            "numerator": 71,
+            "value": 0.9726027397260274
+          },
+          "tp": 71
+        },
+        "failed": 0,
+        "findings": {
+          "fn": 0,
+          "fp": 1,
+          "precision": {
+            "denominator": 11,
+            "numerator": 10,
+            "value": 0.9090909090909091
+          },
+          "recall": {
+            "denominator": 10,
+            "numerator": 10,
+            "value": 1.0
+          },
+          "tp": 10
+        },
+        "human_verified_citation_support": null,
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 1,
+        "negative_identity_false_positives": 0,
+        "negative_packets": {
+          "denominator": 2,
+          "numerator": 1,
+          "value": 0.5
+        },
+        "packets_scored": 9,
+        "packets_total": 10,
+        "provisional_support": {
+          "denominator": 74,
+          "numerator": 71,
+          "value": 0.9594594594594594
+        },
+        "rejected": 1,
+        "successful": 9,
+        "unannotated_facts": 3,
+        "unsupported_citations": 3
+      },
+      "versions": {
+        "checklist": "outpatient-referral-demo@1",
+        "evaluator": "offline-eval-v1",
+        "implementation_sha256": "1c5de6adbc352b08aa997f8f7784a024e8150d61a76ade27e4f097e6a5450cdc",
+        "model": "fake-extraction-v1",
+        "parser": "pypdf-6.21.1/text-v1",
+        "price_version": null,
+        "prompt": "referral-extract-v1",
+        "schema": "extraction-v1"
+      },
+      "commit": "0bfb26daef8a20fd707988a9bdcc8b18760d248d",
+      "working_tree_dirty": true,
+      "created_at": "2026-10-22T08:28:15.274840+00:00",
+      "corpus_sha256": "7d4e1ef1217a5a9978a9725a122336151ea80d970798c8d8cc5d9bb36d6ba12f",
+      "recording_sha256": "c772e23247103c89c13bb096bca838a1bd3606b4d19c4c5c334bc395e811f08d",
+      "offline_gates": {
+        "citation_integrity": true,
+        "finding_precision": true,
+        "finding_recall": true,
+        "minimum_clean_test_negatives": false,
+        "no_critical_annotation_mismatch": false,
+        "no_negative_identity_false_positives": true,
+        "no_unexpected_outcomes": true,
+        "provisional_fact_precision": true
+      }
+    }
+  ],
+  "real_model_metrics": null,
+  "real_cost_usd": null,
+  "real_latency_p95_ms": null,
+  "human_verified_support": null,
+  "limitations": [
+    {
+      "id": "temporal-context",
+      "case": "dev-06",
+      "mode": "baseline",
+      "category": "Observed offline baseline limitation",
+      "expected": "Keep the date context and flag directly opposing medication statements at the same date.",
+      "actual": "The simple baseline drops temporal context and misses one C06 statement_difference finding.",
+      "impact": "The reviewer could miss a clarification task.",
+      "handling": "Inspect both source statements; the Fake validation + checklist path retains dates and detects this item. This is not a real-model comparison."
+    },
+    {
+      "id": "historical-template",
+      "case": "dev-08",
+      "mode": "baseline / fake / replay",
+      "category": "Observed offline context limitation",
+      "expected": "Do not treat a historical template as current allergy status.",
+      "actual": "The line reader selects an Unknown statement under a historical-template heading, producing one extra C07 unknown finding.",
+      "impact": "A reviewer gets an unnecessary clarification task despite an intact source quote.",
+      "handling": "Read the surrounding source. Keep this failure in the report; lexical citation checks do not establish semantic support."
+    },
+    {
+      "id": "scan",
+      "case": "dev-10",
+      "mode": "all offline paths",
+      "category": "Deterministic unsupported-input rejection",
+      "expected": "Reject the packet when a scanned page cannot be read.",
+      "actual": "PDF_UNREADABLE_PAGE; no successful result is produced.",
+      "impact": "The packet cannot receive an automated check.",
+      "handling": "Supply supported text material or use manual review. Count the rejected packet in the total; do not report it as an extraction success."
+    },
+    {
+      "id": "annotation-alignment",
+      "case": "dev-03 / dev-06",
+      "mode": "fake / replay",
+      "category": "Provisional annotation disagreement",
+      "expected": "Fact status and temporal context match the exact annotation tuple.",
+      "actual": "Report date context and a specific negated medication assertion differ from provisional labels.",
+      "impact": "Two fact mismatches remain counted; they are not automatically classified as invented clinical facts.",
+      "handling": "An operator must review the label and contract alignment. No gold or threshold was changed to improve the score."
+    }
+  ]
+}

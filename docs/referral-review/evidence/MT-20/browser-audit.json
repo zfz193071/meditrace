@@ -1,0 +1,32 @@
+[
+  {
+    "name": "desktop",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "What we measured. What remains unknown.",
+    "blocked": true,
+    "cards": 3,
+    "limits": 4,
+    "calls": []
+  },
+  {
+    "name": "tablet",
+    "width": 1024,
+    "scrollWidth": 1024,
+    "title": "What we measured. What remains unknown.",
+    "blocked": true,
+    "cards": 3,
+    "limits": 4,
+    "calls": []
+  },
+  {
+    "name": "mobile",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "What we measured. What remains unknown.",
+    "blocked": true,
+    "cards": 3,
+    "limits": 4,
+    "calls": []
+  }
+]

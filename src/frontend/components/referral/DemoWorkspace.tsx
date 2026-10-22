@@ -29,7 +29,7 @@ export function DemoWorkspace() {
       <p className="rr-muted">Suggested 60–90 second walkthrough: inspect both birth dates, keep both issues unresolved with reasons, then confirm and export. No real patient information should be entered.</p>
     </section>
     <DemoReview key={`${choice}:${generation}`} choice={choice} onDirty={setDirty} />
-    <footer><p>Public development fixtures, including an explicitly authored report-recovery variant. These examples are not evaluation results.</p><Link prefetch={false} href="/project#evaluation">Evaluation status</Link> · <Link prefetch={false} href="/project#architecture">Architecture</Link></footer>
+    <footer><p>Public development fixtures, including an explicitly authored report-recovery variant. These examples are not evaluation results.</p><Link prefetch={false} href="/evaluation">Evaluation status</Link> · <Link prefetch={false} href="/project#architecture">Architecture</Link></footer>
   </div>;
 }
 

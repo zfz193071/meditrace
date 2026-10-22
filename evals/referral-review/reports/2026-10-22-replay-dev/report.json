@@ -1,0 +1,2159 @@
+{
+  "annotation_status": "provisional_operator_review_pending",
+  "blockers": [
+    "Operator gold review pending",
+    "No authorized real-model evaluation or independent evaluation ledger",
+    "Frozen release gates and 20 real latency measurements not established"
+  ],
+  "commit": "0bfb26daef8a20fd707988a9bdcc8b18760d248d",
+  "corpus_sha256": "7d4e1ef1217a5a9978a9725a122336151ea80d970798c8d8cc5d9bb36d6ba12f",
+  "cost": {
+    "actual_usd": null,
+    "estimated_usd": null,
+    "input_tokens": null,
+    "measurement": "not measured; offline synthetic output",
+    "output_tokens": null,
+    "unknown_packets": 10
+  },
+  "created_at": "2026-10-22T08:28:15.274840+00:00",
+  "environment": {
+    "pydantic": "2.14.1",
+    "pypdf": "6.21.1",
+    "python": "3.12.14",
+    "system": "Darwin"
+  },
+  "frozen_test_exposed": false,
+  "latency": {
+    "failures": 0,
+    "p95_ms": 3799.257,
+    "release_latency_eligible": false,
+    "scope": "local offline execution, not model latency",
+    "success_count": 9,
+    "total_packets": 10
+  },
+  "offline_gates": {
+    "citation_integrity": true,
+    "finding_precision": true,
+    "finding_recall": true,
+    "minimum_clean_test_negatives": false,
+    "no_critical_annotation_mismatch": false,
+    "no_negative_identity_false_positives": true,
+    "no_unexpected_outcomes": true,
+    "provisional_fact_precision": true
+  },
+  "origin": "fake",
+  "provider": "replay",
+  "recorded_versions": {
+    "checklist": "outpatient-referral-demo@1",
+    "evaluator": "offline-eval-v1",
+    "implementation_sha256": "1c5de6adbc352b08aa997f8f7784a024e8150d61a76ade27e4f097e6a5450cdc",
+    "model": "fake-extraction-v1",
+    "parser": "pypdf-6.21.1/text-v1",
+    "price_version": null,
+    "prompt": "referral-extract-v1",
+    "schema": "extraction-v1"
+  },
+  "recording_sha256": "c772e23247103c89c13bb096bca838a1bd3606b4d19c4c5c334bc395e811f08d",
+  "release_status": "BLOCKED",
+  "requires_new_real_evaluation": true,
+  "rows": [
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "attachment_reference": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 2
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "attachment_unmatched": {
+            "fn": 1,
+            "fp": 0,
+            "tp": 0
+          },
+          "identity_mismatch": {
+            "fn": 1,
+            "fp": 0,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 10,
+          "numerator": 10,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [
+            [
+              "C02",
+              "identity_mismatch",
+              "patient.dob"
+            ],
+            [
+              "C08",
+              "attachment_unmatched",
+              "attachment_reference"
+            ]
+          ],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 10
+        },
+        "findings": {
+          "fn": 2,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 10,
+          "numerator": 10,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "elapsed_ms": 2657.315,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-01",
+      "metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "attachment_reference": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 2
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "attachment_unmatched": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "identity_mismatch": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "citation_integrity": {
+          "denominator": 10,
+          "numerator": 10,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 10
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 2
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 10,
+          "numerator": 10,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "original_elapsed_ms": 2559.384,
+      "packet_sha256": "9fffe2abc3abcdb4f3857284e91b7744b76475024033595482c7698d5684a581",
+      "page_count": 2,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "unknown": {
+            "fn": 1,
+            "fp": 0,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [
+            [
+              "C07",
+              "unknown",
+              "allergies"
+            ]
+          ],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 1,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "elapsed_ms": 2003.812,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-02",
+      "metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "unknown": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "citation_integrity": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 1
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "original_elapsed_ms": 1885.418,
+      "packet_sha256": "f9febb7d633aff590adbc6870e874d59b53c34783d00d8c598deaead49c4761d",
+      "page_count": 1,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "attachment_reference": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 2
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "report.description": {
+            "fn": 1,
+            "fp": 1,
+            "tp": 0
+          }
+        },
+        "by_kind": {},
+        "citation_integrity": {
+          "denominator": 11,
+          "numerator": 11,
+          "value": 1.0
+        },
+        "clean_negative": true,
+        "critical_unannotated_facts": 1,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [
+            [
+              "report.description",
+              "Synthetic Follow-up Report D03, dated 2026-10-01.",
+              "stated",
+              null
+            ]
+          ],
+          "missing_findings": [],
+          "unmatched_facts": [
+            [
+              "report.description",
+              "Synthetic Follow-up Report D03, dated 2026-10-01.",
+              "stated",
+              "2026-10-01"
+            ]
+          ]
+        },
+        "facts": {
+          "fn": 1,
+          "fp": 1,
+          "tp": 10
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 11,
+          "numerator": 10,
+          "value": 0.9090909090909091
+        },
+        "unannotated_facts": 1,
+        "unsupported_citations": 1
+      },
+      "elapsed_ms": 3799.257,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-03",
+      "metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "attachment_reference": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 2
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "report.description": {
+            "fn": 1,
+            "fp": 1,
+            "tp": 0
+          }
+        },
+        "by_kind": {},
+        "citation_integrity": {
+          "denominator": 11,
+          "numerator": 11,
+          "value": 1.0
+        },
+        "clean_negative": true,
+        "critical_unannotated_facts": 1,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [
+            [
+              "report.description",
+              "Synthetic Follow-up Report D03, dated 2026-10-01.",
+              "stated",
+              null
+            ]
+          ],
+          "missing_findings": [],
+          "unmatched_facts": [
+            [
+              "report.description",
+              "Synthetic Follow-up Report D03, dated 2026-10-01.",
+              "stated",
+              "2026-10-01"
+            ]
+          ]
+        },
+        "facts": {
+          "fn": 1,
+          "fp": 1,
+          "tp": 10
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 11,
+          "numerator": 10,
+          "value": 0.9090909090909091
+        },
+        "unannotated_facts": 1,
+        "unsupported_citations": 1
+      },
+      "original_elapsed_ms": 5715.259,
+      "packet_sha256": "b67dc7990959873846552ae3f8af3e8bb8ac5c56adc89705ed67b58996595d5f",
+      "page_count": 2,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "missing": {
+            "fn": 1,
+            "fp": 0,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [
+            [
+              "C07",
+              "missing",
+              "allergies"
+            ]
+          ],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 7
+        },
+        "findings": {
+          "fn": 1,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "elapsed_ms": 2.488,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-04",
+      "metrics": {
+        "by_field": {
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "missing": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "citation_integrity": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 7
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 1
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "original_elapsed_ms": 5.939,
+      "packet_sha256": "5146a1735551b0dc2579fcf37e0c26eaa7293c6b8a7fcb37cac63969afb74e74",
+      "page_count": 1,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "unknown": {
+            "fn": 1,
+            "fp": 0,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [
+            [
+              "C06",
+              "unknown",
+              "medications"
+            ]
+          ],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 1,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "elapsed_ms": 2.149,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-05",
+      "metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "unknown": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "citation_integrity": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 1
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "original_elapsed_ms": 8.296,
+      "packet_sha256": "58641f1bbdd7621e98672d4db5458e4d28d62eafaf5e27680c6309a90e0e6669",
+      "page_count": 1,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 1,
+            "fp": 1,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "statement_difference": {
+            "fn": 1,
+            "fp": 0,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 1,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [
+            [
+              "medications",
+              "As of 2026-10-01: not taking FictionalMed B.",
+              "stated",
+              "2026-10-01"
+            ]
+          ],
+          "missing_findings": [
+            [
+              "C06",
+              "statement_difference",
+              "medications"
+            ]
+          ],
+          "unmatched_facts": [
+            [
+              "medications",
+              "As of 2026-10-01: not taking FictionalMed B.",
+              "explicitly_none",
+              "2026-10-01"
+            ]
+          ]
+        },
+        "facts": {
+          "fn": 1,
+          "fp": 1,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 1,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 9,
+          "numerator": 8,
+          "value": 0.8888888888888888
+        },
+        "unannotated_facts": 1,
+        "unsupported_citations": 1
+      },
+      "elapsed_ms": 4.734,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-06",
+      "metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 1,
+            "fp": 1,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "statement_difference": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "citation_integrity": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 1,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [
+            [
+              "medications",
+              "As of 2026-10-01: not taking FictionalMed B.",
+              "stated",
+              "2026-10-01"
+            ]
+          ],
+          "missing_findings": [],
+          "unmatched_facts": [
+            [
+              "medications",
+              "As of 2026-10-01: not taking FictionalMed B.",
+              "explicitly_none",
+              "2026-10-01"
+            ]
+          ]
+        },
+        "facts": {
+          "fn": 1,
+          "fp": 1,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 1
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 9,
+          "numerator": 8,
+          "value": 0.8888888888888888
+        },
+        "unannotated_facts": 1,
+        "unsupported_citations": 1
+      },
+      "original_elapsed_ms": 7.406,
+      "packet_sha256": "acc6b33fd902de2f807a427f881df61bc1a41d30f705e393c3f178579c99bd57",
+      "page_count": 2,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "missing": {
+            "fn": 3,
+            "fp": 0,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 5,
+          "numerator": 5,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [
+            [
+              "C01",
+              "missing",
+              "patient.name"
+            ],
+            [
+              "C02",
+              "missing",
+              "patient.dob"
+            ],
+            [
+              "C03",
+              "missing",
+              "referrer.contact"
+            ]
+          ],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 5
+        },
+        "findings": {
+          "fn": 3,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 5,
+          "numerator": 5,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "elapsed_ms": 1.799,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-07",
+      "metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "missing": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 3
+          }
+        },
+        "citation_integrity": {
+          "denominator": 5,
+          "numerator": 5,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 5
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 3
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 5,
+          "numerator": 5,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "original_elapsed_ms": 6.137,
+      "packet_sha256": "84df04e208720df81aca9ab17797e9d2b7e1bb9789abd8f16dddf428ec15774c",
+      "page_count": 1,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 1,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {},
+        "citation_integrity": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "clean_negative": true,
+        "critical_unannotated_facts": 1,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": [
+            [
+              "allergies",
+              "Unknown.",
+              "unknown",
+              null
+            ]
+          ]
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 1,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 9,
+          "numerator": 8,
+          "value": 0.8888888888888888
+        },
+        "unannotated_facts": 1,
+        "unsupported_citations": 1
+      },
+      "elapsed_ms": 3.557,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-08",
+      "metrics": {
+        "by_field": {
+          "allergies": {
+            "fn": 0,
+            "fp": 1,
+            "tp": 1
+          },
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "unknown": {
+            "fn": 0,
+            "fp": 1,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "clean_negative": true,
+        "critical_unannotated_facts": 1,
+        "differences": {
+          "extra_findings": [
+            [
+              "C07",
+              "unknown",
+              "allergies"
+            ]
+          ],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": [
+            [
+              "allergies",
+              "Unknown.",
+              "unknown",
+              null
+            ]
+          ]
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 1,
+          "tp": 8
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 1,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 1,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 9,
+          "numerator": 8,
+          "value": 0.8888888888888888
+        },
+        "unannotated_facts": 1,
+        "unsupported_citations": 1
+      },
+      "original_elapsed_ms": 6.769,
+      "packet_sha256": "0a85fa0ead1f3fcf775b5252886bd7a20888ba3493398ba7fc384dafe17ae799",
+      "page_count": 1,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": {
+        "by_field": {
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "missing": {
+            "fn": 1,
+            "fp": 0,
+            "tp": 0
+          }
+        },
+        "citation_integrity": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [
+            [
+              "C07",
+              "missing",
+              "allergies"
+            ]
+          ],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 7
+        },
+        "findings": {
+          "fn": 1,
+          "fp": 0,
+          "tp": 0
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "elapsed_ms": 2.163,
+      "error": null,
+      "estimated_cost_usd": null,
+      "expected_rejection": null,
+      "key": "dev-09",
+      "metrics": {
+        "by_field": {
+          "medications": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.dob": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "patient.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "recipient": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referral.reason": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.contact": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          },
+          "referrer.name": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "by_kind": {
+          "missing": {
+            "fn": 0,
+            "fp": 0,
+            "tp": 1
+          }
+        },
+        "citation_integrity": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "clean_negative": false,
+        "critical_unannotated_facts": 0,
+        "differences": {
+          "extra_findings": [],
+          "missing_facts": [],
+          "missing_findings": [],
+          "unmatched_facts": []
+        },
+        "facts": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 7
+        },
+        "findings": {
+          "fn": 0,
+          "fp": 0,
+          "tp": 1
+        },
+        "invalid_citations": 0,
+        "lexically_absent_values": 0,
+        "missing_citations": 0,
+        "negative_false_positive_items": 0,
+        "negative_identity_false_positives": 0,
+        "provisional_support": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "unannotated_facts": 0,
+        "unsupported_citations": 0
+      },
+      "original_elapsed_ms": 7.907,
+      "packet_sha256": "d031d0ab1ff4f10fc8bf34720871a6268b26a538cd8dea063063e35f73ba9d0d",
+      "page_count": 1,
+      "status": "succeeded",
+      "tokens": null,
+      "unexpected_outcome": false
+    },
+    {
+      "actual_cost_usd": null,
+      "candidate_metrics": null,
+      "elapsed_ms": 2585.446,
+      "error": "PDF_UNREADABLE_PAGE",
+      "estimated_cost_usd": null,
+      "expected_rejection": "SCANNED_PAGE",
+      "key": "dev-10",
+      "metrics": null,
+      "original_elapsed_ms": 2272.337,
+      "packet_sha256": "63c302fa0a1caea8896ff80315dfd626869a030639b6ce1af5ffeb2e7232d05d",
+      "page_count": 2,
+      "status": "rejected",
+      "tokens": null,
+      "unexpected_outcome": false
+    }
+  ],
+  "schema_version": "eval-report-v1",
+  "split": "dev",
+  "summary": {
+    "by_field": {
+      "allergies": {
+        "fn": 0,
+        "fp": 1,
+        "precision": {
+          "denominator": 8,
+          "numerator": 7,
+          "value": 0.875
+        },
+        "recall": {
+          "denominator": 7,
+          "numerator": 7,
+          "value": 1.0
+        },
+        "tp": 7
+      },
+      "attachment_reference": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 2,
+          "numerator": 2,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 2,
+          "numerator": 2,
+          "value": 1.0
+        },
+        "tp": 2
+      },
+      "medications": {
+        "fn": 1,
+        "fp": 1,
+        "precision": {
+          "denominator": 11,
+          "numerator": 10,
+          "value": 0.9090909090909091
+        },
+        "recall": {
+          "denominator": 11,
+          "numerator": 10,
+          "value": 0.9090909090909091
+        },
+        "tp": 10
+      },
+      "patient.dob": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "tp": 9
+      },
+      "patient.name": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "tp": 8
+      },
+      "recipient": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "tp": 9
+      },
+      "referral.reason": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "tp": 9
+      },
+      "referrer.contact": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": 1.0
+        },
+        "tp": 8
+      },
+      "referrer.name": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 9,
+          "numerator": 9,
+          "value": 1.0
+        },
+        "tp": 9
+      },
+      "report.description": {
+        "fn": 1,
+        "fp": 1,
+        "precision": {
+          "denominator": 1,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "recall": {
+          "denominator": 1,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "tp": 0
+      }
+    },
+    "by_kind": {
+      "attachment_unmatched": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 1,
+          "numerator": 1,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 1,
+          "numerator": 1,
+          "value": 1.0
+        },
+        "tp": 1
+      },
+      "identity_mismatch": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 1,
+          "numerator": 1,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 1,
+          "numerator": 1,
+          "value": 1.0
+        },
+        "tp": 1
+      },
+      "missing": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 5,
+          "numerator": 5,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 5,
+          "numerator": 5,
+          "value": 1.0
+        },
+        "tp": 5
+      },
+      "statement_difference": {
+        "fn": 0,
+        "fp": 0,
+        "precision": {
+          "denominator": 1,
+          "numerator": 1,
+          "value": 1.0
+        },
+        "recall": {
+          "denominator": 1,
+          "numerator": 1,
+          "value": 1.0
+        },
+        "tp": 1
+      },
+      "unknown": {
+        "fn": 0,
+        "fp": 1,
+        "precision": {
+          "denominator": 3,
+          "numerator": 2,
+          "value": 0.6666666666666666
+        },
+        "recall": {
+          "denominator": 2,
+          "numerator": 2,
+          "value": 1.0
+        },
+        "tp": 2
+      }
+    },
+    "citation_integrity": {
+      "denominator": 74,
+      "numerator": 74,
+      "value": 1.0
+    },
+    "critical_unannotated_facts": 3,
+    "facts": {
+      "fn": 2,
+      "fp": 3,
+      "precision": {
+        "denominator": 74,
+        "numerator": 71,
+        "value": 0.9594594594594594
+      },
+      "recall": {
+        "denominator": 73,
+        "numerator": 71,
+        "value": 0.9726027397260274
+      },
+      "tp": 71
+    },
+    "failed": 0,
+    "findings": {
+      "fn": 0,
+      "fp": 1,
+      "precision": {
+        "denominator": 11,
+        "numerator": 10,
+        "value": 0.9090909090909091
+      },
+      "recall": {
+        "denominator": 10,
+        "numerator": 10,
+        "value": 1.0
+      },
+      "tp": 10
+    },
+    "human_verified_citation_support": null,
+    "invalid_citations": 0,
+    "lexically_absent_values": 0,
+    "missing_citations": 0,
+    "negative_false_positive_items": 1,
+    "negative_identity_false_positives": 0,
+    "negative_packets": {
+      "denominator": 2,
+      "numerator": 1,
+      "value": 0.5
+    },
+    "packets_scored": 9,
+    "packets_total": 10,
+    "provisional_support": {
+      "denominator": 74,
+      "numerator": 71,
+      "value": 0.9594594594594594
+    },
+    "rejected": 1,
+    "successful": 9,
+    "unannotated_facts": 3,
+    "unsupported_citations": 3
+  },
+  "versions": {
+    "checklist": "outpatient-referral-demo@1",
+    "evaluator": "offline-eval-v1",
+    "implementation_sha256": "1c5de6adbc352b08aa997f8f7784a024e8150d61a76ade27e4f097e6a5450cdc",
+    "model": "fake-extraction-v1",
+    "parser": "pypdf-6.21.1/text-v1",
+    "price_version": null,
+    "prompt": "referral-extract-v1",
+    "schema": "extraction-v1"
+  },
+  "working_tree_dirty": true
+}
