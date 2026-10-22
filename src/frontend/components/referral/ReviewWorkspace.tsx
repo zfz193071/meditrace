@@ -1,7 +1,8 @@
 "use client";
+import { useReviewTransport } from "./ReviewTransport";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { workspaceApi as api, errorMessage, operationKey, type Run, type ReviewState, type DecisionInput, type Finding, type Packet } from "../../lib/referral-api/workspace";
-import { handoffDownloadUrl, type HandoffView } from "../../lib/referral-api/handoff";
+import { errorMessage, operationKey, type Run, type ReviewState, type DecisionInput, type Finding, type Packet } from "../../lib/referral-api/workspace";
+import { type HandoffView } from "../../lib/referral-api/handoff";
 import { EvidencePanel } from "./EvidencePanel";
 import { HandoffSummary } from "./HandoffSummary";
 import { ReviewHistory } from "./ReviewHistory";
@@ -13,6 +14,7 @@ const actions: Record<DecisionInput["action"], string> = { resolve: "Resolve", d
 type Props = { packet: Packet; run: Run | null; csrf: string; sourceDirty: boolean; onError: (e: unknown) => void; onDirty: (dirty: boolean) => void };
 
 export function ReviewWorkspace({ packet, run, csrf, sourceDirty, onError, onDirty }: Props) {
+  const api = useReviewTransport();
   const [chosen, setChosen] = useState<Run | null>(null);
   const [dirty, setDirty] = useState(false);
   const [refresh, setRefresh] = useState(0);
@@ -45,12 +47,13 @@ export function ReviewWorkspace({ packet, run, csrf, sourceDirty, onError, onDir
       {active?.state === "succeeded" && active.result ? <ReviewSurface key={`${active.id}:${packet.current_revision}`} packet={packet} run={active} csrf={csrf} sourceDirty={sourceDirty || busy} onError={onError} onDirty={dirtyChanged} onChanged={changed} onConfirmed={id => navigate("snapshot", id)} />
         : <p>No completed check is available to review. You can use the manual handoff below. No AI request is started here.</p>}
     </section>
-    {view && <section className="rr-card"><p className="rr-notice">Confirmed snapshot · Review version {view.review_version}{view.historical ? " · Historical — not the current review" : ""}</p><HandoffSummary view={view} /><div className="rr-actions"><a href={handoffDownloadUrl(packet.id, view.snapshot_id, "txt")}>Download confirmed text</a><a href={handoffDownloadUrl(packet.id, view.snapshot_id, "pdf")}>Download confirmed PDF</a></div></section>}
+    {view && <section className="rr-card"><p className="rr-notice">Confirmed snapshot · Review version {view.review_version}{view.historical ? " · Historical — not the current review" : ""}</p><HandoffSummary view={view} />{api.snapshotUrl && <div className="rr-actions"><a href={api.snapshotUrl(packet.id, view.snapshot_id, "txt")}>Download confirmed text</a><a href={api.snapshotUrl(packet.id, view.snapshot_id, "pdf")}>Download confirmed PDF</a></div>}</section>}
     <ReviewHistory packetId={packet.id} refresh={refresh} onRun={id => navigate("run", id)} onSnapshot={id => navigate("snapshot", id)} onError={onError} />
   </>;
 }
 
 function ReviewSurface({ packet, run, csrf, sourceDirty, onError, onDirty, onChanged, onConfirmed }: Omit<Props, "run"> & { run: Run; onChanged: () => void; onConfirmed: (id: string) => void }) {
+  const api = useReviewTransport();
   const [state, setState] = useState<ReviewState | null>(null);
   const [selected, setSelected] = useState(run.result?.findings[0]?.id ?? "");
   const [kind, setKind] = useState("all");
@@ -83,7 +86,7 @@ function ReviewSurface({ packet, run, csrf, sourceDirty, onError, onDirty, onCha
       setState(next); setBlocked(false); setMessage("Saved decisions loaded. Any unsaved edit remains below for comparison.");
     } catch (e) { if (alive.current) { setBlocked(true); setError(errorMessage(e)); onError(e); } }
     finally { if (alive.current) setBusy(false); }
-  }, [run.id, run.revision_id, result.run_id, result.revision_id, packet.id, onError]);
+  }, [api, run.id, run.revision_id, result.run_id, result.revision_id, packet.id, onError]);
   useEffect(() => { alive.current = true; void reload(); return () => { alive.current = false; }; }, [reload]);
   const stale = !state || state.stale || run.stale || !state.revision.is_current || state.revision.revision_number !== packet.current_revision;
   const decisions = new Map(state?.decisions.map(d => [d.finding_id, d]) ?? []);

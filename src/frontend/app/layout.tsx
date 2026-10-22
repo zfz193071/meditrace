@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MediTrace - 医疗 AI 诊断溯源系统",
-  description: "结合大模型与 Web3 技术的医疗诊断辅助系统",
+  title: "MediTrace | Referral Review Copilot",
+  description: "Review referral documents, trace source evidence and prepare a human-confirmed handoff. Synthetic portfolio prototype.",
 };
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

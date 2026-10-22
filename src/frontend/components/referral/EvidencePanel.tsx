@@ -1,9 +1,11 @@
 "use client";
+import { useReviewTransport } from "./ReviewTransport";
 import { useEffect, useState } from "react";
-import { workspaceApi as api, errorMessage, type Evidence, type Page, type Revision } from "../../lib/referral-api/workspace";
-import { evidenceSlice, verifyPageHash, originalDocumentUrl } from "../../lib/referral-api/evidence";
+import { errorMessage, type Evidence, type Page, type Revision } from "../../lib/referral-api/workspace";
+import { evidenceSlice, verifyPageHash } from "../../lib/referral-api/evidence";
 
 export function EvidencePanel({ packetId, evidence, revision, onError }: { packetId: string; evidence: Evidence; revision: Revision; onError: (e: unknown) => void }) {
+  const api = useReviewTransport();
   const [page, setPage] = useState<Page | null>(null);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
@@ -23,7 +25,7 @@ export function EvidencePanel({ packetId, evidence, revision, onError }: { packe
       } catch (e) { if (alive) { setError(errorMessage(e)); onError(e); } }
     }
     void read(); return () => { alive = false; };
-  }, [packetId, evidence, revision, doc, onError, attempt]);
+  }, [api, packetId, evidence, revision, doc, onError, attempt]);
   const slice = page && evidenceSlice(evidence, page, revision);
   return <article className="rr-evidence" aria-label={`${doc?.filename ?? "Unavailable source"}, page ${evidence.page_number}`}>
     <h4>{doc?.filename ?? "Source unavailable"}</h4>
@@ -32,7 +34,7 @@ export function EvidencePanel({ packetId, evidence, revision, onError }: { packe
       <p className="rr-source-excerpt">{slice.before}<mark>{slice.quote}</mark>{slice.after}</p>
       <details><summary>Read full normalized page</summary><p tabIndex={0} aria-label="Normalized source page" className="rr-full-page">{Array.from(page!.normalized_text).slice(0, evidence.start_cp).join("")}<mark>{slice.quote}</mark>{Array.from(page!.normalized_text).slice(evidence.end_cp).join("")}</p></details>
     </>}
-    {doc && <a href={originalDocumentUrl(packetId, doc.id)} download>Download original {doc.kind === "pdf" ? "PDF" : "text"} — page {evidence.page_number}</a>}
+    {doc && <a href={api.originalUrl(packetId, doc.id)} download>Download original {doc.kind === "pdf" ? "PDF" : "text"} — page {evidence.page_number}</a>}
     <p className="rr-muted">The normalized text is the citation reference. Original files are downloaded, not embedded or executed.</p>
   </article>;
 }

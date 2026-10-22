@@ -1,0 +1,31 @@
+{
+  "url": "file:///var/folders/n9/mrcdss1j56z50k7vzzxrrw900000gn/T/meditrace-mt16-qa-CMUPTx/index.html",
+  "calls": [],
+  "localEntries": 0,
+  "sessionEntries": 0,
+  "screenshots": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "name": "tablet",
+      "width": 1024,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    }
+  ],
+  "network": [
+    "file:///var/folders/n9/mrcdss1j56z50k7vzzxrrw900000gn/T/meditrace-mt16-qa-CMUPTx/index.html",
+    "file:///var/folders/n9/mrcdss1j56z50k7vzzxrrw900000gn/T/meditrace-mt16-qa-CMUPTx/demo-qa.js"
+  ],
+  "identityExportWarning": true
+}

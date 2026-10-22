@@ -1,8 +1,10 @@
 "use client";
+import { useReviewTransport } from "./ReviewTransport";
 import { useEffect, useState } from "react";
-import { workspaceApi as api, errorMessage, type ReviewEvent } from "../../lib/referral-api/workspace";
+import { errorMessage, type ReviewEvent } from "../../lib/referral-api/workspace";
 
 export function ReviewHistory({ packetId, refresh, onRun, onSnapshot, onError }: { packetId: string; refresh: number; onRun: (id: string) => void; onSnapshot: (id: string) => void; onError: (e: unknown) => void }) {
+  const api = useReviewTransport();
   const [items, setItems] = useState<ReviewEvent[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [busy, setBusy] = useState(true);
@@ -12,7 +14,7 @@ export function ReviewHistory({ packetId, refresh, onRun, onSnapshot, onError }:
     let alive = true; setBusy(true); setError("");
     api.history(packetId).then(next => { if (alive) { setItems(next.items); setCursor(next.next_cursor ?? null); } }).catch(e => { if (alive) { setError(errorMessage(e)); onError(e); } }).finally(() => { if (alive) setBusy(false); });
     return () => { alive = false; };
-  }, [packetId, refresh, retry, onError]);
+  }, [api, packetId, refresh, retry, onError]);
   async function more() {
     if (!cursor || busy) return;
     setBusy(true); setError("");
