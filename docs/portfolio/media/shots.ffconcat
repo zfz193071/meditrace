@@ -1,0 +1,18 @@
+ffconcat version 1.0
+file '01-intro.png'
+duration 10
+file '02-evidence.png'
+duration 10
+file '03-decision.png'
+duration 10
+file '04-handoff.png'
+duration 10
+file '06-stale.png'
+duration 10
+file '07-prepared.png'
+duration 10
+file '05-export.png'
+duration 10
+file '08-evaluation.png'
+duration 10
+file '08-evaluation.png'

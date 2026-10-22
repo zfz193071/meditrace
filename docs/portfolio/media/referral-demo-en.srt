@@ -1,0 +1,39 @@
+1
+00:00:00,000 --> 00:00:10,000
+For referral reviewers: check the supplied documents,
+inspect the evidence, and prepare a human-reviewed handoff.
+
+2
+00:00:10,000 --> 00:00:20,000
+These synthetic documents contain different dates of birth.
+Both source quotes remain visible; the system does not choose an identity.
+
+3
+00:00:20,000 --> 00:00:30,000
+The reviewer keeps the identity issue unresolved and records a reason.
+Human corrections stay separate from original source facts.
+
+4
+00:00:30,000 --> 00:00:40,000
+After both items are handled, create a confirmed local snapshot.
+The unresolved identity warning remains prominent.
+
+5
+00:00:40,000 --> 00:00:50,000
+In the missing-report case, load a prepared source revision.
+The earlier result becomes read-only; no model is called.
+
+6
+00:00:50,000 --> 00:01:00,000
+Load the prepared result for the added synthetic report.
+The new result has no attachment finding and does not inherit old decisions.
+
+7
+00:01:00,000 --> 00:01:10,000
+Export the reviewed version-2 handoff with source references.
+This is an actual local text export, not a server or clinical approval.
+
+8
+00:01:10,000 --> 00:01:20,000
+Offline baseline, Fake and replay counts expose failures and limitations.
+Real-model evaluation, operator review and final release are still pending.

@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-22",
+  "source_commit": "33e2bb7",
+  "environment": "env -i; no .env files; no backend or provider keys",
+  "dependencies": "Cloned existing locked node_modules into isolated repository layout; not a fresh dependency-install test",
+  "command": "pnpm --dir <isolated-root>/src/frontend build",
+  "result": "success",
+  "routes": [
+    "/",
+    "/demo",
+    "/evaluation",
+    "/project"
+  ],
+  "services_started": false,
+  "limits": [
+    "No Next/FastAPI service started",
+    "No clean-room fresh installation claim",
+    "No public deployment verification"
+  ]
+}

@@ -1,0 +1,71 @@
+Referral handoff — synthetic demo
+
+Reviewed
+
+Precomputed synthetic example. Local illustrative confirmation only; not clinical guidance.
+
+Recorded source facts
+
+patient.name: Synthetic Person D01 (stated) [96787de8-e8b4-5408-8d78-2149d20ece12]
+
+patient.dob: 1980-06-15 (stated) [787d3b7f-e867-5955-9b02-e35bd08b6a6c]
+
+referrer.name: Synthetic Referrer D01 (stated) [d009cdac-6a58-57df-9478-23c6aee8f1cf]
+
+referrer.contact: referrer-d01@example.invalid (stated) [678866ac-8898-5f35-b86e-7eb64c14697c]
+
+recipient: Synthetic Outpatient Desk (stated) [dac8bbac-2b12-5167-9ff6-ba6e5076e965]
+
+referral.reason: Review of the supplied fictional symptom history. (stated) [c37045af-525a-5520-9feb-3a0972fec80b]
+
+medications: No current medications. (explicitly_none) [595ebfac-513d-561f-b40c-763d02bd30ca]
+
+allergies: No known allergies. (explicitly_none) [0bf766a5-e4b4-5a2e-aa99-016eca903b41]
+
+attachment_reference: Synthetic Echo Report A is attached. (stated) [a55a2d27-e232-53ee-b516-eeea7778e64e]
+
+report.description: Synthetic Echo Report A, dated 2026-10-01. (stated; 2026-10-01) [fce64a99-5f55-5466-9cff-c087baae2a01]
+
+Human review decisions
+
+No checklist findings in this prepared result. Reviewed does not mean clinically complete.
+
+Source index
+
+[96787de8-e8b4-5408-8d78-2149d20ece12] Synthetic referral.pdf · page 1 · characters 82–111
+Patient: Synthetic Person D01
+
+[787d3b7f-e867-5955-9b02-e35bd08b6a6c] Synthetic referral.pdf · page 1 · characters 112–127
+DOB: 1980-06-15
+
+[d009cdac-6a58-57df-9478-23c6aee8f1cf] Synthetic referral.pdf · page 1 · characters 128–160
+Referrer: Synthetic Referrer D01
+
+[678866ac-8898-5f35-b86e-7eb64c14697c] Synthetic referral.pdf · page 1 · characters 161–198
+Contact: referrer-d01@example.invalid
+
+[dac8bbac-2b12-5167-9ff6-ba6e5076e965] Synthetic referral.pdf · page 1 · characters 199–235
+Recipient: Synthetic Outpatient Desk
+
+[c37045af-525a-5520-9feb-3a0972fec80b] Synthetic referral.pdf · page 1 · characters 236–293
+Reason: Review of the supplied fictional symptom history.
+
+[595ebfac-513d-561f-b40c-763d02bd30ca] Synthetic referral.pdf · page 1 · characters 294–330
+Medications: No current medications.
+
+[0bf766a5-e4b4-5a2e-aa99-016eca903b41] Synthetic referral.pdf · page 1 · characters 331–361
+Allergies: No known allergies.
+
+[a55a2d27-e232-53ee-b516-eeea7778e64e] Synthetic referral.pdf · page 1 · characters 362–410
+Attachment: Synthetic Echo Report A is attached.
+
+[fce64a99-5f55-5466-9cff-c087baae2a01] Synthetic Echo Report A.txt · page 1 · characters 95–137
+Synthetic Echo Report A, dated 2026-10-01.
+
+Confirmation
+
+Source version 2 · Review version 1
+2026-10-22T08:51:09.713Z
+SHA-256 d98e7f8bcd504dc9e524292bd29b96cf98d1ba3636a5e1e9bf0951b8a0661186
+
+This is a local demo snapshot. Refreshing or resetting discards all edits and snapshots. No diagnosis, triage or clinical accuracy claim is made.

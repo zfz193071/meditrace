@@ -1,0 +1,83 @@
+Referral handoff — synthetic demo
+
+Reviewed — unresolved items remain
+
+Identity unresolved — verify dates of birth before using these records together.
+
+Precomputed synthetic example. Local illustrative confirmation only; not clinical guidance.
+
+Recorded source facts
+
+patient.name: Synthetic Person D01 (stated) [96787de8-e8b4-5408-8d78-2149d20ece12]
+
+patient.dob: 1980-06-15 (stated) [787d3b7f-e867-5955-9b02-e35bd08b6a6c]
+
+referrer.name: Synthetic Referrer D01 (stated) [d009cdac-6a58-57df-9478-23c6aee8f1cf]
+
+referrer.contact: referrer-d01@example.invalid (stated) [678866ac-8898-5f35-b86e-7eb64c14697c]
+
+recipient: Synthetic Outpatient Desk (stated) [dac8bbac-2b12-5167-9ff6-ba6e5076e965]
+
+referral.reason: Review of the supplied fictional symptom history. (stated) [c37045af-525a-5520-9feb-3a0972fec80b]
+
+medications: No current medications. (explicitly_none) [595ebfac-513d-561f-b40c-763d02bd30ca]
+
+allergies: No known allergies. (explicitly_none) [0bf766a5-e4b4-5a2e-aa99-016eca903b41]
+
+attachment_reference: Synthetic Echo Report A is attached. (stated) [a55a2d27-e232-53ee-b516-eeea7778e64e]
+
+patient.dob: 1981-06-15 (stated) [cae8d214-8998-559e-aac2-f5e36e39f705]
+
+Human review decisions
+
+C02 · Recorded identity values differ; verify both sources without selecting or merging an identity. Checked all 2 supplied, successfully parsed documents (2 pages) in this revision.
+Status: unresolved
+Reason: Verify the date of birth with the referring team.
+Linked citations: None
+Decision review version: 1
+
+C08 · No unambiguous matching attachment was found in this packet; verify with the sender. This does not establish whether an examination occurred. Checked all 2 supplied, successfully parsed documents (2 pages) in this revision.
+Status: unresolved
+Reason: Request the missing report from the sender.
+Linked citations: None
+Decision review version: 2
+
+Source index
+
+[96787de8-e8b4-5408-8d78-2149d20ece12] Synthetic referral.pdf · page 1 · characters 82–111
+Patient: Synthetic Person D01
+
+[787d3b7f-e867-5955-9b02-e35bd08b6a6c] Synthetic referral.pdf · page 1 · characters 112–127
+DOB: 1980-06-15
+
+[d009cdac-6a58-57df-9478-23c6aee8f1cf] Synthetic referral.pdf · page 1 · characters 128–160
+Referrer: Synthetic Referrer D01
+
+[678866ac-8898-5f35-b86e-7eb64c14697c] Synthetic referral.pdf · page 1 · characters 161–198
+Contact: referrer-d01@example.invalid
+
+[dac8bbac-2b12-5167-9ff6-ba6e5076e965] Synthetic referral.pdf · page 1 · characters 199–235
+Recipient: Synthetic Outpatient Desk
+
+[c37045af-525a-5520-9feb-3a0972fec80b] Synthetic referral.pdf · page 1 · characters 236–293
+Reason: Review of the supplied fictional symptom history.
+
+[595ebfac-513d-561f-b40c-763d02bd30ca] Synthetic referral.pdf · page 1 · characters 294–330
+Medications: No current medications.
+
+[0bf766a5-e4b4-5a2e-aa99-016eca903b41] Synthetic referral.pdf · page 1 · characters 331–361
+Allergies: No known allergies.
+
+[a55a2d27-e232-53ee-b516-eeea7778e64e] Synthetic referral.pdf · page 1 · characters 362–410
+Attachment: Synthetic Echo Report A is attached.
+
+[cae8d214-8998-559e-aac2-f5e36e39f705] Synthetic intake note.txt · page 1 · characters 85–100
+DOB: 1981-06-15
+
+Confirmation
+
+Source version 1 · Review version 3
+2026-10-22T08:51:08.477Z
+SHA-256 b275f82a5960a925871cce03aa15eaacd30a589d47d5a8715b806710e73973d8
+
+This is a local demo snapshot. Refreshing or resetting discards all edits and snapshots. No diagnosis, triage or clinical accuracy claim is made.

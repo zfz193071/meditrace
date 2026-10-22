@@ -1,0 +1,12 @@
+{
+  "duration_seconds": 79.933333,
+  "width": 1280,
+  "height": 720,
+  "codec": "h264",
+  "frame_count": 1199,
+  "caption_cues": 8,
+  "captions": "burned-in English; sidecar SRT",
+  "audio": "none; silent rough cut",
+  "source": "Actual offline UI states; still-frame holds and edits, not a continuous screen recording",
+  "bytes": 626276
+}

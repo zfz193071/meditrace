@@ -1,102 +1,102 @@
-# MediTrace - 医疗 AI 诊断溯源系统
+# MediTrace — Referral Review Copilot
 
-MediTrace 提供医疗咨询对话、诊断报告和链上记录查询，结合 Next.js、FastAPI、PostgreSQL、IPFS 与 Solidity。诊断建议仅用于辅助参考，不能替代医生诊断。
+A synthetic-data portfolio prototype for staff checking referral documents: find missing information or conflicting details, inspect the source evidence, record a human decision, and export a versioned handoff.
 
-在线地址：https://meditrace.baozaolaoba.top
+**Start here:** [80-second captioned rough cut](docs/portfolio/media/referral-demo-rough-cut.mp4) · [Run the demo locally](#try-the-demo) · [Evaluation and failures](evals/referral-review/README.md) · [Code](https://github.com/zfz193071/meditrace)
 
-## 新版开发规划
+**Status:** the English landing page, three fixed demos and offline evaluation are implemented. This V1 is not fully accepted or deployed. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual offline UI, not live model inference. A verified public V1 demo URL will be added after the release gates pass; an older deployment is not evidence of the current build.
 
-已确定下一版方向为 **MediTrace — Referral Review Copilot**：转诊材料核对、原文证据定位、人工审核和交接导出，用于 AI 应用／全栈求职展示。架构、模块规格、24 张开发工单和最终验收标准见 [V1 开发基线](docs/referral-review/README.md)。当前为规划，尚未完成新版开发；以下仍描述现有实现。
+## Try the demo
 
-## 项目结构
-
-```text
-meditrace/
-├── AGENTS.md                          # 项目协作与测试约束
-├── BACKEND-DEPLOYMENT.md              # 前后端部署、环境变量及恢复步骤
-├── BUGFIX-VERCEL-BACKEND-DEPLOYMENT.md # 后端部署修复及验证记录
-├── deploy-vercel.sh                   # 前后端一键部署入口
-├── vercel.json                       # Vercel Services 与路由配置
-├── scripts/                          # 部署流程测试
-└── src/
-    ├── frontend/                     # Next.js 前端
-    ├── backend/                      # FastAPI 后端、数据库迁移及测试
-    └── contracts/                    # Solidity 合约及部署脚本
-```
-
-## 部署
-
-前后端运行在同一个 Vercel 项目，生产数据保存在 Neon PostgreSQL。`/health` 和 `/api/*` 交给后端，其余路径交给前端。
-
-在本项目中对助手说“部署”，或在终端运行：
+Prerequisites: Node.js 22 and pnpm 10.34.7. From a checkout, run these commands manually:
 
 ```bash
-./deploy-vercel.sh
+pnpm --dir src/frontend install --frozen-lockfile
+pnpm --dir src/frontend dev
 ```
 
-脚本检查项目和免费套餐，发布前后端，验证线上接口，并在验证失败时尝试回退。
+Open [the local demo](http://localhost:3000/demo). The frontend-only `/demo` needs no backend service, account, payment credentials or model key. It uses bundled synthetic sources and precomputed results. Do not enter real patient information.
 
-```bash
-./deploy-vercel.sh --check   # 检查部署前置条件，不发布
-./deploy-vercel.sh --verify  # 只读验证当前线上服务
+1. In the identity case, compare both highlighted dates of birth. Choose **Keep unresolved**, enter a reason and save each of the two findings.
+2. Confirm the handoff and download, copy or print it. The unresolved identity warning remains visible.
+3. Switch to the missing-report case. **Load prepared revision** makes the old result read-only; **Load prepared result** displays the fixed newer result. Neither action calls a model.
+4. Reset, switch cases or refresh to discard local edits. Visitor inputs are not persisted by the demo adapter.
+
+The landing page is `/`; measured offline results and limitations are at `/evaluation`. `/workspace` is a separate authenticated backend flow with additional configuration and outstanding external integration acceptance. The private workspace is not required to understand the public examples.
+
+## Architecture and engineering choices
+
+```mermaid
+flowchart LR
+  Demo[Bundled synthetic demo] --> Local[Isolated in-memory adapter]
+  Local --> UI[Shared evidence and review UI]
+  UI --> Export[Confirmed handoff / local export]
+  Private[Authenticated workspace] --> API[FastAPI API]
+  API --> Parse[Bounded parsing / source revisions]
+  Parse --> Extract[Authorized extraction]
+  Extract --> Rules[Deterministic checklist]
+  Rules --> Review[Human decisions / immutable snapshot]
 ```
 
-账号登录、环境变量、数据库迁移及故障恢复见 [前后端部署指南](./BACKEND-DEPLOYMENT.md)。
+- **Evidence before summaries:** citations carry source document, page, Unicode code-point offsets and text hash. A matching quote proves location, not semantic correctness; the evaluation includes a historical-template failure.
+- **Versioned review:** source changes invalidate earlier runs for new decisions. Reviewer corrections are separate from the original extracted facts. Confirmed snapshots preserve the review context.
+- **Controlled execution:** backend code separates create, execute and read-only status. Dispatch markers, idempotency and cost reservations address retries and unknown outcomes. PostgreSQL concurrency and real-provider acceptance remain pending; this is not an exactly-once provider guarantee.
+- **A shared interface:** the demo and workspace reuse evidence, review, history and handoff components. The demo adapter has no server writes and is not proof of backend authentication or persistence.
+- **A bounded scope:** no diagnosis, triage, clinical completeness judgment, OCR, HealthLink or hospital-system integration. The prototype has not been validated against New Zealand clinical workflows.
 
-## 本地开发
+Implementation guides: [architecture](docs/referral-review/ARCHITECTURE.md), [domain and API](docs/referral-review/DOMAIN-AND-API.md), [glossary](GLOSSARY.md), [implementation and acceptance status](docs/referral-review/README.md).
 
-需要 Node.js 22、pnpm 10.34.7、Python 3.12 和 uv 0.13.3。本地服务由开发者手动启动和停止。新模块的配置、契约生成和测试见 [Referral Review 工程操作](docs/referral-review/CONFIGURATION.md)。
+## Evaluation: what the evidence supports
 
-### 后端
+The checked-in development run contains ten synthetic packets: nine readable packets and one rejected scan. It compares a line-reader baseline, scripted Fake output passed through the production extraction validator/checklist, and replay of that recording. **There is no real-model accuracy score.**
 
-在仓库根目录执行：
+| Development-only measurement | Baseline | Fake pipeline | Replay of Fake |
+| --- | --- | --- | --- |
+| Fact TP / FP / FN | 69 / 5 / 4 | 71 / 3 / 2 | 71 / 3 / 2 |
+| Finding TP / FP / FN | 9 / 1 / 1 | 10 / 1 / 0 | 10 / 1 / 0 |
+| Accepted facts with intact citations | 74 / 74 | 74 / 74 | 74 / 74 |
+| Clean packets with an extra finding | 1 / 2 | 1 / 2 | 1 / 2 |
+
+Annotations are provisional pending operator review. Real-model tokens, cost, latency and independently verified semantic support are unmeasured. The twenty-packet frozen split has not received the required real quality evaluation. Tests passed are engineering regression evidence, not clinical accuracy or business impact.
+
+[Metric definitions and commands](evals/referral-review/README.md) · [Failure analysis](evals/referral-review/FAILURES.md) · [Latest implementation evidence](docs/referral-review/MT-20-EVIDENCE.md).
+
+<a id="本地开发"></a>
+
+## Development and verification
+
+The frontend is Next.js / React / TypeScript; the backend is Python 3.12 / FastAPI. Local persistence uses SQLite; PostgreSQL is the target production database. Backend setup uses a virtual environment:
 
 ```bash
 cd src/backend
 uv sync --frozen
-# .env 不存在时才复制模板；保留已有配置
-cp .env.example .env
-# 按需编辑 .env；不设置 DATABASE_URL 时使用本地 SQLite。
+# Review .env.example and configure only the services you intend to use.
+# Preserve existing environment files; do not copy over them blindly.
 ./.venv/bin/python main.py
 ```
 
-后端默认地址为 http://localhost:8000。旧聊天的真实 AI 推理需要 `DEEPSEEK_API_KEY`；未配置时使用演示回复。新的 `/api/v1` 目前仅提供基础 capabilities／readiness，真实执行始终关闭，不能将它视为完整业务已就绪。
+Backend services are started/stopped manually. See [configuration](docs/referral-review/CONFIGURATION.md), [migrations](docs/referral-review/MIGRATIONS.md), and [deployment operations](BACKEND-DEPLOYMENT.md). Deployment is a separate gated task; installing dependencies does not authorize paid model use.
 
-### 前端
-
-另开终端，从仓库根目录执行：
+Useful offline checks, from the repository root:
 
 ```bash
-cd src/frontend
-pnpm install --frozen-lockfile
-cp .env.example .env.local
-pnpm dev
+pnpm --dir src/frontend typecheck
+pnpm --dir src/frontend test --runInBand
+pnpm --dir src/frontend build
+PYTHON_DOTENV_DISABLED=1 DATABASE_URL=sqlite:///:memory: src/backend/.venv/bin/python -m pytest src/backend/tests/referral_review -q
+src/backend/.venv/bin/python evals/referral-review/run.py --provider fake --output /tmp/meditrace-fake-evaluation
 ```
 
-访问 http://localhost:3000。对话页面为 `/chat` 和 `/chat/{id}`。
+Choose a new evaluation output directory for each run. The evaluation CLI currently rejects real execution even with a cap: independent evaluation accounting and global reservation integration remain unfinished. Never automate browser AI generation, including fake generation buttons; fixed-result navigation, review and export are allowed.
 
-### 区块链与报告
+## Delivery limits and contribution provenance
 
-合约源码和部署脚本位于 `src/contracts/`。启用链上写入需要配置 RPC、合约地址及后端签名私钥；IPFS 报告存储需要 Pinata 配置。详细变量说明见 [部署指南](./BACKEND-DEPLOYMENT.md#环境变量)。
+OAuth/Private Blob/Stripe and PostgreSQL acceptance, operator annotation review, authorized real evaluation, complete integration and final deployment remain outstanding. Legacy diagnosis/chat/blockchain code is historical and has not yet been retired; new budget controls must not be assumed to protect those older endpoints.
 
-## 验证
+Development has used an AI coding assistant for implementation, tests and documentation under project instructions. Automated checks and reviewed artifacts are linked; they do not prove that the project owner personally wrote or independently reviewed every line. The [interview and authorship guide](docs/portfolio/INTERVIEW.md) separates repository evidence from personal claims that require confirmation.
 
-```bash
-# 部署与回退流程测试，不创建真实部署
-python3 scripts/test_deploy_workflow.py
+[Portfolio materials](docs/portfolio/README.md) include the captioned rough cut, technical walkthrough, role-specific project bullets and unsent outreach drafts. They remain drafts until the owner verifies their personal claims and the remaining acceptance gates are completed.
 
-# 后端数据库集成测试，使用临时 SQLite，不调用 AI
-PYTHON_DOTENV_DISABLED=1 DATABASE_URL=sqlite:///:memory: src/backend/.venv/bin/python -m pytest src/backend/tests/referral_review src/backend/test_database_deployment.py -q
-```
+## License
 
-**禁止自动在浏览器发送 AI 消息测试。** 对话及流式显示请手动发送消息验证，以避免自动测试消耗 API token。
-
-## 文档
-
-- [项目助手指南](./AGENTS.md)
-- [前后端部署指南](./BACKEND-DEPLOYMENT.md)
-- [Vercel 后端修复与发布记录](./BUGFIX-VERCEL-BACKEND-DEPLOYMENT.md)
-
-## 许可证
-
-MIT License
+No repository-wide `LICENSE` file is currently present; the previous README's MIT label was not accompanied by a license grant. No new repository license is asserted here. Synthetic fixture reuse terms are in [the fixture license](fixtures/referral-review/LICENSE.txt); the bundled font has [separate terms](fixtures/referral-review/BITSTREAM-VERA-LICENSE.txt). Third-party dependencies retain their own licenses. The owner must confirm a repository-wide license before presenting this as licensed open-source software.
