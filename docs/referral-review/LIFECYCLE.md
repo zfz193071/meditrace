@@ -33,7 +33,7 @@
 
 对象删除前持久化 running 状态、尝试次数和 10 分钟 lease。删除返回成功并提交配额释放之后才标 succeeded；删除后 DB 提交失败时仍占用容量，lease 到期重试幂等删除。存储失败使用最长 60 分钟的退避，10 次后停止；DB 图清理失败回滚、记录 `PURGE_FAILED`，5 分钟后重试，10 次后停止。等待子任务不占用失败次数。
 
-处理告警时先检查存储／DB 连通、部署配置和错误码，不读取或粘贴私人原文。对象恢复可显式执行既有 `python -m referral_review.documents.maintenance --limit 20 --retry-exhausted`（使用项目 `.venv`，在 backend 目录，配置由操作者提供）。包／账号任务的 exhausted 恢复需操作者审核选定 job ID，在事务内将该任务 `attempt_count=0,state='pending',next_attempt_at=当前UTC` 后重跑；不要删除 cleanup job 或手动减配额，不得对全部队列盲目清零。
+处理告警时先检查存储／DB 连通、部署配置和错误码，不读取或粘贴私人原文。使用 MT-19 的 `python3 scripts/referral_operations.py retry-cleanup --job-id "$JOB_ID" --apply` 恢复选定 failed 任务；十次上限需额外 `--retry-exhausted`。CLI 默认只读，独立 Bearer 鉴权，保留领域清理条件，拒绝抢占 running lease。无需手动改表；不要删除 cleanup job 或手动减配额，不得对全部队列盲目清零。详见 [OPERATIONS](OPERATIONS.md)。
 
 应用产生的对象都先有 DB reservation 和 object cleanup intent；这里的孤立清理覆盖未保存到 revision 的上传、上传失败和写对象后 DB 失败，不扫描／删除 Blob store 中其他应用或手动上传的未知对象。
 

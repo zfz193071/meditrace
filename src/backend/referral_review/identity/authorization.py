@@ -37,6 +37,10 @@ def protect_request(request: Request):
     root = request.scope.get("root_path", "")
     if root and path.startswith(root + "/"):
         path = path[len(root):]
+    if path == "/internal/operations" and request.method in {"GET", "POST"}:
+        from ..operations.routes import require_operator
+        require_operator(request)
+        return
     # These exact POST routes authenticate raw signatures / operator bearer in their handlers.
     if request.method == "POST" and path in {"/billing/webhook", "/internal/maintenance"}:
         return

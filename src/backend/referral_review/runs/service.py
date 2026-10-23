@@ -19,6 +19,7 @@ from ..persistence.migrations import require_current_schema
 from ..schemas import DocumentPageResponse, ErrorCode, RunResponse
 from ..usage import Usage, rates
 from . import results
+from ..operations.telemetry import audit, observe
 
 PENDING_TTL = timedelta(minutes=30)
 LEASE = timedelta(seconds=240)
@@ -124,6 +125,7 @@ class Runs:
                     input_hash=input_hash, prompt_version=PROMPT_VERSION, schema_version=SCHEMA_VERSION,
                     model_requested=model, created_at=self.clock()).returning(m.runs)).mappings().one()
             self.packets._record(conn, owner, f"run:create:{packet_id}", key, digest, row["id"])
+            audit(conn, row, "created", self.clock())
             return self._public(conn, row, packet)
 
     def latest(self, token, packet_id):
@@ -145,6 +147,7 @@ class Runs:
         """Bind an HTTP idempotency key to one owner/action/run; state machine prevents replay dispatch."""
         with self.engine.begin() as conn:
             row, _ = self._owned(conn, token, rid)
+            audit(conn, row, action, self.clock())
             operation = f"run:{action}"
             prior, digest = self.packets._previous(conn, row["owner_id"], operation, key, {"run_id": str(rid)})
             if prior is None:
@@ -197,6 +200,7 @@ class Runs:
                 m.runs.c.provider_dispatched_at.is_(None)).values(state="running", lease_expires_at=self.clock() + LEASE)).rowcount
             if claimed != 1:
                 raise ApiError(ErrorCode.RUN_ACTIVE)
+            audit(conn, row, "reserved", self.clock())
             return dict(row), source, manifest
 
     def _dispatch(self, token, rid):
@@ -216,6 +220,7 @@ class Runs:
                     raise ApiError(ErrorCode.BUDGET_EXHAUSTED)
             self.fault("before_dispatch_marker")
             conn.execute(m.runs.update().where(m.runs.c.id == rid).values(provider_dispatched_at=self.clock()))
+            audit(conn, row, "dispatched", self.clock())
 
     def _finish(self, owner, rid, extraction, evaluation, deadline):
         def check_deadline():
@@ -240,6 +245,8 @@ class Runs:
                 provider_request_id=extraction.provider_request_id, usage=extraction.usage.model_dump() if extraction.usage else None,
                 finished_at=self.clock()))
 
+            audit(conn, row, "complete", self.clock())
+
     def _error(self, owner, rid, code, *, uncertain=False, error=None):
         with self.engine.begin() as conn:
             row = self.usage._run(conn, owner, rid, active=False)
@@ -252,8 +259,16 @@ class Runs:
                 error_code=code, usage=usage.model_dump() if usage else None,
                 model_reported=getattr(error, "model_reported", None), provider_request_id=getattr(error, "provider_request_id", None),
                 finished_at=self.clock()))
+            audit(conn, row, "failed", self.clock())
 
     async def execute(self, token, rid):
+        started = time.monotonic()
+        try:
+            return await self._execute(token, rid)
+        finally:
+            await run_in_threadpool(observe, self.engine, rid, "complete", int((time.monotonic() - started) * 1000))
+
+    async def _execute(self, token, rid):
         claim = None
         database_task = None
         database_operation = None
@@ -275,12 +290,14 @@ class Runs:
                 if claim is None:
                     return await run_in_threadpool(self.get, token, rid)
                 row, source, manifest = claim
+                await run_in_threadpool(observe, self.engine, rid, "reserved")
                 self.fault("after_claim_commit")
                 adapter = (self.adapter_factory(row, source) if self.adapter_factory else
                            DeepSeekAdapter(self.settings.deepseek_key) if row["mode"] == "real" else FakeAdapter({"facts": []}))
                 if adapter.mode != row["mode"]:
                     raise ApiError(ErrorCode.REAL_AI_NOT_ALLOWED)
                 await database(self._dispatch, token, rid)
+                await run_in_threadpool(observe, self.engine, rid, "dispatched")
                 self.fault("after_dispatch_marker")
                 if time.monotonic() >= deadline:
                     raise TimeoutError()

@@ -165,6 +165,8 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 | GET `/billing/orders/{id}` | 服务端订单状态；前端支付返回页轮询，不能自报成功 |
 | POST `/billing/webhook`（public） | 验证原始 body Stripe 签名、时间和 livemode=false；处理后 2xx |
 | DELETE `/account` | 二次确认参数、CSRF；撤销会话、tombstone 资料、启动清理 |
+| GET `/internal/operations` | 独立 Bearer 鉴权；只读预算、告警和 request/run/账本关联，不返回资料 |
+| POST `/internal/operations` | 独立 Bearer 鉴权及显式 `apply:true`；指定 run 恢复／已记录事件补处理／failed 清理任务重试 |
 | POST `/internal/maintenance` | 仅运维密钥；批次恢复、到期清理、支付待处理恢复；普通 session 无权调用 |
 
 存储键／原始供应商响应／会话哈希不能作为 API 字段返回。public 固定示例以打包静态资产加载，无 public 资料写入接口。
@@ -233,3 +235,5 @@ usage_reservation 状态固定 `reserved | settled | released | retained_unknown
 ### MT-15 审核呈现
 
 页面按 run 的来源 manifest 校验文档成员与解析版本，核对页 hash、Unicode code point offsets 与 quote 后才高亮；历史引用不改用当前来源版本。人工决定通过带审核版本的独立请求保存，409 或不确定响应先保留编辑并暂停写入，用户读取最新决定对比后再显式保存。历史列表分页仅用于参考，不用于推断所有事项的当前状态；当前覆盖层由只读 `/runs/{rid}/review` 返回。原件只走同源鉴权下载，不把来源文本解析为 HTML 或可执行链接。
+
+MT-19 的元数据字段、只读就绪条件、默认只读 CLI、资金告警、未知费用和故障恢复步骤见 [OPERATIONS](OPERATIONS.md)。维护脚本完成后追加只读告警检查；异常计数或监控失败使 Actions 非零退出，真实通知接收仍待 MT-24 验收。

@@ -27,7 +27,7 @@ def test_missing_credentials_start_in_demo_mode_without_enabling_workflows():
         assert data["real_ai_execution_available"] is False
         assert data["payments_available"] is False
         assert client.get("/readiness").status_code == 503
-        assert client.get("/readiness").json()["checks"]["migrations"] == "not_implemented"
+        assert client.get("/readiness").json()["checks"]["migrations"] == "not_checked"
     with pytest.raises(ConfigurationError):
         settings.require_real_ai_configuration()
 
@@ -177,6 +177,7 @@ def test_schema_generation_is_deterministic_and_does_not_depend_on_environment(m
     monkeypatch.setenv("DEEPSEEK_API_KEY", "secret-sentinel")
     assert artifacts() == baseline
     assert set(baseline["openapi.json"]["paths"]) == {
+        "/internal/operations",
         "/capabilities", "/readiness", "/membership", "/auth/session", "/auth/github/start",
         "/auth/github/callback", "/auth/logout", "/account",
         "/billing/checkout", "/billing/orders/{order_id}", "/billing/webhook", "/internal/maintenance",

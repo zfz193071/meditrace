@@ -134,11 +134,13 @@ class Lifecycle:
             self._enqueue(conn, "orphan", did)
 
     def recover_run(self, rid):
+        from ..operations.telemetry import audit
         with self.engine.begin() as conn:
             row = conn.execute(sa.select(m.runs).where(m.runs.c.id == rid)).mappings().first()
             if not row:
                 return
             row = self.usage._run(conn, row["owner_id"], rid, active=False)
+            audit(conn, row, "recovered", self.clock())
             if row["state"] == "pending" and row["created_at"] + timedelta(minutes=30) <= self.clock():
                 conn.execute(m.runs.update().where(m.runs.c.id == rid).values(
                     state="cancelled", error_code="PENDING_EXPIRED", finished_at=self.clock()))

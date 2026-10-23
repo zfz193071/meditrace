@@ -62,6 +62,7 @@ class ApiError(Exception):
 
 
 def error_response(request: Request, code: ErrorCode, *, current_revision: int | None = None, current_review_version: int | None = None) -> JSONResponse:
+    request.state.error_code = code.value
     status, message = ERRORS[code]
     request_id = getattr(request.state, "request_id", uuid4())
     body = ErrorEnvelope(error=ErrorDetail(code=code, message=message,

@@ -13,6 +13,27 @@ class NoRedirect(HTTPRedirectHandler):
         return None
 
 
+ALERT_KEYS = ("financial_halt", "budget_overrun", "persistent_failures", "payment_failures",
+              "payment_backlog", "cleanup_failures", "cleanup_exhausted", "cleanup_overdue", "unknown_runs")
+
+
+def monitor(opener, origin, secret):
+    try:
+        request = Request(origin + "/api/v1/internal/operations", method="GET",
+            headers={"Authorization": "Bearer " + secret})
+        with opener.open(request, timeout=55) as response:
+            if response.status != 200:
+                raise ValueError()
+            alerts = json.loads(response.read(262145))["alerts"]
+        if set(alerts) != set(ALERT_KEYS) or any(type(alerts[key]) is not int or alerts[key] < 0 for key in ALERT_KEYS):
+            raise ValueError()
+    except Exception:
+        print("Operator monitoring failed; check readiness and credentials.", file=sys.stderr)
+        return 1
+    print("Operator alerts: " + " ".join(f"{key}={alerts[key]}" for key in ALERT_KEYS))
+    return int(any(alerts.values()))
+
+
 def main():
     origin = os.environ.get("RR_MAINTENANCE_SITE_ORIGIN", "").rstrip("/")
     secret = os.environ.get("RR_MAINTENANCE_TOKEN", "")
@@ -46,7 +67,7 @@ def main():
             print("Maintenance has failed jobs; operator review is required.", file=sys.stderr)
             return 1
         if not body["backlog"]:
-            return 0
+            return monitor(opener, origin, secret)
         if batch < 9:
             time.sleep(5)
     print("Maintenance backlog remains after ten batches. Inspect and rerun; cleanup is not complete.", file=sys.stderr)

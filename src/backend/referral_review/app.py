@@ -1,6 +1,7 @@
 """Isolated /api/v1 application; no legacy imports, DDL, model or payment calls."""
 
 from uuid import uuid4
+import time
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -27,6 +28,9 @@ from .usage.routes import usage_router
 from .packets import Packets
 from .packets.routes import packet_router
 from .lifecycle.routes import lifecycle_router
+from .operations.routes import operations_router
+from .operations.readiness import probe
+from .operations import telemetry
 from starlette.concurrency import run_in_threadpool
 
 
@@ -66,10 +70,13 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     app.include_router(document_router())
     app.include_router(packet_router())
     app.include_router(lifecycle_router())
+    app.include_router(operations_router())
 
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):
         request.state.request_id = uuid4()  # Never trust an arbitrary inbound logging identifier.
+        context = telemetry.request_id.set(request.state.request_id)
+        started = time.monotonic()
         try:
             await run_in_threadpool(protect_request, request)
             response = await call_next(request)
@@ -86,6 +93,10 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
         response.headers["Cache-Control"] = "private, no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
+        telemetry.emit("request", status=response.status_code,
+            error_code=getattr(request.state, "error_code", None),
+            duration_ms=int((time.monotonic() - started) * 1000))
+        telemetry.request_id.reset(context)
         return response
 
     @app.get("/capabilities", response_model=Capabilities, operation_id="get_capabilities")
@@ -105,11 +116,7 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
 
     @app.get("/readiness", response_model=ReadinessResponse, responses={503: {"model": ReadinessResponse}}, operation_id="get_readiness")
     def readiness():
-        # MT-02/03/19 supply real checks. Never pretend an unimplemented schema is ready.
-        body = ReadinessResponse(
-            status="not_ready", schema_version=None, checklist_version=None,
-            checks={"database": "not_checked", "migrations": "not_implemented", "checklist": "not_implemented"},
-        )
-        return JSONResponse(body.model_dump(mode="json"), status_code=503)
+        body = probe(config, app.state.identity)
+        return JSONResponse(body.model_dump(mode="json"), status_code=200 if body.status == "ready" else 503)
 
     return app

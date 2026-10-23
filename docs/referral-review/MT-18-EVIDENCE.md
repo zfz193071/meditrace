@@ -11,7 +11,7 @@
 - `.github/workflows/referral-maintenance.yml`、`scripts/referral_maintenance.py`：03:17 UTC／手动触发，200 项／45 秒批次预算，最多十批，有积压或失败则 Actions 失败；凭据仅从 secret 环境读取，不跟随重定向。
 - OpenAPI 与 TypeScript 生成产物已更新。操作手册见 [LIFECYCLE](LIFECYCLE.md)，既有边界修复见 [BUGFIX](../../BUGFIX-REFERRAL-LIFECYCLE.md)。
 
-当前为工作区改动，未提交／推送／部署。用户已有 `TASK-PREVISIT-SUMMARY.md` 未改动。
+MT-18 代码已于 2026-10-23 提交为 `6fd7306`；未推送／部署。用户已有 `TASK-PREVISIT-SUMMARY.md` 未改动。
 
 ## 验收逐项
 

@@ -174,6 +174,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/internal/operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status */
+        get: operations["query_operations"];
+        put?: never;
+        /** Apply */
+        post: operations["apply_operation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/membership": {
         parameters: {
             query?: never;
@@ -625,6 +643,23 @@ export interface components {
              */
             state: "cleanup_pending";
         };
+        /** Audit */
+        Audit: {
+            /** Action */
+            action: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Run Id */
+            run_id: string | null;
+        };
         /** BillingEventResponse */
         BillingEventResponse: {
             /**
@@ -633,6 +668,19 @@ export interface components {
              * @constant
              */
             received: true;
+        };
+        /** Budget */
+        Budget: {
+            /** Bucket Key */
+            bucket_key: string;
+            /** Configured Limit Microusd */
+            configured_limit_microusd: number;
+            /** Limit Microusd */
+            limit_microusd: number;
+            /** Reserved Microusd */
+            reserved_microusd: number;
+            /** Spent Microusd */
+            spent_microusd: number;
         };
         /** Capabilities */
         Capabilities: {
@@ -741,6 +789,31 @@ export interface components {
              * @default /account
              */
             return_path: string;
+        };
+        /** CleanupJob */
+        CleanupJob: {
+            /** Attempt Count */
+            attempt_count: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "object" | "packet" | "account" | "orphan" | "audit" | "billing";
+            /**
+             * Next Attempt At
+             * Format: date-time
+             */
+            next_attempt_at: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "pending" | "running" | "succeeded" | "failed";
         };
         /** ConfirmInput */
         ConfirmInput: {
@@ -1258,6 +1331,25 @@ export interface components {
             /** Quote */
             quote: string;
         };
+        /** OperationsStatus */
+        OperationsStatus: {
+            /** Alerts */
+            alerts: {
+                [key: string]: number;
+            };
+            /** Audit */
+            audit: components["schemas"]["Audit"][];
+            /** Audit Limit */
+            audit_limit: number;
+            /** Budgets */
+            budgets: components["schemas"]["Budget"][];
+            /** Cleanup Jobs */
+            cleanup_jobs: components["schemas"]["CleanupJob"][];
+            /** Limit */
+            limit: number;
+            /** Runs */
+            runs: components["schemas"]["RunMetadata"][];
+        };
         /** OrderResponse */
         OrderResponse: {
             /** Amount */
@@ -1423,6 +1515,24 @@ export interface components {
              */
             status: "ready" | "not_ready";
         };
+        /** Reconcile */
+        Reconcile: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "reconcile";
+            /**
+             * Apply
+             * @constant
+             */
+            apply: true;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+        };
         /** ResolutionInput */
         ResolutionInput: {
             /**
@@ -1441,6 +1551,44 @@ export interface components {
              * @default
              */
             reason: string;
+        };
+        /** RetryCleanup */
+        RetryCleanup: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "retry_cleanup";
+            /**
+             * Apply
+             * @constant
+             */
+            apply: true;
+            /**
+             * Job Id
+             * Format: uuid
+             */
+            job_id: string;
+            /**
+             * Retry Exhausted
+             * @default false
+             */
+            retry_exhausted: boolean;
+        };
+        /** RetryPayment */
+        RetryPayment: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "retry_payment";
+            /**
+             * Apply
+             * @constant
+             */
+            apply: true;
+            /** Event Id */
+            event_id: string;
         };
         /** ReviewEvent */
         ReviewEvent: {
@@ -1576,6 +1724,50 @@ export interface components {
             packet_id: string;
             /** Revision Number */
             revision_number: number;
+        };
+        /** RunMetadata */
+        RunMetadata: {
+            /** Actual Microusd */
+            actual_microusd: number | null;
+            /** Adjustment Count */
+            adjustment_count: number;
+            /** Booked Microusd */
+            booked_microusd: number | null;
+            /** Completion Tokens */
+            completion_tokens: number | null;
+            /** Error Code */
+            error_code: string | null;
+            /** Estimated Microusd */
+            estimated_microusd: number | null;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "precomputed" | "fake" | "replay" | "real";
+            /** Model Reported Sha256 */
+            model_reported_sha256: string | null;
+            /** Model Requested Sha256 */
+            model_requested_sha256: string | null;
+            /** Price Version Sha256 */
+            price_version_sha256: string | null;
+            /** Prompt Tokens */
+            prompt_tokens: number | null;
+            /** Reservation Id */
+            reservation_id: string | null;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "pending" | "running" | "succeeded" | "failed" | "outcome_unknown" | "cancelled";
+            /** Total Tokens */
+            total_tokens: number | null;
+            /** Usage State */
+            usage_state: ("reserved" | "settled" | "released" | "retained_unknown" | "estimated_spent") | null;
         };
         /** RunResponse */
         RunResponse: {
@@ -2459,6 +2651,161 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MaintenanceResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    query_operations: {
+        parameters: {
+            query?: {
+                request_id?: string | null;
+                run_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationsStatus"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    apply_operation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Reconcile"] | components["schemas"]["RetryPayment"] | components["schemas"]["RetryCleanup"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationsStatus"];
                 };
             };
             /** @description Unauthorized */

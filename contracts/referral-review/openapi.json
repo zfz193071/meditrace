@@ -29,6 +29,45 @@
         "title": "AccountDeleteResponse",
         "type": "object"
       },
+      "Audit": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          }
+        },
+        "required": [
+          "request_id",
+          "run_id",
+          "action",
+          "created_at"
+        ],
+        "title": "Audit",
+        "type": "object"
+      },
       "BillingEventResponse": {
         "additionalProperties": false,
         "properties": {
@@ -40,6 +79,40 @@
           }
         },
         "title": "BillingEventResponse",
+        "type": "object"
+      },
+      "Budget": {
+        "additionalProperties": false,
+        "properties": {
+          "bucket_key": {
+            "title": "Bucket Key",
+            "type": "string"
+          },
+          "configured_limit_microusd": {
+            "title": "Configured Limit Microusd",
+            "type": "integer"
+          },
+          "limit_microusd": {
+            "title": "Limit Microusd",
+            "type": "integer"
+          },
+          "reserved_microusd": {
+            "title": "Reserved Microusd",
+            "type": "integer"
+          },
+          "spent_microusd": {
+            "title": "Spent Microusd",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bucket_key",
+          "limit_microusd",
+          "configured_limit_microusd",
+          "reserved_microusd",
+          "spent_microusd"
+        ],
+        "title": "Budget",
         "type": "object"
       },
       "Capabilities": {
@@ -228,6 +301,56 @@
           }
         },
         "title": "CheckoutInput",
+        "type": "object"
+      },
+      "CleanupJob": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_count": {
+            "title": "Attempt Count",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "object",
+              "packet",
+              "account",
+              "orphan",
+              "audit",
+              "billing"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "next_attempt_at": {
+            "format": "date-time",
+            "title": "Next Attempt At",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "state",
+          "attempt_count",
+          "next_attempt_at"
+        ],
+        "title": "CleanupJob",
         "type": "object"
       },
       "ConfirmInput": {
@@ -1537,6 +1660,65 @@
         "title": "ModelQuote",
         "type": "object"
       },
+      "OperationsStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "alerts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Alerts",
+            "type": "object"
+          },
+          "audit": {
+            "items": {
+              "$ref": "#/components/schemas/Audit"
+            },
+            "title": "Audit",
+            "type": "array"
+          },
+          "audit_limit": {
+            "title": "Audit Limit",
+            "type": "integer"
+          },
+          "budgets": {
+            "items": {
+              "$ref": "#/components/schemas/Budget"
+            },
+            "title": "Budgets",
+            "type": "array"
+          },
+          "cleanup_jobs": {
+            "items": {
+              "$ref": "#/components/schemas/CleanupJob"
+            },
+            "title": "Cleanup Jobs",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/RunMetadata"
+            },
+            "title": "Runs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "budgets",
+          "alerts",
+          "runs",
+          "audit",
+          "cleanup_jobs",
+          "limit",
+          "audit_limit"
+        ],
+        "title": "OperationsStatus",
+        "type": "object"
+      },
       "OrderResponse": {
         "additionalProperties": false,
         "properties": {
@@ -1906,6 +2088,33 @@
         "title": "ReadinessResponse",
         "type": "object"
       },
+      "Reconcile": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "const": "reconcile",
+            "title": "Action",
+            "type": "string"
+          },
+          "apply": {
+            "const": true,
+            "title": "Apply",
+            "type": "boolean"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "run_id",
+          "apply"
+        ],
+        "title": "Reconcile",
+        "type": "object"
+      },
       "ResolutionInput": {
         "additionalProperties": false,
         "properties": {
@@ -1958,6 +2167,65 @@
           "action"
         ],
         "title": "ResolutionInput",
+        "type": "object"
+      },
+      "RetryCleanup": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "const": "retry_cleanup",
+            "title": "Action",
+            "type": "string"
+          },
+          "apply": {
+            "const": true,
+            "title": "Apply",
+            "type": "boolean"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "retry_exhausted": {
+            "default": false,
+            "title": "Retry Exhausted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action",
+          "job_id",
+          "apply"
+        ],
+        "title": "RetryCleanup",
+        "type": "object"
+      },
+      "RetryPayment": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "const": "retry_payment",
+            "title": "Action",
+            "type": "string"
+          },
+          "apply": {
+            "const": true,
+            "title": "Apply",
+            "type": "boolean"
+          },
+          "event_id": {
+            "pattern": "^evt_[A-Za-z0-9_]{1,180}$",
+            "title": "Event Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "event_id",
+          "apply"
+        ],
+        "title": "RetryPayment",
         "type": "object"
       },
       "ReviewEvent": {
@@ -2246,6 +2514,202 @@
           "created_at"
         ],
         "title": "RevisionResponse",
+        "type": "object"
+      },
+      "RunMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "actual_microusd": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Microusd"
+          },
+          "adjustment_count": {
+            "title": "Adjustment Count",
+            "type": "integer"
+          },
+          "booked_microusd": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booked Microusd"
+          },
+          "completion_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Tokens"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "estimated_microusd": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Microusd"
+          },
+          "mode": {
+            "enum": [
+              "precomputed",
+              "fake",
+              "replay",
+              "real"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "model_reported_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Reported Sha256"
+          },
+          "model_requested_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Requested Sha256"
+          },
+          "price_version_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Version Sha256"
+          },
+          "prompt_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Tokens"
+          },
+          "reservation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reservation Id"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "running",
+              "succeeded",
+              "failed",
+              "outcome_unknown",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "total_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Tokens"
+          },
+          "usage_state": {
+            "anyOf": [
+              {
+                "enum": [
+                  "reserved",
+                  "settled",
+                  "released",
+                  "retained_unknown",
+                  "estimated_spent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage State"
+          }
+        },
+        "required": [
+          "run_id",
+          "state",
+          "mode",
+          "error_code",
+          "model_requested_sha256",
+          "model_reported_sha256",
+          "prompt_tokens",
+          "completion_tokens",
+          "total_tokens",
+          "reservation_id",
+          "usage_state",
+          "estimated_microusd",
+          "actual_microusd",
+          "booked_microusd",
+          "adjustment_count",
+          "price_version_sha256"
+        ],
+        "title": "RunMetadata",
         "type": "object"
       },
       "RunResponse": {
@@ -3562,6 +4026,225 @@
           }
         },
         "summary": "Maintenance"
+      }
+    },
+    "/internal/operations": {
+      "get": {
+        "operationId": "query_operations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "request_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Status"
+      },
+      "post": {
+        "operationId": "apply_operation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "discriminator": {
+                  "mapping": {
+                    "reconcile": "#/components/schemas/Reconcile",
+                    "retry_cleanup": "#/components/schemas/RetryCleanup",
+                    "retry_payment": "#/components/schemas/RetryPayment"
+                  },
+                  "propertyName": "action"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Reconcile"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RetryPayment"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RetryCleanup"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Apply"
       }
     },
     "/membership": {
