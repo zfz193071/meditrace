@@ -26,6 +26,7 @@ from .usage import Usage
 from .usage.routes import usage_router
 from .packets import Packets
 from .packets.routes import packet_router
+from .lifecycle.routes import lifecycle_router
 from starlette.concurrency import run_in_threadpool
 
 
@@ -64,6 +65,7 @@ def create_app(settings: Settings | None = None, *, identity=None, documents=Non
     app.include_router(auth_router(identity))
     app.include_router(document_router())
     app.include_router(packet_router())
+    app.include_router(lifecycle_router())
 
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):

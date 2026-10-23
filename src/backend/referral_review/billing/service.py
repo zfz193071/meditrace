@@ -1,5 +1,6 @@
 """Order/user locks, durable event retries and monotonic revocation. Network outside transactions."""
 from datetime import timedelta
+import time
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
@@ -11,7 +12,7 @@ from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
 from ..schemas import ErrorCode, OrderResponse
 from ..usage.rates import ensure, lock_user, consume
-from .provider import StripeTest, checkout_url, identifier, rejected, verify_event
+from .provider import StripeTest, checkout_url, identifier, rejected, verify_event, maintenance_deadline
 
 
 def configured(settings):
@@ -200,20 +201,56 @@ class Billing:
                 conn.execute(m.billing_events.update().where(m.billing_events.c.stripe_event_id == event["stripe_event_id"])
                     .values(state="processed", processed_at=self.clock()))
 
-    def recover(self, limit=20):
+    def backlog(self, conn):
+        now = self.clock()
+        return (conn.execute(sa.select(sa.func.count()).select_from(m.billing_events).where(
+            m.billing_events.c.state.in_(["pending", "failed"]),
+            m.billing_events.c.received_at > now - timedelta(days=90))).scalar_one()
+            + conn.execute(sa.select(sa.func.count()).select_from(m.orders).where(
+                m.orders.c.state == "pending", m.orders.c.owner_id.is_not(None),
+                m.orders.c.created_at > now - timedelta(days=90))).scalar_one())
+
+    def recover(self, limit=20, *, deadline=None):
+        context = maintenance_deadline.set(deadline)
+        try:
+            return self._recover(limit, deadline=deadline)
+        finally:
+            maintenance_deadline.reset(context)
+
+    def _recover(self, limit, *, deadline):
         """Operator-only bounded recovery; never called by GET or by success page."""
         with self.engine.begin() as conn:
             require_current_schema(conn)
             events = conn.execute(sa.select(m.billing_events.c.stripe_event_id).where(
-                m.billing_events.c.state.in_(["pending", "failed"])).order_by(m.billing_events.c.received_at).limit(limit)).scalars().all()
+                m.billing_events.c.state.in_(["pending", "failed"]),
+                m.billing_events.c.received_at > self.clock() - timedelta(days=90))
+                .order_by(m.billing_events.c.received_at).limit(limit)).scalars().all()
             sessions = conn.execute(sa.select(m.orders.c.checkout_session_id).where(m.orders.c.state == "pending",
+                m.orders.c.owner_id.is_not(None), m.orders.c.created_at > self.clock() - timedelta(days=90),
                 m.orders.c.checkout_session_id.is_not(None)).order_by(m.orders.c.created_at).limit(limit)).scalars().all()
             ambiguous = conn.execute(sa.select(m.orders).where(m.orders.c.state == "pending",
+                m.orders.c.owner_id.is_not(None),
                 m.orders.c.checkout_session_id.is_(None),
                 m.orders.c.created_at > self.clock() - timedelta(hours=23)).order_by(m.orders.c.created_at).limit(limit)).mappings().all()
             ambiguous = [(dict(order), dict(self._detail(conn, order["id"]))) for order in ambiguous]
+            abandoned = conn.execute(sa.select(m.orders.c.id, m.orders.c.owner_id).where(
+                m.orders.c.state == "pending", m.orders.c.owner_id.is_not(None),
+                m.orders.c.checkout_session_id.is_(None), m.orders.c.created_at <= self.clock() - timedelta(hours=23))
+                .order_by(m.orders.c.created_at).limit(limit)).all()
         success = failed = 0
+        def full():
+            return success + failed >= limit or (deadline is not None and time.monotonic() >= deadline - 30)
+        for oid, owner in abandoned:
+            if full():
+                break
+            with self.engine.begin() as conn:
+                conn.execute(sa.select(m.users.c.id).where(m.users.c.id == owner).with_for_update()).first()
+                conn.execute(m.orders.update().where(m.orders.c.id == oid, m.orders.c.state == "pending",
+                    m.orders.c.checkout_session_id.is_(None)).values(state="expired"))
+            success += 1
         for order, detail in ambiguous:
+            if full():
+                break
             try:
                 # Same immutable request/key, within Stripe's minimum 24h retention.
                 # Past expires_at an unexecuted request cannot create a new usable Checkout.
@@ -224,12 +261,16 @@ class Billing:
             except ApiError:
                 failed += 1
         for event_id in events:
+            if full():
+                break
             try:
                 self.process_event(event_id)
                 success += 1
             except ApiError:
                 failed += 1
         for session_id in sessions:
+            if full():
+                break
             try:
                 self._apply(self.provider.session(session_id))
                 success += 1

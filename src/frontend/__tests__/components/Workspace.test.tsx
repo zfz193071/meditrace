@@ -109,6 +109,18 @@ test("unavailable and expired sessions show bounded recovery states", async () =
   expect(screen.queryByLabelText("Or paste synthetic referral text")).not.toBeInTheDocument();
 });
 
+test("a 404 after returning to a deleted packet removes the loaded editor", async () => {
+  render(<Workspace packetId={pid} />);
+  await screen.findByRole("heading", { name: packet.title });
+  fireEvent.change(screen.getByLabelText("Or paste synthetic referral text"), { target: { value: "Synthetic memory sentinel" } });
+  mock.packet.mockRejectedValue(new WorkspaceError("NOT_FOUND", 404));
+  fireEvent(window, new Event("pageshow"));
+  await screen.findByText(/This material is unavailable, deleted or expired/);
+  expect(screen.queryByDisplayValue("Synthetic memory sentinel")).not.toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: packet.title })).not.toBeInTheDocument();
+  expect(mock.execute).not.toHaveBeenCalled();
+});
+
 test("preloaded unknown result offers recovery without executing", async () => {
   mock.reconcile.mockResolvedValue(unknownRun);
   render(<RunPanel packetId={pid} revision={revision} initialRun={unknownRun} membership={membership} caps={caps} csrf="test-csrf" sourceDirty={false} onError={access.onError} />);

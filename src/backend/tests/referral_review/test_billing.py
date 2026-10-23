@@ -98,6 +98,28 @@ def rows(b, table):
         return [dict(r) for r in conn.execute(sa.select(table)).mappings()]
 
 
+def test_deleted_account_rejects_late_and_duplicate_payment_events(billing):
+    from referral_review.lifecycle import Lifecycle
+    b = billing
+    create(b)
+    sid = rows(b, m.orders)[0]["checkout_session_id"]
+    b[2].paid(sid)
+    assert event(b, sid).status_code == 200
+    assert len(rows(b, m.memberships)) == 1
+    response = b[0].request("DELETE", "/account", json={"confirmation": "DELETE"}, headers=b[4])
+    assert response.status_code == 202
+    # Before physical cleanup the disabled user still prevents new grants.
+    assert event(b, sid, eid="evt_late_before_purge").status_code in (400, 401)
+    result = Lifecycle(b[1].identity).maintain()
+    assert result["backlog"] == 0
+    assert rows(b, m.users) == [] and rows(b, m.memberships)[0]["owner_id"] is None
+    assert event(b, sid).status_code == 200  # Already-processed dedupe is harmless.
+    assert event(b, sid, eid="evt_late_after_purge").status_code == 400
+    sign_in(b[0])
+    assert b[0].get("/membership").json()["remaining"] == 0
+    assert len(rows(b, m.memberships)) == 1
+
+
 def test_checkout_reuses_pending_order_and_paid_entitlement_is_exactly_once(billing):
     b = billing
     first = create(b)

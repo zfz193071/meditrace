@@ -3,12 +3,16 @@ import hashlib
 import hmac
 import json
 import re
+import time
+from contextvars import ContextVar
 from urllib.parse import urlsplit
 
 import httpx
 
 from ..errors import ApiError
 from ..schemas import ErrorCode
+
+maintenance_deadline = ContextVar("stripe_maintenance_deadline", default=None)
 
 EVENT_TYPES = {
     "checkout.session.completed", "checkout.session.async_payment_succeeded",
@@ -71,11 +75,15 @@ class StripeTest:
             raise ApiError(ErrorCode.BILLING_DISABLED)
 
     def _request(self, method, path, *, data=None, params=None, key=None):
+        deadline = maintenance_deadline.get()
+        remaining = deadline - time.monotonic() if deadline is not None else 60
+        if remaining <= 0:
+            raise ApiError(ErrorCode.PAYMENT_PENDING)
         headers = {"Authorization": "Bearer " + self.settings.stripe_secret_key.get_secret_value()}
         if key:
             headers["Idempotency-Key"] = key
         try:
-            with httpx.Client(transport=self.transport, timeout=15, follow_redirects=False) as client:
+            with httpx.Client(transport=self.transport, timeout=min(15, remaining / 4), follow_redirects=False) as client:
                 response = client.request(method, "https://api.stripe.com/v1/" + path,
                                           data=data, params=params, headers=headers)
                 response.raise_for_status()

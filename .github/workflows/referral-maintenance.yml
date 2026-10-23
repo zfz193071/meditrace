@@ -1,0 +1,24 @@
+name: Referral daily maintenance
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: referral-maintenance
+  cancel-in-progress: false
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run bounded maintenance
+        env:
+          RR_MAINTENANCE_SITE_ORIGIN: ${{ secrets.RR_MAINTENANCE_SITE_ORIGIN }}
+          RR_MAINTENANCE_TOKEN: ${{ secrets.RR_MAINTENANCE_TOKEN }}
+        run: python scripts/referral_maintenance.py

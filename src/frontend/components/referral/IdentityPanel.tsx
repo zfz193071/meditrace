@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import BillingPanel from "./BillingPanel";
+import AccountDeletion from "./AccountDeletion";
 import Link from "next/link";
 import { getSession, signOut, type Session } from "../../lib/referral-api";
 
@@ -14,6 +15,7 @@ export default function IdentityPanel({ workspace = false, returnPath = "/worksp
   const [busy, setBusy] = useState(false);
   const [logoutError, setLogoutError] = useState(false);
   const [expired, setExpired] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const requestVersion = useRef(0);
   const inFlight = useRef<AbortController | null>(null);
   const wasSignedIn = useRef(false);
@@ -92,6 +94,7 @@ export default function IdentityPanel({ workspace = false, returnPath = "/worksp
           <p role="alert">Sign-in did not complete. Please start again; no new session was created.</p>}
         {expired && <p role="alert">Your session ended. Sign in again to continue.</p>}
         {signedOut && <p role="status">You have signed out.</p>}
+        {deleted && <p role="status">Account access has ended. Content cleanup is queued; physical deletion is not yet confirmed.</p>}
         {logoutError && <p role="alert">Sign-out could not be confirmed. Please retry.</p>}
         {session?.user && <>
           {billingReturnPath && session.csrf_token && <BillingPanel key={session.user.id} csrf={session.csrf_token} returnPath={billingReturnPath} />}
@@ -100,6 +103,11 @@ export default function IdentityPanel({ workspace = false, returnPath = "/worksp
           <button disabled={busy} onClick={logout} className="rounded border border-teal-300 px-5 py-3 disabled:opacity-50">
             {busy ? "Signing out…" : "Sign out"}
           </button>
+          {returnPath === "/account" && session.csrf_token && <AccountDeletion csrf={session.csrf_token} onDeleted={() => {
+            ++requestVersion.current; inFlight.current?.abort(); wasSignedIn.current = false;
+            setSession({ user: null, csrf_token: null, expires_at: null, login_available: true });
+            setExpired(false); setDeleted(true);
+          }} />}
         </>}
         {session?.login_available && !session.user && <a className="inline-block rounded bg-teal-300 px-5 py-3 text-slate-950 focus-visible:outline focus-visible:outline-2"
           href={`/api/v1/auth/github/start?return_path=${encodeURIComponent(safePath)}`}>Continue with GitHub</a>}

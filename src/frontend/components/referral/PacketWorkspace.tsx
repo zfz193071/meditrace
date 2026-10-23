@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { workspaceApi as api, errorMessage, operationKey, type Packet, type Revision, type Run, type Membership, type Document } from "../../lib/referral-api/workspace";
+import { workspaceApi as api, WorkspaceError, errorMessage, operationKey, type Packet, type Revision, type Run, type Membership, type Document } from "../../lib/referral-api/workspace";
 import { type Access, expiryLabel, useUnsavedChanges } from "./WorkspaceGate";
 import { RunPanel } from "./RunPanel";
 import { ReviewWorkspace } from "./ReviewWorkspace";
@@ -55,6 +55,18 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
     } catch (e) { if (alive.current && version === loadVersion.current) fail(e); }
   }, [packetId, fail, onError]);
   useEffect(() => { alive.current = true; void load(); return () => { alive.current = false; }; }, [load]);
+  useEffect(() => {
+    if (!packet) return;
+    const invalidate = () => { ++loadVersion.current; onError(new WorkspaceError("NOT_FOUND", 404)); };
+    const timer = setTimeout(invalidate, Math.max(0, Math.min(Date.parse(packet.expires_at) - Date.now(), 2_147_483_647)));
+    const verify = () => {
+      if (document.visibilityState !== "visible") return;
+      void api.packet(packetId).catch(e => { if (alive.current) onError(e); });
+    };
+    window.addEventListener("focus", verify); window.addEventListener("pageshow", verify);
+    document.addEventListener("visibilitychange", verify);
+    return () => { clearTimeout(timer); window.removeEventListener("focus", verify); window.removeEventListener("pageshow", verify); document.removeEventListener("visibilitychange", verify); };
+  }, [packet, packetId, onError]);
   // Parsing state is read-only. After eight queries the user can explicitly reload.
   useEffect(() => {
     if (!packet?.documents.some(d => ["uploading", "parsing"].includes(d.parse_status)) || attempt >= 8) return;

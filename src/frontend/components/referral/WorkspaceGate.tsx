@@ -7,6 +7,7 @@ export function WorkspaceGate({ packetId, children }: { packetId?: string; child
   const [session, setSession] = useState<Session | null>(null);
   const [caps, setCaps] = useState<Capabilities | null>(null);
   const [error, setError] = useState("");
+  const [unavailable, setUnavailable] = useState(false);
   const version = useRef(0);
   const invalidate = useCallback(() => { ++version.current; }, []);
   const refresh = useCallback(async () => {
@@ -14,14 +15,17 @@ export function WorkspaceGate({ packetId, children }: { packetId?: string; child
     try {
       const [next, capabilities] = await Promise.all([api.session(), api.capabilities()]);
       if (current !== version.current) return;
-      setSession(next); setCaps(capabilities); setError("");
+      setSession(next); setCaps(capabilities); setError(""); setUnavailable(false);
     } catch (e) { if (current === version.current) { setError(errorMessage(e)); setSession(null); } }
   }, []);
   const onError = useCallback((e: unknown) => {
+    if (e instanceof WorkspaceError && e.status === 404 && packetId) {
+      ++version.current; setUnavailable(true); setError(e.message);
+    }
     if (e instanceof WorkspaceError && (e.status === 401 || e.status === 403)) {
       ++version.current; setSession(null); setError(e.message);
     }
-  }, []);
+  }, [packetId]);
   useEffect(() => {
     void refresh();
     const visible = () => { if (document.visibilityState === "visible") void refresh(); };
@@ -43,7 +47,7 @@ export function WorkspaceGate({ packetId, children }: { packetId?: string; child
       <p>Your saved packets and selection drafts are restored after sign-in. Unsaved text is not stored in this browser.</p>
       {session.login_available ? <a className="rr-button" href={`/api/v1/auth/github/start?return_path=${encodeURIComponent(returnPath)}`}>Continue with GitHub</a> : <p>Sign-in is unavailable. Please try again later.</p>}
     </section>}
-    {session?.user && caps && session.csrf_token && <Fragment key={session.user.id}>
+    {!unavailable && session?.user && caps && session.csrf_token && <Fragment key={session.user.id}>
       <p className="rr-muted">Signed in as {session.user.display_name}</p>
       {!caps.workspace_available ? <section className="rr-card"><h1>Workspace unavailable</h1><p>The private workspace is not configured. No files can be uploaded yet.</p><button onClick={refresh}>Check again</button></section>
         : children({ csrf: session.csrf_token, capabilities: caps, onError })}

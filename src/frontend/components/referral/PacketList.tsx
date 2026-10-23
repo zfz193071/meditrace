@@ -39,6 +39,8 @@ export function PacketList({ csrf, onError }: Access) {
   }
   return <>
     <div className="rr-heading"><div><h1>Your referral packets</h1><p>Prepare sources, check gaps, then review the handoff.</p></div><button disabled={busy} onClick={() => load()}>Refresh list</button></div>
+    <p>Packets expire 7 days after creation. Unused uploads expire after 24 hours. Deletion ends access immediately;
+      all versions and review history are queued for cleanup within a 24-hour target. Downloaded copies and provider backups may remain.</p>
     {error && <p className="rr-alert" role="alert">{error}</p>}
     <section className="rr-card"><h2>Create a packet</h2>
       <form onSubmit={event => { event.preventDefault(); void create(); }} className="rr-form">

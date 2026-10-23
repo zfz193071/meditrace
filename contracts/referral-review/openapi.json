@@ -1,6 +1,34 @@
 {
   "components": {
     "schemas": {
+      "AccountDeleteInput": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmation": {
+            "const": "DELETE",
+            "title": "Confirmation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirmation"
+        ],
+        "title": "AccountDeleteInput",
+        "type": "object"
+      },
+      "AccountDeleteResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "const": "cleanup_pending",
+            "default": "cleanup_pending",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "title": "AccountDeleteResponse",
+        "type": "object"
+      },
       "BillingEventResponse": {
         "additionalProperties": false,
         "properties": {
@@ -1217,6 +1245,74 @@
           }
         },
         "title": "InputLimits",
+        "type": "object"
+      },
+      "MaintenanceInput": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "anyOf": [
+              {
+                "const": "continue",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor"
+          },
+          "limit": {
+            "default": 200,
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "MaintenanceInput",
+        "type": "object"
+      },
+      "MaintenanceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "backlog": {
+            "title": "Backlog",
+            "type": "integer"
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "const": "continue",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor"
+          },
+          "exhausted": {
+            "title": "Exhausted",
+            "type": "integer"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "processed": {
+            "title": "Processed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "processed",
+          "failed",
+          "exhausted",
+          "backlog",
+          "cursor"
+        ],
+        "title": "MaintenanceResponse",
         "type": "object"
       },
       "ManifestDocument": {
@@ -2631,6 +2727,105 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/account": {
+      "delete": {
+        "operationId": "delete_account",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDeleteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDeleteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Delete Account"
+      }
+    },
     "/auth/github/callback": {
       "get": {
         "operationId": "complete_github_login",
@@ -3282,11 +3477,25 @@
     "/internal/maintenance": {
       "post": {
         "operationId": "run_maintenance",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaintenanceInput",
+                "default": {
+                  "limit": 200
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceResponse"
+                }
               }
             },
             "description": "Successful Response"

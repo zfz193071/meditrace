@@ -48,6 +48,8 @@ MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-M
 | `RR_REAL_AI_USER_IDS` | 空；逗号分隔的内部 user UUID，不是 GitHub 昵称；真实配置预检要求非空 | MT-04/10 |
 | `RR_MAINTENANCE_TOKEN` | 未设置；若设置至少 32 字符的高熵秘密 | MT-18/19 |
 
+MT-18 的每日维护 workflow 另需仓库 secret `RR_MAINTENANCE_SITE_ORIGIN`（HTTPS origin）和与后端一致的 `RR_MAINTENANCE_TOKEN`。该 origin 是调用脚本配置，不是新增后端 Settings 字段。调度、分批、故障补偿和备份限制见 [LIFECYCLE](LIFECYCLE.md)；部署到仓库不等于已配置／已验证线上调度。
+
 `VERCEL=1` 或 `VERCEL_ENV=preview/production` 是平台注入的 runtime 信号，不是应用身份凭据。`Settings.require_real_ai_configuration()` 仅检查配置完整性，不替代账号鉴权、会员、余额或事务预留。1 USD = 1,000,000 micro-USD；这里不提供会自动启用消费的价格／预算示例。
 
 前端 build-time：Node 22、pnpm 10.34.7；旧 `NEXT_PUBLIC_BACKEND_URL` 只供旧页面使用。新客户端固定同源 `/api/v1`，无公开密钥／名单配置。开发时 Next.js 将此路径代理到 `127.0.0.1:8000`；生产不生成此代理，沿用根 `vercel.json` 的 Services rewrite。`.env.example` 是模板，复制前请确认不会覆盖现有 `.env`；配置模块本身不主动读取文件，旧 `main.py` 加载环境后挂载新模块，CI 使用 `PYTHON_DOTENV_DISABLED=1` 避免本地密钥影响测试。

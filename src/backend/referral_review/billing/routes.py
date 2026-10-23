@@ -1,5 +1,4 @@
 """Exact webhook and maintenance authentication; no blanket public path exemption."""
-import hmac
 from uuid import UUID
 
 from fastapi import APIRouter, Header, Request
@@ -41,15 +40,5 @@ def billing_router():
             raise ApiError(ErrorCode.EVENT_REJECTED)
         await run_in_threadpool(billing.receive, bytes(raw), signatures[0])
         return BillingEventResponse()
-
-    @router.post("/internal/maintenance", operation_id="run_maintenance")
-    def maintenance(request: Request):
-        billing = service(request)
-        secret = billing.settings.maintenance_token
-        supplied = request.headers.getlist("authorization")
-        if not secret or len(supplied) != 1 or not hmac.compare_digest(
-                supplied[0].encode(), ("Bearer " + secret.get_secret_value()).encode()):
-            raise ApiError(ErrorCode.FORBIDDEN)
-        return {"billing": billing.recover()}
 
     return router

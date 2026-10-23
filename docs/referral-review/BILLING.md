@@ -9,7 +9,7 @@
 - `POST /api/v1/billing/checkout`：登录、同源 Origin、CSRF、Idempotency-Key；请求只有 `return_path`，不接受 Price／金额／会员／模式。只允许账户、工作区或当前账号有权访问的资料包路径。
 - `GET /api/v1/billing/orders/{id}`：按当前账号查服务器订单，不查供应商、不修改权益、不执行核对。
 - `POST /api/v1/billing/webhook`：只对这一个 POST 路径免 Cookie CSRF；原始 body 上限 256 KB，验证 HMAC-SHA256、签名时间 ±300 秒、test mode 和允许的事件类型。签名时间是本次投递时间，旧事件重送可使用新签名；超过订单 90 天保留边界不得重新激活。
-- `POST /api/v1/internal/maintenance`：只接受 `Authorization: Bearer <RR_MAINTENANCE_TOKEN>`，普通登录无权限；当前只返回 billing 恢复结果，后续生命周期和运行维护分别由 MT-18／19 接入。不自动安排调用。
+- `POST /api/v1/internal/maintenance`：只接受 `Authorization: Bearer <RR_MAINTENANCE_TOKEN>`，普通登录无权限；MT-18 已接入费用恢复、资料生命周期与支付恢复，统一返回计数及 backlog，详见 [生命周期手册](LIFECYCLE.md)。仓库提供每日／手动 Actions workflow，线上配置与调度尚待验收。
 
 `/account` 展示会员有效期、剩余／预留额度和明确的测试购买入口；确认服务器订单后再提供 Stripe 链接。`/account/payment?order=<uuid>` 最多查询 10 次，每次间隔 3 秒，之后可手动刷新。URL 中的 `paid=true` 等标记不参与判断。页面不创建 run、不执行模型；回到原包时读取已有服务端草稿。工作区有未保存编辑时不显示支付导航，先保存再离开。
 

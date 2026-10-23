@@ -186,6 +186,13 @@ class Documents:
                 m.storage_reservations.c.document_id == upload.document_id)).mappings().one()
             if reservation["state"] != "reserved" or reservation["expires_at"] <= self.clock():
                 raise ApiError(ErrorCode.STORAGE_UNAVAILABLE)
+            # Give the bounded object write a full lease, including when reading
+            # the request body consumed most of the original upload reservation.
+            expires = self.clock() + LEASE
+            conn.execute(m.storage_reservations.update().where(m.storage_reservations.c.id == reservation["id"])
+                         .values(expires_at=expires))
+            conn.execute(m.cleanup_jobs.update().where(m.cleanup_jobs.c.entity_id == upload.document_id,
+                m.cleanup_jobs.c.kind == "object").values(next_attempt_at=expires))
         self.store.write(upload.key, body, "application/pdf" if kind == "pdf" else "text/plain; charset=utf-8")
         # A commit failure is ambiguous: abort() first checks committed state.
         self._settle(token, upload, filename, kind, body, digest)
@@ -308,7 +315,10 @@ class Documents:
                 return False
             conn.execute(m.storage_reservations.update().where(m.storage_reservations.c.id == row["id"])
                          .values(state="cleanup_pending"))
-            conn.execute(m.documents.update().where(m.documents.c.id == document_id).values(parse_status="failed"))
+            # Lifecycle may queue an immutable ready document after tombstoning.
+            # Its parse record stays frozen until physical row deletion.
+            conn.execute(m.documents.update().where(m.documents.c.id == document_id,
+                m.documents.c.parse_status != "ready").values(parse_status="failed"))
             conn.execute(m.cleanup_jobs.update().where(m.cleanup_jobs.c.id == job["id"]).values(
                 state="running", attempt_count=job["attempt_count"] + 1, next_attempt_at=self.clock() + LEASE))
         try:

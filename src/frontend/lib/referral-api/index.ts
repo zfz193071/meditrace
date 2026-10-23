@@ -38,3 +38,13 @@ export async function signOut(csrfToken: string): Promise<void> {
   // An expired/revoked session is already signed out.
   if (!response.ok && response.status !== 401) throw new Error("Sign-out could not be confirmed.");
 }
+
+export async function deleteAccount(csrfToken: string): Promise<void> {
+  const body: components["schemas"]["AccountDeleteInput"] = { confirmation: "DELETE" };
+  const response = await fetch(`${REFERRAL_API_PREFIX}/account`, {
+    method: "DELETE", credentials: "same-origin", cache: "no-store",
+    headers: { "X-CSRF-Token": csrfToken, "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
+    body: JSON.stringify(body),
+  });
+  if (response.status !== 202) throw new Error("Account deletion could not be confirmed.");
+}
