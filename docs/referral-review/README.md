@@ -1,6 +1,6 @@
 # MediTrace Referral Review Copilot — V1 开发基线
 
-日期：2026-10-21。状态：MT-01 工程基线已完成；MT-02 等待 PostgreSQL 验收；MT-03 等待操作者标注复核；MT-04 认证代码与离线测试已实施，等待前置验收和真实 OAuth；MT-05 私有存储代码已实施，等待前置验收、PostgreSQL 并发和真实 Private Blob；MT-06 解析代码与离线测试已实施，等待前置验收及 PostgreSQL 验证；MT-07 资料包后端代码与离线测试已实施，等待前置验收及 PostgreSQL 并发验证；MT-08 结构化提取与 Adapter 已实施，等待前置验收；MT-09 确定性清单已实施，等待前置验收；MT-10 费用预留与限流已实施，等待前置验收及 PostgreSQL 竞争验证；MT-11 批次执行与恢复已实施，等待前置验收及 PostgreSQL 竞争验证；MT-12 人工审核与不可变确认快照已实施，等待前置验收及 PostgreSQL 竞争验证；MT-13 摘要及 PDF／文本导出已实施并完成离线逐页 QA，等待前置及页面集成验收；MT-14 工作区、导入和执行状态 UI 已实施，等待前置及真实登录集成验收；MT-15 双栏证据审核、历史与确认导出 UI 已实施并完成离线验证，等待前置及页面集成验收；MT-16 英文首页、免登录三例及内存审核 Adapter 已实施并完成离线验证，等待前置及独立试用／集成验收；MT-20 离线评估基线、replay 和评估展示页已实施，真实评估账本／授权预算／人工标注及冻结集实测未完成；MT-23 英文 README、求职材料与约 80 秒字幕粗剪初稿已交付，等待前置验收及最终复核；MT-17 测试支付、会员与回调恢复代码已实施，等待真实 Stripe 和 PostgreSQL 并发验收；MT-18 删除、到期清理、补偿和每日维护代码已实施并完成离线验证，等待真实 Blob、PostgreSQL 与线上调度验收；MT-19 可观测性、只读就绪检查、运维 CLI 和故障手册已实施，等待前置及线上通知验收；MT-21—22、24 尚未开始，完整产品未交付。基础配置见 [CONFIGURATION](CONFIGURATION.md)，数据迁移见 [MIGRATIONS](MIGRATIONS.md)，验收结果见 [MT-01 证据](MT-01-EVIDENCE.md)／[MT-02 证据](MT-02-EVIDENCE.md)／[MT-03 证据](MT-03-EVIDENCE.md)／[MT-04 证据](MT-04-EVIDENCE.md)／[MT-05 证据](MT-05-EVIDENCE.md)／[MT-06 证据](MT-06-EVIDENCE.md)／[MT-07 证据](MT-07-EVIDENCE.md)／[MT-08 证据](MT-08-EVIDENCE.md)／[MT-09 证据](MT-09-EVIDENCE.md)／[MT-10 证据](MT-10-EVIDENCE.md)／[MT-11 证据](MT-11-EVIDENCE.md)／[MT-12 证据](MT-12-EVIDENCE.md)／[MT-13 证据](MT-13-EVIDENCE.md)／[MT-14 证据](MT-14-EVIDENCE.md)／[MT-15 证据](MT-15-EVIDENCE.md)／[MT-16 证据](MT-16-EVIDENCE.md)／[MT-20 证据](MT-20-EVIDENCE.md)／[MT-23 初稿证据](MT-23-EVIDENCE.md)。
+日期：2026-10-23。状态：MT-01 工程基线已完成；MT-02 等待 PostgreSQL 验收；MT-03 等待操作者标注复核；MT-04—19 的代码及离线验证已按各票证据推进，外部集成和前置验收仍未完成；MT-20 离线部分已实施，真实评估待独立账本、预算及人工标注；MT-21 源码已封闭旧入口并更新发布保护，安全生产基线及线上验收未完成；MT-23 初稿已交付；MT-22、24 尚未开始，完整产品未交付。基础配置见 [CONFIGURATION](CONFIGURATION.md)，数据迁移见 [MIGRATIONS](MIGRATIONS.md)，逐票实施和验收缺项见各工单及对应证据，MT-21 见 [实施证据](MT-21-EVIDENCE.md)。
 
 目标：交付一个可以公开用于 AI 应用／全栈求职的英文产品，完成“资料导入 → 缺失与差异核对 → 证据定位 → 人工处理 → 交接导出”。全部 24 张工单及发布门槛通过，才称为本版项目开发完成。
 
@@ -120,4 +120,6 @@ MT-17 已接入测试 Checkout、账户／返回页、签名回调、一次权�
 
 MT-18 已接入账号删除、全版本内容清理、孤立上传／到期处理、费用恢复、去标识化及有界每日维护；账号及资料包界面显示保留说明。参见 [证据](MT-18-EVIDENCE.md)和[生命周期手册](LIFECYCLE.md)。前置未关闭，真实 Private Blob、PostgreSQL 竞争、Actions 调度／通知及供应商备份策略未验收，保持 TODO。
 
-MT-19 已接入结构化脱敏日志、request/run/账本关联、只读 readiness、独立 Bearer 运维接口、默认只读 CLI 和维护后告警计数检查。参见 [证据](MT-19-EVIDENCE.md)与[运维手册](OPERATIONS.md)。前置 MT-11／17／18 未关闭，真实 PostgreSQL、线上故障和通知到达未验收，保持 TODO；下一实施项为 MT-21。
+MT-19 已接入结构化脱敏日志、request/run/账本关联、只读 readiness、独立 Bearer 运维接口、默认只读 CLI 和维护后告警计数检查。参见 [证据](MT-19-EVIDENCE.md)与[运维手册](OPERATIONS.md)。前置 MT-11／17／18 未关闭，真实 PostgreSQL、线上故障和通知到达未验收，保持 TODO。
+
+MT-21 已在源码中退役旧 API／页面，发布脚本改为只读新 readiness、审核过的追加迁移和安全回滚前置检查；参见 [证据](MT-21-EVIDENCE.md)。前置 MT-11／17／19 未关闭，且安全生产基线和线上验证待 MT-24，保持 TODO；下一实施项为 MT-22。

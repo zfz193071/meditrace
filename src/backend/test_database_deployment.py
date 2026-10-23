@@ -6,6 +6,7 @@ import uuid
 from pathlib import Path
 
 import pytest
+pytest.skip("Retired conversation persistence; referral migrations have separate tests", allow_module_level=True)
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url

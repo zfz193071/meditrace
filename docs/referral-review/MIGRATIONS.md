@@ -37,7 +37,7 @@
 
 冻结迁移文件：`src/backend/migrations_referral/versions/rr_0001_create_isolated_referral_domain.py`；MT-06 追加 `rr_0002_document_parse_details.py`，MT-07 追加 `rr_0003_packet_drafts.py`，MT-10 追加 `rr_0004_usage_ledger.py`，MT-12 追加 `rr_0005_review_history.py`。已应用的版本不能改写，后续变更新增 revision，并更新审查 allowlist／版本检查；不对旧迁移执行自动 downgrade。
 
-应用启动不导入该迁移文件、不建新表。原 main.py 的旧启动逻辑仍由 MT-21 退役；本次未改动旧启动逻辑或旧数据库数据。readiness 仍是基础版 503，真实数据库／清单就绪聚合属于 MT-19。
+应用启动不导入该迁移文件、不建新表。MT-21 已移除原 main.py 的旧启动建表逻辑，旧数据库数据未修改。MT-19 readiness 对数据库／迁移／清单执行只读检查，未迁移时返回 503。
 
 迁移命令在 `src/backend` 下用 `./.venv/bin/python` 执行。默认只读取版本，必须给出 `--apply --target rr_0006` 才升级到当前版本；已有 `rr_0001`／`rr_0002`／`rr_0003`／`rr_0004` 数据库可追加升级。`upgrade` 共享调用方事务；PostgreSQL 额外获取事务级 advisory lock，防止同库同时执行两个部署迁移。未知版本或没有版本记录但已有 rr_ 表时直接拒绝，不猜测／接管现有结构。
 
@@ -87,6 +87,6 @@ receipt 只含随机 schema、marker 和不含密码的数据库标识指纹，�
   --database-env DATABASE_URL --target rr_0006 --apply --confirm-production
 ```
 
-第二条命令仍只执行 allowlist 的追加版本，不会运行旧 migrations 目录中的 SQL。事务内 SQL 失败回滚；如果连接在提交确认时丢失，先重新只读检查版本，不假定服务端必然回滚。未知状态停止后人工检查，禁止自动 stamp 修饰失败。成功后应用回滚仅切回兼容代码，不能删除新表／新数据。Alembic downgrade 明确拒绝执行。现有 deploy-vercel.sh 未接入该迁移，自动发布迁移集成在 MT-21/24。
+第二条命令仍只执行 allowlist 的追加版本，不会运行旧 migrations 目录中的 SQL。事务内 SQL 失败回滚；如果连接在提交确认时丢失，先重新只读检查版本，不假定服务端必然回滚。未知状态停止后人工检查，禁止自动 stamp 修饰失败。成功后应用回滚仅切回已封闭旧公开接口的兼容代码，不能删除新表／新数据。Alembic downgrade 明确拒绝执行。MT-21 已将 `deploy-vercel.sh --migrate` 接入审核过的 `rr_` revision allowlist；真实 PostgreSQL 与发布验证仍属 MT-24 门槛。
 
 实现依据：共享显式事务采用 [Alembic connection sharing](https://alembic.sqlalchemy.org/en/latest/cookbook.html#sharing-a-connection-across-one-or-more-programmatic-migration-commands)；跨行／跨表约束使用外键和唯一键，而不是依赖跨表 CHECK，符合 [PostgreSQL constraints 文档](https://www.postgresql.org/docs/current/ddl-constraints.html)。这些依据不替代本项目尚待执行的 PostgreSQL 集成测试。

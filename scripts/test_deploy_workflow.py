@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import urllib.error
+import sys
+import types
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "deploy-vercel.sh"
@@ -20,6 +22,7 @@ class DeploymentTests(unittest.TestCase):
         self.module = {"__name__": "deploy_workflow_test"}
         exec(compile(SOURCE, str(SCRIPT), "exec"), self.module)
         self.module["STATE_DIR"] = Path(self.temp.name)
+        self.module["ROOT"] = SCRIPT.parent
         self.module["note"] = lambda message: None
         self.active = "old-release"
         self.calls = []
@@ -63,7 +66,8 @@ class DeploymentTests(unittest.TestCase):
 
     def test_staged_application_failure_never_promotes(self):
         def fail(*args, **kwargs):
-            raise self.module["DeployError"]("HTTP 500")
+            if kwargs.get("staged"):
+                raise self.module["DeployError"]("HTTP 500")
         self.module["verify"] = fail
         with self.assertRaises(self.module["DeployError"]):
             self.module["deploy"]({}, False)
@@ -78,7 +82,7 @@ class DeploymentTests(unittest.TestCase):
                 raise self.module["Unreachable"]("DNS unavailable")
         self.module["verify"] = verify
         self.module["deploy"]({}, False)
-        self.assertEqual(origins, ["https://staged.example", self.module["ORIGIN"]])
+        self.assertEqual(origins, [self.module["ORIGIN"], "https://staged.example", self.module["ORIGIN"]])
         self.assertEqual(self.state()["status"], "verified")
 
     def test_production_failure_rolls_back_and_still_fails(self):
@@ -106,7 +110,7 @@ class DeploymentTests(unittest.TestCase):
 
     def test_does_not_roll_back_another_operators_deployment(self):
         def verify(origin, *args, **kwargs):
-            if not kwargs.get("staged"):
+            if self.active == "new-release" and not kwargs.get("staged"):
                 self.active = "someone-elses-release"
                 raise self.module["DeployError"]("Concurrent deployment")
         self.module["verify"] = verify
@@ -117,7 +121,8 @@ class DeploymentTests(unittest.TestCase):
 
     def test_does_not_promote_over_a_concurrent_release_during_build(self):
         def verify(*args, **kwargs):
-            self.active = "someone-elses-release"
+            if kwargs.get("staged"):
+                self.active = "someone-elses-release"
         self.module["verify"] = verify
         with self.assertRaises(self.module["DeployError"]):
             self.module["deploy"]({}, False)
@@ -134,24 +139,77 @@ class DeploymentTests(unittest.TestCase):
         def response(request, **kwargs):
             self.assertEqual(request.get_method(), "GET")
             paths.append(request.full_url)
-            if request.full_url.endswith("/health"):
-                return Response(b'{"status":"healthy"}')
-            if "/api/conversations?patientId=deploy-check-" in request.full_url:
-                return Response(b'{"conversations":[],"total":0}')
+            if request.full_url.endswith("/api/v1/readiness"):
+                return Response(b'{"status":"ready","checks":{"database":"ready","migrations":"ready","checklist":"ready"}}')
+            if "/api/" in request.full_url:
+                return Response(b'{"error":"LEGACY_API_RETIRED"}')
             return Response(b"<!DOCTYPE html><html></html>")
         with patch("urllib.request.urlopen", side_effect=response):
+            namespace["fetch"] = lambda origin, path, *args: (410, '{"error":"LEGACY_API_RETIRED"}') if (path.startswith("/api/") and path != "/api/v1/readiness") or path == "/health" else (200, response(urllib.request.Request(origin + path)).read().decode())
             namespace["verify"]("https://example.test")
-        self.assertEqual(len(paths), 3)
-        self.assertFalse(any("messages" in path or "diagnose" in path for path in paths))
+        self.assertEqual(len(paths), 2)
+        self.assertFalse(any("messages" in path or "execute" in path for path in paths))
 
     def test_http_500_is_not_treated_as_network_failure(self):
         namespace = {"__name__": "verify_test"}
         exec(compile(SOURCE, str(SCRIPT), "exec"), namespace)
-        error = urllib.error.HTTPError("https://example.test", 500, "Failed", {}, None)
+        error = urllib.error.HTTPError("https://example.test", 500, "Failed", {}, io.BytesIO(b"failed"))
         with patch("urllib.request.urlopen", side_effect=error):
             with self.assertRaises(namespace["DeployError"]) as raised:
                 namespace["verify"]("https://example.test", staged=True)
         self.assertNotIsInstance(raised.exception, namespace["Unreachable"])
+
+    def test_unsafe_previous_release_blocks_before_build(self):
+        self.module["verify"] = lambda *args, **kwargs: (_ for _ in ()).throw(self.module["DeployError"]("old API open"))
+        with self.assertRaisesRegex(self.module["DeployError"], "safe compatible rollback"):
+            self.module["deploy"]({}, False)
+        self.assertEqual(self.calls, [])
+
+    def test_rollback_failure_never_reports_success(self):
+        def verify(origin, *args, **kwargs):
+            if self.active == "new-release":
+                raise self.module["DeployError"]("new release unavailable")
+        self.module["verify"] = verify
+        original = self.command
+        def command(*args, **kwargs):
+            if args[0] == "rollback":
+                raise self.module["DeployError"]("rollback failed")
+            return original(*args, **kwargs)
+        self.module["vc"] = command
+        with self.assertRaisesRegex(self.module["DeployError"], "rollback failed"):
+            self.module["deploy"]({}, False)
+        self.assertEqual(self.state()["status"], "rolling-back")
+
+    def test_migration_uses_only_reviewed_referral_runner(self):
+        backend = SCRIPT.parent / "src/backend"
+        sys.path.insert(0, str(backend))
+        self.addCleanup(lambda: sys.path.remove(str(backend)))
+        calls = []
+        database = types.ModuleType("referral_review.persistence.database")
+        database.create_engine = lambda url: Engine()
+        migrations = types.ModuleType("referral_review.persistence.migrations")
+        migrations.HEAD = "rr_0006"
+        migrations.REVIEWED_REVISIONS = frozenset({"rr_0006"})
+        migrations.upgrade = lambda conn, target: calls.append(target)
+        migrations.current_revision = lambda conn: migrations.HEAD
+        dotenv = types.ModuleType("dotenv")
+        dotenv.dotenv_values = lambda path: {}
+        class Engine:
+            def begin(self):
+                class Transaction:
+                    def __enter__(self):
+                        return object()
+                    def __exit__(self, *args):
+                        pass
+                return Transaction()
+            def dispose(self):
+                calls.append("disposed")
+        with patch.object(sys, "executable", str(backend / "venv/bin/python")), \
+             patch.dict("os.environ", {"DATABASE_URL": "postgresql://user:pass@localhost/rr_test"}), \
+             patch.dict(sys.modules, {"dotenv": dotenv, "referral_review.persistence.database": database,
+                                      "referral_review.persistence.migrations": migrations}):
+            self.module["migrate"]()
+        self.assertEqual(calls, [migrations.HEAD, "disposed"])
 
 
 if __name__ == "__main__":

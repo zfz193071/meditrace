@@ -12,7 +12,7 @@ MT-02 已添加领域持久化与显式追加迁移，但尚待 PostgreSQL 实�
 
 MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-Member` 不被信任；未知 `RR_*` 配置（含 fake identity / dev grant）直接拒绝。配置错误不回显输入；MT-14 起，真实配置通过校验且认证接线存在时，capabilities 可报告真实执行可用；这不是个人授权，创建和执行仍检查邀请、会员、额度、预算及限流。
 
-这些限制只覆盖新的 `/api/v1` 模块。旧 `/api/diagnose`、聊天等功能尚未退役，旧模块并不使用新的预算开关；因此不能把 MT-01 视为旧站的费用／安全改造。旧入口封闭是 MT-21 的发布前置条件。
+这些限制只覆盖新的 `/api/v1` 模块。MT-21 源码已将旧 `/api/*` 入口统一退役为 410；线上部署和验收尚未完成，当前生产站点不能据此视为已封闭。
 
 ## 环境变量表
 
@@ -38,7 +38,7 @@ MT-01 不注册任何 execute、grant 或开发登录接口。`X-User-ID`、`X-M
 | `RR_STRIPE_AMOUNT_MINOR` | 0；非负整数；真正启用 Checkout 前必须核对固定商品金额 | MT-17 |
 | `RR_STRIPE_CURRENCY` | usd；3 位小写字母 | MT-17 |
 | `REAL_AI_ENABLED` | false；不能单独授权调用 | MT-10/11 |
-| `DEEPSEEK_API_KEY` | 未设置，秘密；旧聊天也读取此变量，不能用新开关控制旧聊天 | MT-08/21 |
+| `DEEPSEEK_API_KEY` | 未设置，秘密；仅新受控提取读取，旧聊天入口在 MT-21 源码中已退役 | MT-08/21 |
 | `RR_MODEL_ID` | 未设置；明确模型标识，不能使用客户端指定值 | MT-08 |
 | `RR_MODEL_PRICE_VERSION` | 未设置；有日期的人工核实价格版本 | MT-10 |
 | `RR_MODEL_INPUT_MICROUSD_PER_MILLION_TOKENS` | 0；每百万输入 token 的整数 micro-USD，启用真实调用须 > 0 | MT-10 |
@@ -52,7 +52,7 @@ MT-18 的每日维护 workflow 另需仓库 secret `RR_MAINTENANCE_SITE_ORIGIN`�
 
 `VERCEL=1` 或 `VERCEL_ENV=preview/production` 是平台注入的 runtime 信号，不是应用身份凭据。`Settings.require_real_ai_configuration()` 仅检查配置完整性，不替代账号鉴权、会员、余额或事务预留。1 USD = 1,000,000 micro-USD；这里不提供会自动启用消费的价格／预算示例。
 
-前端 build-time：Node 22、pnpm 10.34.7；旧 `NEXT_PUBLIC_BACKEND_URL` 只供旧页面使用。新客户端固定同源 `/api/v1`，无公开密钥／名单配置。开发时 Next.js 将此路径代理到 `127.0.0.1:8000`；生产不生成此代理，沿用根 `vercel.json` 的 Services rewrite。`.env.example` 是模板，复制前请确认不会覆盖现有 `.env`；配置模块本身不主动读取文件，旧 `main.py` 加载环境后挂载新模块，CI 使用 `PYTHON_DOTENV_DISABLED=1` 避免本地密钥影响测试。
+前端 build-time：Node 22、pnpm 10.34.7；`NEXT_PUBLIC_BACKEND_URL` 只供保留的历史客户端代码使用，公开页面不调用它。新客户端固定同源 `/api/v1`，无公开密钥／名单配置。开发时 Next.js 将此路径代理到 `127.0.0.1:8000`；生产不生成此代理，沿用根 `vercel.json` 的 Services rewrite。`.env.example` 是模板，复制前请确认不会覆盖现有 `.env`；配置模块本身不主动读取文件，`main.py` 在本地加载 `.env` 后仅挂载新模块并封闭旧路由，CI 使用 `PYTHON_DOTENV_DISABLED=1` 避免本地密钥影响测试。
 
 认证的启用条件、Cookie、归属 Interface 和手动 GitHub 验收步骤见 [认证手册](AUTHENTICATION.md)。身份配置不会自动迁移数据库、授予会员或放开真实 AI。
 

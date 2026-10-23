@@ -110,9 +110,9 @@ docs/referral-review/        # this specification and implementation tickets
 
 ## 部署迁移
 
-新增 `/api/v1/*` 不复用 `/api/diagnose` 或旧会话表。发布时关闭旧读写／流式／上传／链上接口，返回统一 410，不再实例化旧 Web3/IPFS 客户端。旧数据保留，旧页面转到带说明的新入口。
+新增 `/api/v1/*` 不复用 `/api/diagnose` 或旧会话表。MT-21 源码已将旧读写／流式／报告／验证／链上接口统一返回 410，不再导入或实例化旧 Web3/IPFS 客户端；旧数据保留，旧页面转到带说明的新入口。线上生效仍待 MT-24 发布验证。
 
-发布脚本现有 `/api/conversations` 探测替换成 GET `/api/v1/readiness`，检查数据库连通、迁移版本和清单就绪，不返回资料、不调用模型。迁移只执行已审核的 referral migration ID 集合，不能自动跑旧 DROP TABLE SQL。迁移后回滚应用不会自动撤销表；回滚只能选用已关闭旧公开资料接口的安全版本，不能恢复旧暴露面。
+发布脚本已将 `/api/conversations` 探测替换成 GET `/api/v1/readiness` 和旧路径 410 探测，检查数据库连通、迁移版本和清单就绪，不返回资料、不调用模型。迁移只执行已审核的 referral migration ID 集合，不能自动跑旧 DROP TABLE SQL。迁移后回滚应用不会自动撤销表；脚本要求先有已关闭旧公开资料接口的安全生产基线，不能恢复旧暴露面。首次切换及线上验收待 MT-24。
 
 ## 核实的外部依据
 

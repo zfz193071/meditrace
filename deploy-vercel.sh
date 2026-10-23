@@ -21,7 +21,6 @@ import sys
 import time
 import urllib.error
 import urllib.request
-import uuid
 from datetime import datetime, timezone
 
 ROOT = Path.cwd()
@@ -87,13 +86,14 @@ def active_deployment():
 def check_inputs():
     stdout, _ = vc("deploy", "--dry", "--json")
     files = {item["path"] for item in json.loads(stdout)["files"]}
-    required = {"src/backend/main.py", "src/backend/database.py", "src/backend/requirements.txt",
-                "src/backend/abi/DiagnosisRecord.json", "src/backend/fonts/SourceHanSansCN-Regular.ttf",
+    required = {"src/backend/main.py", "src/backend/referral_review/app.py", "src/backend/requirements.txt",
+                "src/backend/migrations_referral/versions/rr_0001_create_isolated_referral_domain.py",
+                "src/backend/fonts/SourceHanSansCN-Regular.ttf",
                 "src/frontend/package.json", "vercel.json"}
     if not required.issubset(files):
         raise DeployError("Missing deployment files: " + ", ".join(sorted(required - files)))
     if any(("venv" in Path(path).parts or "node_modules" in Path(path).parts or
-            (Path(path).name.startswith(".env") and path != "src/frontend/.env.production") or
+            Path(path).name.startswith(".env") or
             Path(path).suffix in (".db", ".sqlite", ".sqlite3")) for path in files):
         raise DeployError("Deployment inputs contain local dependencies, database files or environment files.")
     note(f"Deployment inputs verified ({len(files)} files).")
@@ -134,39 +134,49 @@ def preflight():
     return project
 
 
+def fetch(origin, path, headers=None, staged=False):
+    request = urllib.request.Request(origin + path, headers=headers or {}, method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            return response.status, response.read(2_000_000).decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        if staged and exc.code in (401, 403):
+            raise Unreachable("Staged deployment requires protection access.") from None
+        return exc.code, exc.read(2_000_000).decode("utf-8")
+    except (urllib.error.URLError, TimeoutError, OSError):
+        raise Unreachable(f"Cannot connect to {origin}.") from None
+
+
 def verify(origin, headers=None, attempts=1, staged=False):
-    # Read-only requests: never invoke AI, upload reports or submit transactions.
-    patient = "deploy-check-" + uuid.uuid4().hex[:24]
-    paths = ["/", "/health", "/api/conversations?patientId=" + patient]
+    # GET only: no packet creation, AI, payment or chain calls.
+    paths = ["/", "/api/v1/readiness"]
     for attempt in range(attempts):
         try:
             for path in paths:
-                request = urllib.request.Request(origin + path, headers=headers or {})
-                try:
-                    with urllib.request.urlopen(request, timeout=20) as response:
-                        body = response.read(2_000_000).decode("utf-8")
-                        status = response.status
-                except urllib.error.HTTPError as exc:
-                    if staged and exc.code in (401, 403):
-                        raise Unreachable("Staged deployment requires protection access.") from None
-                    raise DeployError(f"{path.split('?')[0]} returned HTTP {exc.code}.") from None
-                except (urllib.error.URLError, TimeoutError, OSError):
-                    raise Unreachable(f"Cannot connect to {origin}.") from None
+                status, body = fetch(origin, path, headers, staged)
                 if status != 200:
-                    raise DeployError(f"{path.split('?')[0]} returned HTTP {status}.")
+                    raise DeployError(f"{path} returned HTTP {status}.")
                 if path == "/":
                     valid = "<!doctype html>" in body.lower()
                 else:
                     try:
                         data = json.loads(body)
-                        valid = (data.get("status") == "healthy") if path == "/health" else (
-                            isinstance(data.get("conversations"), list) and isinstance(data.get("total"), int)
-                        )
+                        valid = data.get("status") == "ready" and all(
+                            value == "ready" for value in data.get("checks", {}).values())
                     except (ValueError, AttributeError):
                         valid = False
                 if not valid:
-                    raise DeployError(f"{path.split('?')[0]} returned an unexpected response.")
-            note(f"Verified {origin}: frontend HTML, backend health and PostgreSQL conversation list.")
+                    raise DeployError(f"{path} returned an unexpected response.")
+            for path in ("/health", "/api/diagnose", "/api/history/retirement-check", "/api/verify/retirement-check",
+                         "/api/report/retirement-check", "/api/conversations", "/api/generate-title"):
+                status, body = fetch(origin, path, headers, staged)
+                try:
+                    retired = json.loads(body).get("error") == "LEGACY_API_RETIRED"
+                except (ValueError, AttributeError):
+                    retired = False
+                if status != 410 or not retired:
+                    raise DeployError(f"{path} is not safely retired (HTTP {status}).")
+            note(f"Verified {origin}: frontend HTML, referral readiness and retired legacy GET routes.")
             return
         except DeployError:
             if attempt + 1 == attempts:
@@ -176,11 +186,13 @@ def verify(origin, headers=None, attempts=1, staged=False):
 
 
 def migrate():
-    # Only the reviewed additive migration is allowed; 001_conversations.sql drops tables.
+    # Only reviewed additive rr_* revisions; never execute legacy SQL.
     if not Path(sys.executable).is_relative_to(ROOT / "src/backend/venv"):
         raise DeployError("--migrate requires src/backend/venv and its installed dependencies.")
     from dotenv import dotenv_values
-    from sqlalchemy import create_engine, text
+    sys.path.insert(0, str(ROOT / "src/backend"))
+    from referral_review.persistence.database import create_engine
+    from referral_review.persistence.migrations import HEAD, REVIEWED_REVISIONS, current_revision, upgrade
     settings = dotenv_values(ROOT / "src/backend/.env")
     url = os.environ.get("DATABASE_URL") or settings.get("DATABASE_URL")
     if not url or not url.startswith(("postgresql://", "postgres://")):
@@ -189,23 +201,22 @@ def migrate():
     SECRETS.append(url)
     from urllib.parse import urlsplit
     location = urlsplit(url)
-    note(f"Applying the known additive migration to {location.hostname}{location.path}.")
-    engine = create_engine(url.replace("postgres://", "postgresql://", 1), connect_args={"connect_timeout": 10})
+    if HEAD not in REVIEWED_REVISIONS:
+        raise DeployError("Referral migration head is not reviewed.")
+    note(f"Applying reviewed referral migrations through {HEAD} to {location.hostname}{location.path}.")
+    engine = create_engine(url.replace("postgres://", "postgresql://", 1))
     try:
         with engine.begin() as connection:
-            tables = {row[0] for row in connection.execute(text(
-                "SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()"
-            ))}
-            if not {"conversations", "messages"}.issubset(tables):
-                raise DeployError("Expected legacy tables are missing; refusing to infer a different migration.")
-            connection.exec_driver_sql((ROOT / "src/backend/migrations/002_vercel_schema_compatibility.sql").read_text())
+            upgrade(connection, HEAD)
+            if current_revision(connection) != HEAD:
+                raise DeployError("Referral migration head was not reached.")
     except DeployError:
         raise
     except Exception as exc:
         raise DeployError(f"Database migration failed ({type(exc).__name__}); transaction rolled back.") from None
     finally:
         engine.dispose()
-    note("Known additive schema migration completed.")
+    note(f"Reviewed additive referral migration {HEAD} completed.")
 
 
 def save_state(state):
@@ -219,6 +230,14 @@ def deploy(project, with_migration):
     previous = active_deployment()
     if previous.get("projectId") != PROJECT or not previous.get("id"):
         raise DeployError("Cannot identify the current production deployment for rollback.")
+    # The first cutover needs a separately established compatible baseline.
+    # An unsafe previous deployment must never become an automatic rollback target.
+    try:
+        verify(ORIGIN)
+    except (DeployError, Unreachable):
+        raise DeployError("Current production is not a verified retired-API baseline; establish a safe compatible rollback deployment before using this workflow.") from None
+    if active_deployment().get("id") != previous["id"]:
+        raise DeployError("Production changed while checking the safe rollback baseline.")
     state = {"started_at": datetime.now(timezone.utc).isoformat(), "previous_id": previous["id"],
              "origin": ORIGIN, "status": "building"}
     save_state(state)

@@ -32,9 +32,7 @@ coverage/
 # ---------- 环境变量文件 ----------
 # 含密钥，绝对不要上传（src/backend/.env 内有 DEEPSEEK_API_KEY / SEPOLIA_PRIVATE_KEY / PINATA 密钥）
 .env*
-!src/frontend/.env.production
-# 注意：前端 .env.production 只含公开配置（后端源地址 / 合约地址 / Sepolia RPC），
-# 且已被 git 跟踪，因此不排除；Vercel 控制台的同名环境变量优先级更高。
+# 新前端使用同源 /api/v1，无需上传前端 .env 文件。
 
 # ---------- 版本控制与平台内部目录 ----------
 .git/

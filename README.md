@@ -91,7 +91,7 @@ Choose a new evaluation output directory for each run. The evaluation CLI curren
 
 ## Delivery limits and contribution provenance
 
-OAuth/Private Blob/Stripe and PostgreSQL acceptance, operator annotation review, authorized real evaluation, complete integration and final deployment remain outstanding. Legacy diagnosis/chat/blockchain code is historical and has not yet been retired; new budget controls must not be assumed to protect those older endpoints.
+OAuth/Private Blob/Stripe and PostgreSQL acceptance, operator annotation review, authorized real evaluation, complete integration and final deployment remain outstanding. The current source retires legacy diagnosis, chat and blockchain HTTP endpoints with 410 responses; this has only been verified offline and has not been deployed. Historical tables and implementation files remain in the repository.
 
 Development has used an AI coding assistant for implementation, tests and documentation under project instructions. Automated checks and reviewed artifacts are linked; they do not prove that the project owner personally wrote or independently reviewed every line. The [interview and authorship guide](docs/portfolio/INTERVIEW.md) separates repository evidence from personal claims that require confirmation.
 

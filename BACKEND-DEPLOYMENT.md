@@ -1,111 +1,32 @@
-# MediTrace 前后端一键部署
+# MediTrace V1 发布与回退
 
-更新日期：2026-09-22。
+状态：MT-21 源码已实施；尚未发布或完成 MT-24 线上验收。当前生产站点可能仍运行旧应用，不能当成安全回退版本。
 
-## 当前架构
+## 架构与配置
 
-- Vercel 项目：`meditrace`，使用 Hobby 免费套餐。
-- 仓库根目录的 `vercel.json` 定义两个 Services：Next.js 前端和 FastAPI 后端。
-- `/health`、`/api/*` 转发到后端，其余路径交给前端。
-- 生产数据库使用 Neon PostgreSQL；Vercel 上必须配置 `DATABASE_URL`，不能依赖本地 SQLite。
-- 生产域名：`https://meditrace.baozaolaoba.top`。
+根目录 `vercel.json` 将 `/api/*` 转发到 FastAPI，将其他页面转发到 Next.js。新业务 API 位于 `/api/v1`；旧诊断、聊天、报告、验证及链上入口在当前源码中统一返回 410。旧数据表保留，不在启动时迁移或删除。生产使用 PostgreSQL，须配置 `DATABASE_URL`；新功能的其余变量见 [配置表](docs/referral-review/CONFIGURATION.md)。新应用不依赖钱包、RPC、Pinata 或 IPFS 凭据。旧配置可以留在 Vercel 待另行清理，但新入口不读取它们。
 
-## 环境变量
+## 部署脚本
 
-密钥仅放在 Vercel 项目的 Production 环境变量中，勿写进文档或提交到仓库。
+`./deploy-vercel.sh --check` 只检查 Vercel 项目、套餐、数据库环境变量及上传文件。`--verify` 只发 GET：首页、`/api/v1/readiness` 及旧 API 退役探测；readiness 必须返回 200，数据库、迁移和清单检查均为 `ready`。探测旧路由时要求 410 和 `LEGACY_API_RETIRED`，不读取旧业务记录。脚本不会建包、执行 AI、支付或链上调用。
 
-| 变量 | 用途 |
-| --- | --- |
-| `DATABASE_URL` | 必需，Neon 的 PostgreSQL 连接字符串，启用 SSL；可使用 pooled 地址 |
-| `NEXT_PUBLIC_BACKEND_URL` | 前端构建配置，当前为 `https://meditrace.baozaolaoba.top`，不要添加 `/api` 后缀 |
-| `CORS_ORIGINS` | 允许访问后端的前端源地址，多个值用逗号分隔 |
-| `USE_SEPOLIA` | 当前为 `true`，使用 Sepolia 测试网 |
-| `SEPOLIA_RPC_URL` | Sepolia RPC 地址 |
-| `CONTRACT_ADDRESS_SEPOLIA` | 已部署的合约地址 |
-| `PINATA_API_KEY`、`PINATA_SECRET_API_KEY`、`PINATA_JWT_TOKEN` | IPFS 报告存储配置 |
-| `SEPOLIA_PRIVATE_KEY` | 仅后端签名写链时需要；未配置时不能完成后端签名上链 |
-| `DEEPSEEK_API_KEY` | 可选；当前生产环境未配置，诊断和对话使用代码中的演示回复 |
+`./deploy-vercel.sh` 构建两个 Services、先验证暂存部署，再 promote 并复验生产。发布前必须确认当前生产版本已经通过同一组新 readiness 与旧 API 退役探测，才允许将它记录为自动回退候选。现有旧生产版本未达到该条件时，脚本会在构建前停止；首次切换需要先独立建立并记录一个已关闭旧公开接口、与 `rr_` 迁移兼容的安全基线。MT-24 执行并记录该步骤，不能将旧公开读接口版本当作候选。这个保护也意味着当前阶段运行普通部署命令会明确失败。
 
-真实 AI 推理在 FastAPI 中执行。需要真实回复时才配置 `DEEPSEEK_API_KEY`，这会产生独立于 Vercel 的 API 费用。Vercel 和 Neon 免费套餐均有用量限制。
+验证失败时只在当前生产仍指向本次发布 ID 的情况下回退。回退后再次只读验证；若回退命令或验证失败，脚本非零退出，`.vercel/last-deploy.json` 保留失败状态，不报告成功。人工回退也必须先核对目标版本已封闭旧接口，不能盲目执行旧文档中的任意 `vercel rollback` 命令。
 
-## 部署
+## 迁移
 
-在本项目中对助手说“部署”，会自动执行仓库根目录的可执行文件，同时发布前端和后端：
+`./deploy-vercel.sh --migrate` 是显式选择，要求后端 venv 和 PostgreSQL `DATABASE_URL`。它仅调用 `referral_review.persistence.migrations.upgrade` 至审核 allowlist 中的 `rr_0006`，使用一个事务，不执行旧 `migrations/001_conversations.sql` 或 `002_vercel_schema_compatibility.sql`。正常部署不做数据库 DDL。生产迁移前仍须完成 [迁移手册](docs/referral-review/MIGRATIONS.md) 的 PostgreSQL、备份和授权条件；当前条件尚未满足。
+
+若网络在提交时断开，只读检查 schema 版本后再决定下一步；不推断失败或自动降级。应用回退不删除 `rr_` 表，也不恢复旧 API。
+
+## 离线检查
 
 ```bash
-./deploy-vercel.sh
+python3 scripts/test_deploy_workflow.py
+PYTHON_DOTENV_DISABLED=1 src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review/test_retired_api.py
+pnpm --dir src/frontend typecheck
+pnpm --dir src/frontend build
 ```
 
-原 `./VERCEL-DEPLOYMENT-SCRIPT.sh` 也会转到同一个入口。脚本从自身位置定位仓库，可从任意目录调用。
-
-流程：检查项目绑定、登录状态、Hobby 套餐、Production 数据库变量和上传文件；使用 `--prod --skip-domain` 构建两个服务；验证新部署后 promote 到现有域名；检查生产首页 HTML、`/health` 及带随机患者标记的会话列表 JSON。
-
-临时 `vercel.app` 地址发生网络故障或访问保护拦截时，脚本会明确提示并改为切换后验证自定义域名。若新部署可访问但返回 HTTP 500 或错误响应，则停止，不切换生产。
-
-切换后验证失败会尝试回退到运行前记录的版本，脚本仍以非零退出；如果检测到其他人已发布另一个版本，则不覆盖对方的发布。回退失败时停止并保留状态，供人工排查。
-
-脚本复用 Vercel 已配置的环境变量，不自动覆盖密钥、不升级套餐、不提交或推送 Git，也不启动/停止本地服务。发布的是当前工作目录内容，包含未提交但未被忽略的修改。
-
-### 只检查或验证
-
-```bash
-./deploy-vercel.sh --check   # 检查账号、项目及实际上传文件，不发布、不迁移
-./deploy-vercel.sh --verify  # 只读验证当前线上前端、后端及数据库
-./deploy-vercel.sh --help
-```
-
-首次在新机器使用时，需要安装 Vercel CLI 并完成 `vercel login`，然后执行
-`vercel link --project meditrace --scope lucyzhus-projects --yes`。
-脚本使用后端 venv 中的 Python（若存在），否则普通部署可使用 Python 3.9+。
-
-项目 Root Directory 应为仓库根目录，Framework Preset 为 Services。不要只上传 `src/frontend`。
-后端依赖由 `src/backend/requirements.txt` 提供，合约 ABI 位于 `src/backend/abi/DiagnosisRecord.json`，PDF 字体位于 `src/backend/fonts/`。
-
-`.vercelignore` 排除密钥文件、虚拟环境、数据库文件、测试与内部文档，保留 README 和应用源码。
-
-如果 Neon 最初创建的 `conversations` 只有 `id/title/created_at/updated_at`，需要先运行
-`src/backend/migrations/002_vercel_schema_compatibility.sql`。它追加当前 API 需要的字段，
-保留原表、UUID 主键、外键和旧时间字段；可重复执行。不要运行会 DROP TABLE 的旧开发迁移。
-
-当前生产数据库已经完成该迁移，普通部署不再执行迁移。确实需要重复兼容迁移时：
-
-```bash
-./deploy-vercel.sh --migrate
-```
-
-该选项先执行唯一指定的 `002_vercel_schema_compatibility.sql`，然后部署。数据库地址取当前进程 `DATABASE_URL`，其次取 `src/backend/.env`；运行前应确认它指向待迁移数据库。迁移需要后端 venv 和 requirements.txt 中的依赖。它不读取或覆盖 Vercel 的敏感变量，也不自动扫描执行其他 SQL 文件。应用回退不会撤销已完成的追加字段迁移。
-
-### 日志与恢复
-
-- 本次日志：`.vercel/deploy-YYYYMMDD-HHMMSS.log`。
-- 最近发布状态、前后版本 ID：`.vercel/last-deploy.json`，`status: verified` 才表示发布且验证通过。
-- 同一检出中的部署/检查使用进程锁，避免两个脚本同时操作。
-- 如需人工回退：`vercel rollback <last-deploy.json 中的 previous_id> --yes --scope lucyzhus-projects`，随后运行 `./deploy-vercel.sh --verify`。
-- 登录失效、套餐不符或配置缺失时脚本会停止并说明原因；不会无限重试部署。
-
-## 验证
-
-```bash
-curl --fail https://meditrace.baozaolaoba.top/health
-curl --fail 'https://meditrace.baozaolaoba.top/api/conversations?patientId=deployment-check'
-```
-
-健康检查应返回 `{"status":"healthy","version":"0.1.0"}`；会话列表应返回 JSON。
-
-数据库回归测试不发起 AI 请求，也不需要启动本地服务：
-
-```bash
-DATABASE_URL=sqlite:///:memory: src/backend/venv/bin/python -m pytest src/backend/test_database_deployment.py -q
-```
-
-设置 `TEST_DATABASE_URL` 可同时验证真实 PostgreSQL。测试在随机独立 schema 中运行，结束后只删除该测试 schema；Neon 测试连接使用 unpooled 地址来设置 `search_path`，应用仍使用 pooled 地址。
-测试包含新建表和旧 Neon 表迁移后两种 PostgreSQL 场景。
-
-请手动在浏览器发送消息测试对话；禁止自动在浏览器触发 AI 回复。
-部署脚本的验证仅发出 GET 请求，不创建业务记录，不调用 DeepSeek、IPFS 上传或区块链写入。
-
-部署和回退流程的离线测试：`python3 scripts/test_deploy_workflow.py`。它模拟 Vercel 和 HTTP 响应，不产生真实发布。
-
-## 故障记录
-
-见 `BUGFIX-VERCEL-BACKEND-DEPLOYMENT.md`。查看日志时不要输出连接串或密钥。
+本地服务由操作者手动启停。在线 `--verify` 会联网访问生产，但只执行 GET；尚未完成 MT-24 时不能据此声称 V1 已发布。部署状态与脱敏日志位于 `.vercel/`。禁止在日志或工单粘贴数据库连接串、密钥或原始资料。

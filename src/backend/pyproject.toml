@@ -17,9 +17,6 @@ dependencies = [
   "requests>=2.32,<3",
   "cryptography>=50.0.2,<52",
   "fpdf2>=2.8.8,<3",
-  # Legacy routes remain until MT-21. No new chain or IPFS functionality.
-  "web3>=8,<9",
-  "ipfshttpclient==0.8.0a2",
   "vercel-blob>=0.5.0,<0.6",
   "pypdf==6.21.1",
 ]

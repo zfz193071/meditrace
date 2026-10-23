@@ -4,6 +4,7 @@
 """
 
 import pytest
+pytest.skip("Retired chat API; covered by referral_review/test_retired_api.py", allow_module_level=True)
 import sys
 import os
 import json
