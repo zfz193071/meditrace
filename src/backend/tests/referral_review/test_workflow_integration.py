@@ -51,7 +51,7 @@ def postgres_running_review(pg, auth_client, tmp_path):
             sources=[dict(document_id=document_id, page_number=1, quote="Patient: Synthetic Example")])]})
         service = Runs(identity, adapter_factory=lambda row, source: adapter)
         client.app.state.runs = service
-        yield dict(workspace=postgres_workspace, client=client, identity=identity, clock=clock,
+        yield dict(workspace=postgres_workspace, client=client, identity=identity, clock=clock, headers=headers,
             pid=packet["id"], did=document_id, revision=revision_id, owner=owner,
             adapter=adapter, service=service)
 
