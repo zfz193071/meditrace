@@ -21,3 +21,9 @@
 - `pip-audit -r src/backend/requirements.txt --no-deps --disable-pip`：**No known vulnerabilities found**。
 - `scripts/check_backend_lock.py`：通过；锁文件仅升级 pypdf，requirements 由 uv 生成且一致。
 - 冻结语料目录和历史评估报告无改动；`git diff --check` 通过。远程完整回归结果在最终 CI 记录中补充。
+
+## 全链路兼容回归
+
+完整 CI 发现提取契约仍只接受旧解析版本，导致新解析页在进入 Fake 提取前被拒绝，表现为评估中断分母与伪造引用故障测试失败。本地 `test_evaluation.py -k fault_injection_false_quote` 复现同一 `Invalid source page` 错误。补充新旧两版解析来源的参数化提取测试，先确认新版失败、旧版通过，再将 6.21.2 加入显式兼容白名单。保留旧版以继续使用已有不可变文档，并不重新加载旧库解析上传文件；未知版本仍拒绝。
+
+修复后 `test_extraction.py` 与 `test_evaluation.py` 共 **53 passed，61.72 秒**，包括原先失败的中断分母、Fake replay 和伪造引用拒绝路径；未调用真实模型。

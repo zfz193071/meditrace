@@ -23,7 +23,8 @@ class ExtractionRevision(Contract):
         if sum(len(p.normalized_text) for p in self.pages) > 30_000:
             raise ValueError("Revision text limit exceeded")
         for p in self.pages:
-            if (p.parse_quality not in ("ready", "empty") or p.parser_version not in ("text-v1", "pypdf-6.21.1/text-v1")
+            if (p.parse_quality not in ("ready", "empty") or p.parser_version not in (
+                    "text-v1", "pypdf-6.21.1/text-v1", "pypdf-6.21.2/text-v1")
                 or normalize_text(p.normalized_text) != p.normalized_text
                 or text_hash(p.normalized_text) != p.text_hash):
                 raise ValueError("Invalid source page")

@@ -23,8 +23,9 @@ def source(text="Patient: Alex Example", parser="text-v1"):
     return revision, {"facts": [fact]}
 
 
-async def test_fake_preserves_evidence_and_absent_fields():
-    revision, output = source("Patient: Alex Example 🧪", "pypdf-6.21.1/text-v1")
+@pytest.mark.parametrize("parser_version", ["pypdf-6.21.1/text-v1", "pypdf-6.21.2/text-v1"])
+async def test_fake_preserves_evidence_and_absent_fields(parser_version):
+    revision, output = source("Patient: Alex Example 🧪", parser_version)
     result = await extract(revision, Settings(), FakeAdapter(output))
     assert result.mode == "fake" and len(result.facts) == 1
     evidence = result.evidence[0]
