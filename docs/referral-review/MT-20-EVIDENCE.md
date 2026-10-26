@@ -2,10 +2,12 @@
 
 ## 2026-10-26：独立费用账本基础层
 
-新增 `evaluation/ledger.py`、共享 `usage/budget.py`、追加迁移 `rr_0007` 及 SQLite／PostgreSQL 参数化、多进程竞争测试。评估 cap、原子共享日月预留、单次派发财务标记、幂等结算、unknown 保留与有界恢复已实施。实现及未完成边界见 [账本手册](EVALUATION-LEDGER.md)。
+实现提交：`d45d810f510025fc6d734c0d28e282cb6a530b09`（验证分支）。新增 `evaluation/ledger.py`、共享 `usage/budget.py`、追加迁移 `rr_0007` 及 SQLite／PostgreSQL 参数化、多进程竞争测试。评估 cap、原子共享日月预留、单次派发财务标记、幂等结算、unknown 保留与有界恢复已实施。实现及未完成边界见 [账本手册](EVALUATION-LEDGER.md)。
 
 - 定向测试 `test_evaluation_ledger.py test_usage.py test_persistence.py`：97 passed／74 skipped；跳过的是本机未配置的 PostgreSQL，不计为通过。
-- PostgreSQL CI 已加入评估与工作区混合竞争、同一 batch 预算竞争及重复派发／结算；远端结果在验证完成后记录。
+- [完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317) 全通过：后端 798 passed／97 skipped；前端 15 suites／69 tests、lint／build／typecheck、前后端审计通过。详情见 [CI 记录](CI-2026-10-26.md)。
+- 完整本地后端回归：798 passed／97 skipped，489.10 秒；PostgreSQL 由独立 CI 验证。部署脚本离线回归 13 项通过，公开评估汇总与历史开发集报告一致。
+- [PostgreSQL 17 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317/job/121391749549)：196 passed／0 skipped，64.33 秒（包含 SQLite／PostgreSQL 参数化）。已实际执行评估与工作区混合竞争、同一 batch 预算竞争及重复派发／结算；零跳过检查通过。
 - `--provider real` 继续拒绝，正数 cap 也不能打开；无供应商调用、模型费用、线上发布或生产迁移。
 - 剩余工程工作：真实 CLI 的授权／合成输入绑定、共享并发槽、录制与报告／恢复接入、晚到 usage 的追加校正；仍须人工 gold、明确预算和真实冻结集测量。前置未关闭，MT-20 仍为 TODO。
 

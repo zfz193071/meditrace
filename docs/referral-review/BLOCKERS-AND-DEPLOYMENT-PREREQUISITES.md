@@ -16,11 +16,11 @@
 - Vercel 项目开启了 Git 自动部署且生产分支为 main。为防止推送绕过发布门槛，验证分支已设置 `git.deploymentEnabled: false`，实际推送后最近部署记录仍为既有生产版本。远端 main 尚未包含该保护，不向其推送未包含保护的提交。见 [修复记录](../../BUGFIX-VERCEL-GIT-AUTO-DEPLOY.md)。
 - 历史 CI 经退役测试步骤、pypdf 安全补丁及解析版本兼容修复后，在提交 `ef5d9e5` [全部通过](https://github.com/zfz193071/meditrace/actions/runs/40257964496)：后端 564 passed／69 skipped，另一个 PostgreSQL job 137 passed／0 skipped，前端 68 tests、构建／类型检查／前后端依赖审计均通过。详见 [最终 CI 证据](CI-2026-10-26.md)，不将普通 job 的 skipped 当作验收通过。
 
-- 最新 OAuth 修复提交 `381850a` 的 [完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40264116229) 全通过：后端 767 passed／73 skipped；独立 PostgreSQL job 141 passed／0 skipped；前端 15 suites／69 tests、构建、类型检查及依赖审计通过。共享认证 fixture 的 HTTP／HTTPS 参数化也扩展了下游 API 用例覆盖，计数不能视为新增功能数。
+- OAuth 修复提交 `381850a` 的 [完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40264116229) 全通过：后端 767 passed／73 skipped；独立 PostgreSQL job 141 passed／0 skipped；前端 15 suites／69 tests、构建、类型检查及依赖审计通过。共享认证 fixture 的 HTTP／HTTPS 参数化也扩展了下游 API 用例覆盖，计数不能视为新增功能数。
 
 ## 2026-10-26 MT-20 工程推进
 
-独立评估账本及共享日月费用预留已实施，详见 [账本范围](EVALUATION-LEDGER.md)。真实 CLI 仍拒绝派发，缺共享并发槽、授权与合成输入绑定、真实录制／恢复及晚到费用校正。未请求或消耗真实模型预算，未应用生产迁移，MT-20 不关闭。
+独立评估账本及共享日月费用预留已实施（`d45d810`），详见 [账本范围](EVALUATION-LEDGER.md)。本地后端 798 passed／97 skipped；[独立 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40267092317/job/121391749549) 196 passed／0 skipped，包含评估与工作区多进程竞争。[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317) 全通过：前端 69 tests、构建／类型检查及前后端审计通过，后端 CI 同为 798 passed／97 skipped。真实 CLI 仍拒绝派发，缺共享并发槽、授权与合成输入绑定、真实录制／恢复及晚到费用校正。未请求或消耗真实模型预算，未应用生产迁移，MT-20 不关闭。
 
 ## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 

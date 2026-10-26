@@ -18,7 +18,7 @@
 
 ## 迁移
 
-`./deploy-vercel.sh --migrate` 是显式选择，要求后端 venv 和 PostgreSQL `DATABASE_URL`。它仅调用 `referral_review.persistence.migrations.upgrade` 至审核 allowlist 中的 `rr_0006`，使用一个事务，不执行旧 `migrations/001_conversations.sql` 或 `002_vercel_schema_compatibility.sql`。正常部署不做数据库 DDL。生产迁移前仍须完成 [迁移手册](docs/referral-review/MIGRATIONS.md) 的 PostgreSQL、备份和授权条件；当前条件尚未满足。
+`./deploy-vercel.sh --migrate` 是显式选择，要求后端 venv 和 PostgreSQL `DATABASE_URL`。它仅调用 `referral_review.persistence.migrations.upgrade` 至审核 allowlist 中的 `rr_0007`，使用一个事务，不执行旧 `migrations/001_conversations.sql` 或 `002_vercel_schema_compatibility.sql`。正常部署不做数据库 DDL。生产迁移前仍须完成 [迁移手册](docs/referral-review/MIGRATIONS.md) 的 PostgreSQL、备份和授权条件；当前条件尚未满足。
 
 若网络在提交时断开，只读检查 schema 版本后再决定下一步；不推断失败或自动降级。应用回退不删除 `rr_` 表，也不恢复旧 API。
 
