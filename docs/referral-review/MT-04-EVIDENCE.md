@@ -1,5 +1,7 @@
 # MT-04 认证实现与验收证据
 
+2026-10-26 更新：MT-02 已完成，MT-04 改为 `BLOCKED`。[OAuth App](https://github.com/settings/applications/3964320) 已创建且核对精确 callback；五项配套 Vercel production 配置已保存，client secret 待操作者手动保存后复核。真实应用 consent、登录／退出／错误回跳及平台日志验收仍未执行。最新资源状态见 [阻碍记录](BLOCKERS-AND-DEPLOYMENT-PREREQUISITES.md)，不以 GitHub 设置页面登录成功替代应用 OAuth 验收。
+
 日期：2026-10-20。认证代码和离线回归已通过；工单尚不可关闭。前置 MT-02 缺 PostgreSQL 实测，MT-04 自身缺真实 GitHub 配置、用户 consent 和完整登录往返。按依赖规则保留 `TODO`，不将模拟供应商响应记为外部验收。
 
 MT-03 已先提交为 `24b710e`；本记录与 MT-04 实现一同提交，提交可通过 `git log -- docs/referral-review/MT-04-EVIDENCE.md` 定位。未推送远程。

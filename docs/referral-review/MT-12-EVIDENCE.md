@@ -4,6 +4,8 @@
 
 ## 交付与边界
 
+2026-10-26 验收补充：`test_reviews_persistence.py` 的 PostgreSQL 参数化测试已在 [PostgreSQL 17 CI](https://github.com/zfz193071/meditrace/actions/runs/40255313217/job/121355790255) 通过。前置 MT-11 及完整双账号／双 tab 验收仍未完成，本票保持 `TODO`；早期未执行 PostgreSQL 的描述为历史快照。
+
 `referral_review/reviews/` 提供事项处理、交接草稿读写、确认、历史分页和快照读取。所有写入要求已认证会话、Origin／CSRF、Idempotency-Key；归属／到期／删除检查共用 MT-04／07，越权资源统一 404。无需会员，不调用模型或账本。
 
 resolve／dismiss／defer／reopen 分别追加 resolved／dismissed／unresolved／open。dismiss/defer 必须填写非空理由；记录操作者、时间、审核版本、理由、人工修正和关联证据。人工修正不修改 Fact／Evidence，来源固定标为 `Reviewer supplied`。关联证据不能跨 run，客户端不能传入来源标记伪装成证据。

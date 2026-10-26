@@ -1,6 +1,8 @@
 # Referral Review 数据迁移手册
 
-适用：MT-02 新领域表、MT-06 解析字段、MT-07 草稿元数据、MT-10 费用账本、MT-12 审核历史及 MT-17 支付恢复。初始版本 `rr_0001` 创建 33 张 `rr_` 业务／关联表；`rr_0002` 为 Document 加入解析字段；`rr_0003` 增加 Packet 的合成资料确认时间和独立的非内容草稿表。`rr_0004` 追加价格快照、共享熔断和费用调整表。`rr_0005` 追加不可覆盖的 review_events，保留每次人工处理、草稿修改和确认；保留已有快照，不为旧数据伪造历史。`rr_0006` 追加 checkout_details，保存订单回跳路径、Checkout URL 和固定过期时间，不保存支付个人信息。使用独立 `rr_alembic_version`，旧 conversations、messages 等表不参与迁移。真实 PostgreSQL 验收尚未执行；完成前不要把本迁移用于生产发布。
+适用：MT-02 新领域表、MT-06 解析字段、MT-07 草稿元数据、MT-10 费用账本、MT-12 审核历史及 MT-17 支付恢复。初始版本 `rr_0001` 创建 33 张 `rr_` 业务／关联表；`rr_0002` 为 Document 加入解析字段；`rr_0003` 增加 Packet 的合成资料确认时间和独立的非内容草稿表。`rr_0004` 追加价格快照、共享熔断和费用调整表。`rr_0005` 追加不可覆盖的 review_events，保留每次人工处理、草稿修改和确认；保留已有快照，不为旧数据伪造历史。`rr_0006` 追加 checkout_details，保存订单回跳路径、Checkout URL 和固定过期时间，不保存支付个人信息。使用独立 `rr_alembic_version`，旧 conversations、messages 等表不参与迁移。
+
+2026-10-26 更新：已完成临时 PostgreSQL 17 验收，MT-02 已关闭；[数据库 job](https://github.com/zfz193071/meditrace/actions/runs/40255313217/job/121355790255) 133 passed／0 skipped。该计数包含 SQLite／PostgreSQL 参数化和跨进程测试。生产迁移仍须确认备份／恢复条件并满足下方发布授权和验收要求，本次未连接生产库。
 
 ## 数据模型与事务接口
 
@@ -43,9 +45,9 @@
 
 ## 独立测试库与清理
 
-当前没有 TEST_DATABASE_URL，按用户要求不使用生产 DATABASE_URL 代替。可以选择：
+本机 shell 没有 TEST_DATABASE_URL，不使用生产 DATABASE_URL 代替。数据库 CI 已于 2026-10-26 在远端实际通过；后续可以选择：
 
-1. 后续在 GitHub Actions 运行 `postgres-persistence` job。它启动自己的临时 PostgreSQL 17 服务，不需要 Neon 凭据；本次只添加了工作流，没有推送或执行远程 CI。
+1. 在 GitHub Actions 运行 `postgres-persistence` job。它启动自己的临时 PostgreSQL 17 服务，不需要 Neon 凭据，现已包含迁移、账本、审核及跨进程测试，并要求零 skipped。
 2. 开发者提供独立 PostgreSQL 数据库，把连接串配置在终端的 TEST_DATABASE_URL 中。不要把连接串写进聊天、命令行参数或提交文件；测试代码不读取 .env 作为隐式连接来源。
 
 自动测试会为每个用例生成 `rr_test_` 加 32 位随机十六进制值的 schema，设置独立 search_path（没有 public 回退），写入随机 ownership marker。结束时只在 schema 名、数据库指纹和随机 marker 全部匹配后删除本次 schema。失败的清理会让测试失败，不会尝试删除 public 或其他 schema。

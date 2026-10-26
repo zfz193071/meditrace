@@ -19,3 +19,5 @@
 移除该过时的独立执行步骤；不移除历史文件，不吞掉 pytest 错误。新 `/api/v1` 启动、readiness 和旧接口退役行为仍由完整 referral suite 中的 `test_retired_api.py`、`test_operations.py` 覆盖，持久化由临时 PostgreSQL job 覆盖。此问题已有单命令确定复现和 CI 日志，不需要额外猜测或运行旧业务服务。
 
 扩展数据库 job 在提交 `14519d0` 的 [CI 运行](https://github.com/zfz193071/meditrace/actions/runs/40255313217/job/121355790255) 中通过：**133 passed，零 skipped，32.48 秒**，包含 SQLite／PostgreSQL 参数化用例及真实 PostgreSQL 跨进程竞争；这不是 133 项全部为 PostgreSQL。完整 foundation 结果待移除过时步骤后验证。
+
+最终结果：`ef5d9e5` 的 [CI](https://github.com/zfz193071/meditrace/actions/runs/40257964496) 两个 job 全部成功，包含上传与生命周期竞争后的数据库 job 为 **137 passed／0 skipped**。完整后端 564 passed／69 skipped、前端 68 tests、构建／类型检查和两端审计均通过，见 [最终证据](docs/referral-review/CI-2026-10-26.md)。

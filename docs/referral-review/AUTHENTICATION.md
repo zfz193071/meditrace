@@ -4,6 +4,10 @@ MT-04 提供 GitHub 登录、不透明会话、退出和共享资料归属校验
 
 ## 启用条件
 
+2026-10-26 配置进度：[MediTrace Referral Review Copilot OAuth App](https://github.com/settings/applications/3964320) 已创建，首页为 `https://meditrace.baozaolaoba.top`，callback 为 `https://meditrace.baozaolaoba.top/api/v1/auth/github/callback`，wildcard 和 device flow 关闭。生产站点、client ID、callback、session key 与 sandbox 模式已写入 Vercel；client secret 正由操作者手动保存，后续按 [阻碍记录](BLOCKERS-AND-DEPLOYMENT-PREREQUISITES.md) 的最新状态复核。本次没有发布，资源创建不代表真实登录已验收。
+
+客户端 secret 由操作者从 GitHub 页面复制，在终端原样执行 `vercel env add RR_GITHUB_CLIENT_SECRET production --sensitive --scope lucyzhus-projects --project meditrace`，等待变量值提示后再粘贴。`RR_GITHUB_CLIENT_SECRET` 是固定变量名，不能换成密钥。首次密钥因误发聊天已撤销并生成新密钥；不得重用首次密钥。浏览器工具不支持向当前工作区导出文件，因此本轮采用操作者直接写入平台的交接方式，不保存密钥到日志或仓库。
+
 后端使用 `RR_MODE=sandbox`，同时配置 `DATABASE_URL`、`RR_SITE_ORIGIN`、`RR_GITHUB_CLIENT_ID`、`RR_GITHUB_CLIENT_SECRET`、`RR_GITHUB_CALLBACK_URL` 和 `RR_SESSION_ENCRYPTION_KEY`。缺任意项时 `/auth/session` 返回匿名且 `login_available=false`，登录入口返回 503，不生成开发账号。错误格式的加密 key 会阻止已配置认证模块启动。
 
 GitHub OAuth App 的 callback 必须精确等于 `RR_SITE_ORIGIN` 加 `/api/v1/auth/github/callback`。只申请公开身份，不申请邮箱或仓库权限；用服务端 `GET /user` 的稳定数字 ID 映射内部 UUID，不信任昵称、客户端 subject 或 `X-User-ID`。OAuth 使用 Authlib、S256 PKCE 和每次登录的新 state。[GitHub OAuth 文档](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps)／[Authlib 客户端文档](https://docs.authlib.org/en/stable/oauth2/client/http/index.html)。

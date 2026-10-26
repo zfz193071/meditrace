@@ -4,6 +4,8 @@
 
 ## 交付
 
+2026-10-26 验收补充：`test_runs_pg.py` 在 [PostgreSQL 17 CI](https://github.com/zfz193071/meditrace/actions/runs/40255313217/job/121355790255) 通过，三个独立 spawn 进程竞争同一批次只发生一次 Fake 调用，会员只消费一次，结果和账本只提交一次。前置工单、真实供应商及完整 UI 流程仍未完成，本票保持 `TODO`；下方未执行 PostgreSQL 的描述为历史快照。
+
 `referral_review/runs/` 接入创建 pending、execute、GET、cancel 和 reconcile 五类操作。新增 CreateRunInput／RunResponse 契约与生成客户端类型。已有表足以保存批次、事实、证据、事项及关联，本票不新增迁移。
 
 - 创建输入只接受 revision_id 和 checklist_version，不接受 owner／mode／model／会员标记。按当前会话与服务器配置选择 fake 或 real；固定 bundled_demo 不允许执行。真实模式还要求已受邀且配置完整。

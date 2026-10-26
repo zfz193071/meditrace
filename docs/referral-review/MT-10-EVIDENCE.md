@@ -4,6 +4,8 @@
 
 ## 交付与边界
 
+2026-10-26 验收补充：`test_usage.py` 的 PostgreSQL 参数化与 `test_usage_pg.py` 的 5 项跨进程竞争／幂等结算已在 [PostgreSQL 17 CI](https://github.com/zfz193071/meditrace/actions/runs/40255313217/job/121355790255) 通过（整个 job 133 passed／0 skipped）。MT-02 已关闭，MT-04 及完整运行／导出验收仍未完成，本票保持 `TODO`。下方早期“未运行 PostgreSQL”描述为实施时快照。
+
 `referral_review/usage/` 提供服务器内部 `reserve`、`settle`、`retain_unknown`、`adjust`、`check_export` 和会话限定的 `membership`。只新增 `GET /api/v1/membership`，返回当前账号的测试会员有效期、剩余／预留次数及真实资格提示；不返回邀请名单、其他账号或全站财务信息，不注册 grant／execute／退款后门。支付授权发放由 MT-17 完成，测试直接在隔离 fixture 中创建权益。
 
 MT-11 必须从服务器会话取得 owner、从已验证请求计算完整输入 token 上界，使用持久 run 的模式和模型。预留不等于派发：同 run 返回已有 reservation 只用于幂等查询，不能再次调用供应商。MT-11 仍必须执行 run CAS、资料版本及解析覆盖检查、持久化 provider_dispatched_at 和单次模型派发。当前 capabilities 的真实执行能力继续关闭。旧诊断接口不经过该账本，MT-21 仍须退役；不能据此称旧站已有全局费用保护。

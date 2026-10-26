@@ -1,6 +1,20 @@
 # MT-02 数据持久化验收记录
 
-日期：2026-10-20。状态：**BLOCKED，等待真实 PostgreSQL 迁移与并发验收**。用户确认按没有测试库处理，本次没有连接生产库、启动本地服务、运行真实 AI 或部署。SQLite 结果不用于宣布 PostgreSQL 的锁与事务正确。
+更新：2026-10-26。状态：**DONE，真实 PostgreSQL 17 迁移与并发验收已完成**。使用 GitHub Actions 临时数据库，未连接生产库、启动本地服务、调用真实模型或部署。
+
+## 2026-10-26 PostgreSQL 验收
+
+最终复核：提交 `ef5d9e5` 的 [完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40257964496) 两个 job 均成功，数据库 job 进一步包含上传和生命周期竞争，共 **137 passed／0 skipped**。详细范围见 [最终 CI 证据](CI-2026-10-26.md)。以下 133 项记录为本票首次满足验收的真实运行证据。
+
+- 验证提交：`14519d07d0949e58d2b8b1ca4605aae9aed7c475`；[CI 数据库 job](https://github.com/zfz193071/meditrace/actions/runs/40255313217/job/121355790255) 成功。
+- 命令：`src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review/test_persistence.py src/backend/tests/referral_review/test_pg_concurrency.py src/backend/tests/referral_review/test_usage.py src/backend/tests/referral_review/test_usage_pg.py src/backend/tests/referral_review/test_reviews_persistence.py src/backend/tests/referral_review/test_runs_pg.py --junitxml=postgres-results.xml`。
+- 结果：**133 passed，0 skipped，32.48 秒**；包含 SQLite／PostgreSQL 参数化用例，不将总数全部称为 PostgreSQL 用例。JUnit 检查确认收集 PostgreSQL 参数化用例且没有跳过。
+- PostgreSQL 实际验证：空库及保留旧表升级、重复迁移、注入 DDL 失败回滚、拒绝 downgrade／未知 schema、跨包和跨批次外键、状态与唯一约束、不可变触发器、UTC 往返及逐用例随机 schema 清理。
+- 三项双连接竞争均通过：同 expected_revision 只有一方成功；最后一个会员额度只预留一次；相反输入顺序竞争日／月预算不超额，失败方不残留预留。
+- 额外通过 MT-10 账本、多进程 reserve／settle 和 MT-11 同批次单次 Fake 派发，以及 MT-12 审核持久化测试；其他工单仍按各自完整验收和依赖判定。
+- 本票 5 条验收已全部满足。该 job 成功不代表同轮 foundation 成功：后者因单独运行已退役测试返回 5 失败，修复记录见 [CI 修复](../../BUGFIX-POSTGRES-CI-COVERAGE.md)。也不代表生产迁移、外部服务或完整 V1 发布通过。
+
+以下为 2026-10-20 实施时的历史记录；其中“未执行／未提交”描述不再代表当前状态。
 
 ## 已实现
 
