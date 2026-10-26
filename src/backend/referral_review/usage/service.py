@@ -19,7 +19,7 @@ from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
 from ..persistence.repository import NotFound, owned_packet, require_transaction
 from ..schemas import ErrorCode, MembershipResponse
-from . import rates, budget
+from . import rates, budget, slots
 from .budget import cost, bucket_limits
 
 
@@ -120,17 +120,19 @@ class Usage:
             output_price = self.settings.output_microusd_per_million if real else 0
             upper = cost(input_bound, output_limit, input_price, output_price)
             keys = budget.reserve(conn, self.settings, self.clock(), upper) if real else {}
-            lease = self.clock() + timedelta(seconds=240)
-            for scope, capacity in ((f"account:{owner}", 1), ("global", 2)):
+            now = self.clock()
+            lease = now + slots.LEASE
+            for scope, capacity in ((f"account:{owner}", 1),):
                 for slot in range(capacity):
                     rates.ensure(conn, m.concurrency_slots, {"scope": scope, "slot_number": slot})
-                slots = conn.execute(sa.select(m.concurrency_slots).where(m.concurrency_slots.c.scope == scope)
+                account_slots = conn.execute(sa.select(m.concurrency_slots).where(m.concurrency_slots.c.scope == scope)
                                      .order_by(m.concurrency_slots.c.slot_number).with_for_update()).mappings().all()
-                free = next((s for s in slots if s["run_id"] is None or s["lease_expires_at"] <= self.clock()), None)
+                free = next((s for s in account_slots if s["run_id"] is None or s["lease_expires_at"] <= now), None)
                 if free is None:
                     raise ApiError(ErrorCode.RUN_ACTIVE)
                 conn.execute(m.concurrency_slots.update().where(m.concurrency_slots.c.scope == scope,
                     m.concurrency_slots.c.slot_number == free["slot_number"]).values(run_id=run_id, lease_expires_at=lease))
+            slots.claim_workspace(conn, run_id, now, lease)
             rid = uuid4()
             conn.execute(m.memberships.update().where(m.memberships.c.id == member["id"])
                          .values(reserved_units=m.memberships.c.reserved_units + 1))

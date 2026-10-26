@@ -36,6 +36,7 @@
 | usage_reservations | id、run_id 唯一、membership_id、units、cost_upper_bound_microusd、actual_microusd、state、price_version |
 | budget_buckets | bucket_key 唯一（UTC 日／月）、limit、reserved、spent；整数 micro-USD，禁止 float |
 | concurrency_slots | scope（账号／全站）、slot_number、run_id、lease_expires_at；唯一 slot，数据库锁保护 |
+| evaluation_slots | 全站 slot_number 0／1、attempt_id、lease_expires_at；与 concurrency_slots 的同编号 global 行共同加锁，任一有效占用即不可分配 |
 | storage_reservations | id、owner_id、document_id 唯一、reserved_bytes、state、expires_at；账号／全站存储桶行锁保护配额 |
 | rate_limit_buckets | scope、action、window_start、count；唯一组合，账户维度为主，IP 以短期加盐哈希保存 |
 | idempotency | owner_id、operation、key、request_hash、resource_id、expires_at；唯一组合 |
@@ -92,7 +93,8 @@ stateDiagram-v2
 - `pending` 不预留模型费用，30 分钟后到期，不能在 GET 中自动执行。
 - execute 事务锁定 run、会员、预算桶与并发槽；固定加锁顺序防死锁。权限／输入检查通过才 reserve，提交后才调用模型。
 - `running` 时重复 execute 返回 202 和当前 run；`succeeded` 返回已有结果；终态失败返回已有终态。它们均不再次请求供应商。
-- 事务外调用前写入派发标记。实例退出后 lease 到期：没有派发标记可标记 failed 并释放费用；有标记则 outcome_unknown。恢复通过显式 `POST reconcile` 或每日维护执行，GET 无此副作用。
+- 全站工作区 Fake／real 与内部评估合计最多两个有效执行槽，账号仍最多一个。评估以独立 attempt 外键记录租约，使用同一组 workspace global 行锁。费用预留与执行槽分别记账，租约到期不代表未知费用可以释放。
+- 事务外调用前，锁定并核实实际账号／全站槽仍归当前 run 且未过期，再写入派发标记。实例退出后 lease 到期：没有派发标记可标记 failed 并释放费用；有标记则 outcome_unknown。恢复通过显式 `POST reconcile` 或每日维护执行，GET 无此副作用。
 - 保留 unknown 的费用最高预留值；24 小时仍不可核实时记为保守估计花费，不退回总预算。成功次数可释放，但失败频率／总预算仍限制重试。账号并发槽在 lease 到期后释放；这只约束本应用活跃执行，不宣称取消了供应商远端任务。
 - 结果与费用结算失败时保留 run_id 和可恢复记录；没有持久化的返回不能在下次重新请求供应商获取。允许因此进入 unknown，UI 提供明确说明。
 - 无自动“取消供应商请求”承诺；运行中只允许离开页面。删除资料包立即屏蔽读取，运行返回时检测 tombstone，丢弃内容并按已产生用量结算。

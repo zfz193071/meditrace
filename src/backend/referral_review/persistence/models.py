@@ -391,6 +391,12 @@ evaluation_attempts = sa.Table("rr_evaluation_attempts", metadata,
 evaluation_buckets = sa.Table("rr_evaluation_buckets", metadata,
     uid("attempt_id", primary=True, reference="rr_evaluation_attempts.id"),
     sa.Column("bucket_key", sa.String(80), sa.ForeignKey("rr_budget_buckets.bucket_key"), primary_key=True))
+evaluation_slots = sa.Table("rr_evaluation_slots", metadata,
+    sa.Column("slot_number", sa.Integer, primary_key=True),
+    uid("attempt_id", nullable=True, reference="rr_evaluation_attempts.id"), timestamp("lease_expires_at", nullable=True),
+    sa.UniqueConstraint("attempt_id"),
+    sa.CheckConstraint("slot_number >= 0 AND slot_number < 2", name="slot"),
+    sa.CheckConstraint("(attempt_id IS NULL AND lease_expires_at IS NULL) OR (attempt_id IS NOT NULL AND lease_expires_at IS NOT NULL)", name="lease"))
 
 # Durable reviewer history, including every replaced handoff draft.
 review_events = sa.Table("rr_review_events", metadata,

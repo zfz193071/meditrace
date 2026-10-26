@@ -2,8 +2,8 @@
 
 Lock order: batch -> attempt -> global control -> sorted budget keys. Each
 attempt has one immutable sample fingerprint and price snapshot via its batch.
-The real CLI stays disabled until operator authorization, shared dispatch slots,
-synthetic manifest validation and recording/recovery are integrated together.
+The real CLI stays disabled until operator authorization, synthetic manifest
+validation and recording/recovery are integrated with these shared slots.
 """
 from contextlib import contextmanager
 from datetime import timedelta
@@ -21,7 +21,7 @@ from ..extraction.contracts import TokenUsage
 from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
 from ..schemas import ErrorCode
-from ..usage import budget, rates
+from ..usage import budget, rates, slots
 
 TERMINAL = ("settled", "released", "estimated_spent")
 
@@ -139,10 +139,11 @@ class EvaluationLedger:
         return batch, attempt, control, keys
 
     def record_dispatch(self, batch_id, attempt_id):
-        """One-way financial marker. Future orchestrator must ALSO own dispatch slots.
+        """Atomically claim a shared global slot and a one-way dispatch marker.
 
         Commit before transport; a crash after this marker must be cost-unknown,
         never retryable. Returning a reservation from reserve is insufficient.
+        This is not operator/invitation/synthetic-input authorization.
         """
         self._configuration()
         with self._transaction() as conn:
@@ -155,8 +156,9 @@ class EvaluationLedger:
             if (attempt["state"] != "reserved" or attempt["lease_expires_at"] <= now
                 or set(keys) != set(budget.bucket_limits(self.settings, now))):
                 raise ApiError(ErrorCode.USAGE_CONFLICT)
+            lease = slots.claim_evaluation(conn, attempt_id, now)
             conn.execute(m.evaluation_attempts.update().where(m.evaluation_attempts.c.id == attempt_id)
-                         .values(state="dispatched", dispatched_at=now))
+                         .values(state="dispatched", dispatched_at=now, lease_expires_at=lease))
             return self._read(conn, attempt_id)
 
     def settle(self, batch_id, attempt_id, *, outcome, usage=None):
@@ -203,6 +205,7 @@ class EvaluationLedger:
                 state=state, outcome=outcome, actual_microusd=actual, settlement_hash=digest, settled_at=now,
                 prompt_tokens=usage.prompt_tokens if usage else None,
                 completion_tokens=usage.completion_tokens if usage else None))
+            slots.release_evaluation(conn, attempt_id)
             return self._read(conn, attempt_id)
 
     def recover(self, *, limit=100):

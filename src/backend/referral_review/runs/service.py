@@ -17,7 +17,7 @@ from ..packets.service import _hash
 from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
 from ..schemas import DocumentPageResponse, ErrorCode, RunResponse
-from ..usage import Usage, rates
+from ..usage import Usage, rates, slots
 from . import results
 from ..operations.telemetry import audit, observe
 
@@ -219,6 +219,7 @@ class Runs:
                 if self.usage._control(conn)["halted"]:
                     raise ApiError(ErrorCode.BUDGET_EXHAUSTED)
             self.fault("before_dispatch_marker")
+            slots.require_workspace(conn, row["owner_id"], rid, self.clock())
             conn.execute(m.runs.update().where(m.runs.c.id == rid).values(provider_dispatched_at=self.clock()))
             audit(conn, row, "dispatched", self.clock())
 

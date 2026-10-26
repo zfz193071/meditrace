@@ -20,7 +20,7 @@
 
 ## 2026-10-26 MT-20 工程推进
 
-独立评估账本及共享日月费用预留已实施（`d45d810`），详见 [账本范围](EVALUATION-LEDGER.md)。本地后端 798 passed／97 skipped；[独立 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40267092317/job/121391749549) 196 passed／0 skipped，包含评估与工作区多进程竞争。[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317) 全通过：前端 69 tests、构建／类型检查及前后端审计通过，后端 CI 同为 798 passed／97 skipped。真实 CLI 仍拒绝派发，缺共享并发槽、授权与合成输入绑定、真实录制／恢复及晚到费用校正。未请求或消耗真实模型预算，未应用生产迁移，MT-20 不关闭。
+独立评估账本及共享日月费用预留已实施（`d45d810`），详见 [账本范围](EVALUATION-LEDGER.md)。本地后端 798 passed／97 skipped；[独立 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40267092317/job/121391749549) 196 passed／0 skipped，包含评估与工作区多进程竞争。[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317) 全通过：前端 69 tests、构建／类型检查及前后端审计通过，后端 CI 同为 798 passed／97 skipped。真实 CLI 仍拒绝派发，共享并发槽现已实现，仍缺授权与合成输入绑定、真实录制／恢复及晚到费用校正。未请求或消耗真实模型预算，未应用生产迁移，MT-20 不关闭。
 
 ## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 
@@ -40,7 +40,7 @@
 
 ## 正式部署完整 V1 的条件
 
-`MT-24` 要求 `MT-01`—`MT-23` **全部 DONE**、[Q01—Q20](QUALITY-AND-RELEASE.md) 和发布门槛全通过。尤其 `MT-20` 独立账本及全站日月费用预留已实施，但还缺共享派发槽、CLI 授权绑定及真实录制／恢复集成；当前真实 runner 主动拒绝派发，Fake／replay 不能替代真实成绩。`MT-22` 还须完成整条任务链、双账号权限、PostgreSQL 并发、故障、三视口／键盘／PDF、依赖审计并写 `acceptance-report.md`。`MT-23` 求职材料初稿需按最终实测复核。
+`MT-24` 要求 `MT-01`—`MT-23` **全部 DONE**、[Q01—Q20](QUALITY-AND-RELEASE.md) 和发布门槛全通过。尤其 `MT-20` 独立账本及全站日月费用预留已实施，共享派发槽也已实现，但还缺 CLI 授权绑定及真实录制／恢复集成；当前真实 runner 主动拒绝派发，Fake／replay 不能替代真实成绩。`MT-22` 还须完成整条任务链、双账号权限、PostgreSQL 并发、故障、三视口／键盘／PDF、依赖审计并写 `acceptance-report.md`。`MT-23` 求职材料初稿需按最终实测复核。
 
 | 外部条件 | 需要的内容与实际验收 | 谁需参与 |
 | --- | --- | --- |

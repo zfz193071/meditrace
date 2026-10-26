@@ -1,5 +1,14 @@
 # MT-20 评估实施证据
 
+## 2026-10-26：共享执行槽
+
+新增 `usage/slots.py`、追加迁移 `rr_0008`，评估和工作区 Fake／real 共用全站两个槽。评估派发标记和 240 秒租约原子提交，终态结算与释放同事务；unknown 保留未过期租约及费用，迟到结果不会释放新持有者。工作区派发前重查账号／全站槽，见 [修复记录](../../BUGFIX-DISPATCH-SLOT-OWNERSHIP.md)。
+
+- 既有账本及迁移回归 `test_usage.py test_evaluation_ledger.py test_persistence.py`：97 passed／74 skipped。
+- 首轮新槽位及工作区派发测试 `test_evaluation_slots.py test_runs.py`：77 passed／11 skipped；另补工作区迟到结算不得释放评估槽的对称用例后，`test_evaluation_slots.py test_evaluation.py` 为 28 passed／12 skipped，包含真实入口继续 fail-closed。部署脚本离线回归 13 项通过。以上跳过均为本机缺少隔离 PostgreSQL。
+- PostgreSQL CI 新增 Fake／real 工作区与评估四进程同时竞争两个槽，以及过期评估完成与新派发竞争；实际执行结果在 CI 完成后记录。
+- 真实评估 CLI 保持关闭，剩余是授权／合成输入绑定、真实 Adapter／录制与恢复接入、晚到费用校正及人工／预算验收；MT-20 保持 TODO。无真实模型调用、生产迁移或部署。
+
 ## 2026-10-26：独立费用账本基础层
 
 实现提交：`d45d810f510025fc6d734c0d28e282cb6a530b09`（验证分支）。新增 `evaluation/ledger.py`、共享 `usage/budget.py`、追加迁移 `rr_0007` 及 SQLite／PostgreSQL 参数化、多进程竞争测试。评估 cap、原子共享日月预留、单次派发财务标记、幂等结算、unknown 保留与有界恢复已实施。实现及未完成边界见 [账本手册](EVALUATION-LEDGER.md)。

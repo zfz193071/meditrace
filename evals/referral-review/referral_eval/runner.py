@@ -259,7 +259,7 @@ def main():
     parser.add_argument('--compare',type=Path,help='Fail if factual/finding counts differ from this report')
     args=parser.parse_args()
     if args.provider=='real':
-        parser.error('Real evaluation disabled: an authorized cap alone is insufficient; the accounting ledger still requires shared dispatch slots, operator authorization and recording/recovery integration before real execution. No request sent.')
+        parser.error('Real evaluation disabled: an authorized cap alone is insufficient; the accounting ledger still requires operator authorization, synthetic-input binding and recording/recovery integration before real execution. No request sent.')
     if args.split=='test' and not args.ack_test_exposure: parser.error('Frozen test inspection requires --ack-test-exposure; do not tune against inspected tests.')
     if args.recording and args.provider!='replay': parser.error('--recording is only valid with --provider replay')
     if args.provider=='replay' and not args.recording: parser.error('--recording is required for replay')

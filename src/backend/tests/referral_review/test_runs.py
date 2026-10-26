@@ -9,6 +9,7 @@ import pytest
 import sqlalchemy as sa
 
 from referral_review.extraction import FakeAdapter
+from referral_review.errors import ApiError
 from referral_review.persistence import models as m
 from referral_review.runs import Runs
 from test_identity import auth_client, sign_in
@@ -52,6 +53,24 @@ def rows(r, table):
 
 def token(r):
     return r["client"].cookies.get(r["identity"].session_cookie)
+
+
+@pytest.mark.parametrize("scope", ["account", "global"])
+@pytest.mark.parametrize("condition", ["expired", "released"])
+def test_dispatch_rechecks_live_slot_ownership(review, scope, condition):
+    r = review
+    rid = UUID(new_run(r).json()["id"])
+    r["service"]._attempt(token(r), rid)
+    assert r["service"]._claim(token(r), rid) is not None
+    key = f"account:{r['owner']}" if scope == "account" else "global"
+    with r["identity"].engine.begin() as conn:
+        changes = dict(lease_expires_at=r["clock"][0]) if condition == "expired" else dict(run_id=None, lease_expires_at=None)
+        conn.execute(m.concurrency_slots.update().where(m.concurrency_slots.c.scope == key,
+            m.concurrency_slots.c.run_id == rid).values(**changes))
+    # The run lease is still valid. It cannot substitute for slot ownership.
+    with pytest.raises(ApiError, match="RUN_ACTIVE"): r["service"]._dispatch(token(r), rid)
+    assert rows(r, m.runs)[0]["provider_dispatched_at"] is None
+    assert r["adapter"].calls == 0
 
 
 def test_create_deduplicates_keys_and_active_content_get_never_dispatches(review):

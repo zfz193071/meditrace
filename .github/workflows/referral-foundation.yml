@@ -78,6 +78,7 @@ jobs:
           src/backend/tests/referral_review/test_usage_pg.py
           src/backend/tests/referral_review/test_evaluation_ledger.py
           src/backend/tests/referral_review/test_evaluation_ledger_pg.py
+          src/backend/tests/referral_review/test_evaluation_slots.py
           src/backend/tests/referral_review/test_reviews_persistence.py
           src/backend/tests/referral_review/test_runs_pg.py
           --junitxml=postgres-results.xml
