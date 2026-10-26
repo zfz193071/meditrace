@@ -117,3 +117,72 @@ def test_packet_review_handoff_revision_and_delete_use_one_api_workflow(running_
 
 def test_packet_review_handoff_revision_and_delete_use_postgres_api_workflow(postgres_running_review):
     exercise_workflow(postgres_running_review)
+
+
+def exercise_resource_isolation(r):
+    created = new_run(r)
+    assert created.status_code == 201, created.text
+    run_id = created.json()["id"]
+    r["rid"] = run_id
+    executed = post(r, run_id, "execute")
+    assert executed.status_code == 200, executed.text
+    findings = executed.json()["result"]["findings"]
+
+    review_version = 0
+    for finding in findings:
+        r["fid"] = finding["id"]
+        resolved = resolve(r, review_version, action="defer", reason="Synthetic ownership check")
+        assert resolved.status_code == 201, resolved.text
+        review_version += 1
+    saved_draft = draft(r, review_version, mode="assisted", run_id=run_id,
+                        fields={"handoff.summary": "Synthetic private summary"})
+    assert saved_draft.status_code == 200, saved_draft.text
+    confirmed = confirm(r, review_version + 1)
+    assert confirmed.status_code == 201, confirmed.text
+    snapshot_id = confirmed.json()["id"]
+
+    client, identity, _, transport, _ = r["workspace"]
+    original_owner = client.get("/auth/session").json()["user"]["id"]
+    client.cookies.clear()
+    transport.subject = 67890
+    sign_in(client)
+    assert client.get("/auth/session").json()["user"]["id"] != original_owner
+    headers = {"Origin": identity.settings.site_origin,
+               "X-CSRF-Token": client.get("/auth/session").json()["csrf_token"]}
+
+    protected_paths = [
+        f"/packets/{r['pid']}",
+        f"/packets/{r['pid']}/draft",
+        f"/packets/{r['pid']}/revisions/1",
+        f"/packets/{r['pid']}/runs/latest",
+        f"/packets/{r['pid']}/documents/{r['did']}",
+        f"/packets/{r['pid']}/documents/{r['did']}/pages/1",
+        f"/packets/{r['pid']}/documents/{r['did']}/original",
+        f"/runs/{run_id}",
+        f"/runs/{run_id}/review",
+        f"/packets/{r['pid']}/handoff-draft",
+        f"/packets/{r['pid']}/snapshots/{snapshot_id}",
+        f"/packets/{r['pid']}/review-history",
+        f"/packets/{r['pid']}/snapshots/{snapshot_id}/handoff",
+        f"/packets/{r['pid']}/snapshots/{snapshot_id}/export?format=txt",
+    ]
+    assert client.get("/packets").json()["items"] == []
+    for path in protected_paths:
+        response = client.get(path)
+        assert response.status_code == 404, f"{path}: {response.status_code} {response.text}"
+
+    execute_foreign = client.post(f"/runs/{run_id}/execute",
+                                  headers=headers | {"Idempotency-Key": "other-user-run"})
+    delete_foreign = client.delete(f"/packets/{r['pid']}",
+                                   headers=headers | {"Idempotency-Key": "other-user-delete"})
+    assert execute_foreign.status_code == 404
+    assert delete_foreign.status_code == 404
+    assert r["adapter"].calls == 1
+
+
+def test_workflow_resources_are_hidden_from_a_second_account(running_review):
+    exercise_resource_isolation(running_review)
+
+
+def test_postgres_workflow_resources_are_hidden_from_a_second_account(postgres_running_review):
+    exercise_resource_isolation(postgres_running_review)
