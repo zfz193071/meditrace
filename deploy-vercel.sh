@@ -315,15 +315,106 @@ def deploy(project, with_migration):
     note("Deployment succeeded: " + ORIGIN)
 
 
+def first_cutover(project, backup_reference):
+    """Establish the first verified safe rollback baseline without restoring legacy APIs."""
+    previous = active_deployment()
+    if previous.get("projectId") != PROJECT or not previous.get("id"):
+        raise DeployError("Cannot identify the current production deployment for first cutover.")
+    state = {"started_at": datetime.now(timezone.utc).isoformat(), "previous_id": previous["id"],
+             "origin": ORIGIN, "status": "first-cutover-building",
+             "backup_reference_provided": bool(backup_reference)}
+    save_state(state)
+    try:
+        stdout, stderr = vc("deploy", "--prod", "--skip-domain", "--yes", "--json", timeout=1200)
+    except DeployError:
+        state["status"] = "first-cutover-build-failed"
+        save_state(state)
+        raise
+    if LOG:
+        LOG.write(redact(stderr) + "\n")
+        LOG.flush()
+    try:
+        deployment = json.loads(stdout)["deployment"]
+        new_id = deployment["id"]
+        new_url = deployment["url"]
+        if not new_url.startswith("https://"):
+            new_url = "https://" + new_url
+        if deployment.get("readyState") != "READY":
+            raise ValueError("not ready")
+    except (ValueError, KeyError, TypeError):
+        state["status"] = "first-cutover-build-result-invalid"
+        save_state(state)
+        raise DeployError("Build did not return a READY deployment; production was not promoted.") from None
+    state.update(deployment_id=new_id, deployment_url=new_url, status="first-cutover-built")
+    save_state(state)
+    note("First-cutover candidate built: " + new_url)
+
+    # The rr_* migration is additive. Keep the existing deployment active until
+    # the staged candidate proves readiness against the migrated schema.
+    try:
+        migrate()
+    except DeployError:
+        state["status"] = "first-cutover-migration-failed"
+        save_state(state)
+        raise
+    bypass = next((key for key, value in project.get("protectionBypass", {}).items()
+                   if value.get("scope") == "automation-bypass"), None)
+    if bypass:
+        SECRETS.append(bypass)
+    try:
+        verify(new_url, {"x-vercel-protection-bypass": bypass} if bypass else {}, staged=True)
+    except (DeployError, Unreachable):
+        state["status"] = "first-cutover-staged-verification-failed"
+        save_state(state)
+        raise
+    if active_deployment().get("id") != previous["id"]:
+        state["status"] = "first-cutover-production-changed"
+        save_state(state)
+        raise DeployError("Production changed during first cutover; candidate was not promoted.")
+
+    try:
+        note("Promoting the first safe baseline to " + ORIGIN)
+        vc("promote", new_url, "--yes", timeout=240)
+    except DeployError:
+        state["status"] = "first-cutover-promotion-unknown"
+        save_state(state)
+        raise DeployError("First-cutover promotion outcome is unknown; inspect Vercel before retrying.") from None
+    state["status"] = "first-cutover-promoted"
+    save_state(state)
+    try:
+        if active_deployment().get("id") != new_id:
+            raise DeployError("The production domain does not point to the first-cutover deployment.")
+        verify(ORIGIN, attempts=3)
+    except (DeployError, KeyboardInterrupt):
+        # Never roll back to the release that exposed retired routes. Keep the
+        # new release active and require forward repair if production checks fail.
+        state["status"] = "first-cutover-unverified"
+        save_state(state)
+        raise
+    state.update(status="first-cutover-verified", finished_at=datetime.now(timezone.utc).isoformat())
+    save_state(state)
+    note("First safe production baseline established and verified: " + ORIGIN)
+
+
 def main():
     global LOG
     parser = argparse.ArgumentParser(prog="deploy-vercel.sh", description="Deploy MediTrace frontend + backend to the existing Vercel Hobby project.")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="check prerequisites and deployment inputs without publishing")
     mode.add_argument("--verify", action="store_true", help="verify the current production frontend, backend and database without publishing")
-    parser.add_argument("--migrate", action="store_true", help="apply only migration 002 to local DATABASE_URL before deploying (explicit opt-in)")
+    parser.add_argument("--migrate", action="store_true", help="apply reviewed referral migrations before a normal deployment (explicit opt-in)")
+    parser.add_argument("--first-cutover", action="store_true", help="establish the first safe production baseline; requires explicit cutover and backup confirmations")
+    parser.add_argument("--confirm-production-cutover", help="must exactly match the production origin for --first-cutover")
+    parser.add_argument("--backup-reference", help="operator-verified production backup reference required for --first-cutover")
     args = parser.parse_args()
-    if args.migrate and (args.check or args.verify):
+    if args.first_cutover:
+        if args.check or args.verify or args.migrate:
+            parser.error("--first-cutover cannot be combined with --check, --verify or --migrate")
+        if args.confirm_production_cutover != ORIGIN or not args.backup_reference or len(args.backup_reference) > 200:
+            parser.error("--first-cutover requires --confirm-production-cutover matching the production origin and a --backup-reference")
+    elif args.confirm_production_cutover or args.backup_reference:
+        parser.error("cutover confirmations can only be used with --first-cutover")
+    elif args.migrate and (args.check or args.verify):
         parser.error("--migrate can only be used with a deployment")
     os.umask(0o077)
     STATE_DIR.mkdir(exist_ok=True)
@@ -341,6 +432,8 @@ def main():
             note("Checks passed. No deployment or migration was performed.")
         elif args.verify:
             verify(ORIGIN, attempts=3)
+        elif args.first_cutover:
+            first_cutover(project, args.backup_reference)
         else:
             deploy(project, args.migrate)
         note("Log: " + str(Path(LOG.name).relative_to(ROOT)))

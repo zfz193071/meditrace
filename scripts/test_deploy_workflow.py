@@ -55,6 +55,65 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual([call[0] for call in self.calls], ["deploy", "promote"])
         self.assertIn("--skip-domain", self.calls[0])
 
+    def test_first_cutover_builds_migrates_and_verifies_before_promoting(self):
+        order = []
+        self.module["migrate"] = lambda: order.append("migrate")
+        self.module["verify"] = lambda origin, *args, **kwargs: order.append(
+            "staged-verify" if kwargs.get("staged") else "production-verify")
+        self.module["first_cutover"]({}, "backup-2026-10-26")
+        self.assertEqual(self.active, "new-release")
+        self.assertEqual(self.state()["status"], "first-cutover-verified")
+        self.assertEqual(order, ["migrate", "staged-verify", "production-verify"])
+        self.assertEqual([call[0] for call in self.calls], ["deploy", "promote"])
+
+    def test_first_cutover_staged_failure_keeps_old_alias_and_never_promotes(self):
+        self.module["migrate"] = lambda: None
+        def verify(origin, *args, **kwargs):
+            if kwargs.get("staged"):
+                raise self.module["DeployError"]("readiness failed")
+        self.module["verify"] = verify
+        with self.assertRaisesRegex(self.module["DeployError"], "readiness failed"):
+            self.module["first_cutover"]({}, "backup-2026-10-26")
+        self.assertEqual(self.active, "old-release")
+        self.assertEqual(self.state()["status"], "first-cutover-staged-verification-failed")
+        self.assertEqual([call[0] for call in self.calls], ["deploy"])
+
+    def test_first_cutover_migration_failure_keeps_old_alias_and_never_verifies(self):
+        def fail_migration():
+            raise self.module["DeployError"]("migration failed")
+        self.module["migrate"] = fail_migration
+        self.module["verify"] = lambda *args, **kwargs: self.fail("Must not verify or promote after migration failure")
+        with self.assertRaisesRegex(self.module["DeployError"], "migration failed"):
+            self.module["first_cutover"]({}, "backup-2026-10-26")
+        self.assertEqual(self.active, "old-release")
+        self.assertEqual(self.state()["status"], "first-cutover-migration-failed")
+        self.assertEqual([call[0] for call in self.calls], ["deploy"])
+
+    def test_first_cutover_never_rolls_back_to_unsafe_previous_release(self):
+        self.module["migrate"] = lambda: None
+        def verify(origin, *args, **kwargs):
+            if not kwargs.get("staged") and self.active == "new-release":
+                raise self.module["DeployError"]("production readiness failed")
+        self.module["verify"] = verify
+        with self.assertRaisesRegex(self.module["DeployError"], "production readiness failed"):
+            self.module["first_cutover"]({}, "backup-2026-10-26")
+        self.assertEqual(self.active, "new-release")
+        self.assertEqual(self.state()["status"], "first-cutover-unverified")
+        self.assertNotIn("rollback", [call[0] for call in self.calls])
+
+    def test_first_cutover_requires_exact_origin_and_backup_reference(self):
+        for args in (
+            ["--first-cutover"],
+            ["--first-cutover", "--confirm-production-cutover", "https://wrong.example",
+             "--backup-reference", "snapshot-1"],
+            ["--first-cutover", "--confirm-production-cutover", self.module["ORIGIN"], "--migrate",
+             "--backup-reference", "snapshot-1"],
+        ):
+            with self.subTest(args=args), patch.object(sys, "argv", ["deploy-vercel.sh", *args]):
+                with self.assertRaises(SystemExit):
+                    self.module["main"]()
+        self.assertEqual(self.calls, [])
+
     def test_build_failure_never_changes_production(self):
         def fail(*args, **kwargs):
             raise self.module["DeployError"]("Build failed")

@@ -15,13 +15,15 @@
 | 检查 | 结果 |
 | --- | --- |
 | 旧 API 路径 × 七种方法、无旧服务导入 | `test_retired_api.py`：85 passed |
-| 发布、迁移和回退 mock 故障路径 | `python3 scripts/test_deploy_workflow.py`：13 passed |
+| 发布、迁移和回退 mock 故障路径 | 原有 13 项；含首次切换、迁移失败和 CLI 防误触现为 `python3 scripts/test_deploy_workflow.py`：18 passed |
 | 全部 referral 后端回归 | 548 passed、69 skipped（跳过项含未配置独立 PostgreSQL） |
 | 前端类型检查、生产构建 | 均通过；构建生成旧页面重定向路由和 `/legacy-retired` |
 | 前端 Jest | 14 suites、68 passed |
 | ESLint | 0 errors、2 个既有未使用变量 warning |
 | 后端依赖锁 | `scripts/check_backend_lock.py`：通过，使用仓库内 uv 缓存 |
 | shell 语法与 diff | `bash -n`、`git diff --check` 通过 |
+
+首次切换流程（2026-10-26）：已增加 `--first-cutover`，要求精确生产域名确认和操作者提供的备份参考。流程构建候选后执行审核过的追加迁移，验证暂存 readiness／旧路由 410，再 promote。迁移或暂存失败不切流；上线后验证失败保留新版本并标记 `first-cutover-unverified`，不回滚到旧公开接口版本。备份参考不会由脚本自动核验，迁移连接串须由受控环境提供。18 项离线 mock 测试通过；未连接生产、未迁移或发布。
 
 失败路径包括旧方法收到无效 JSON 仍为 410、旧服务未导入、线上 readiness／旧接口异常阻止 promote、缺安全回退基线时构建前阻断、回退命令失败时保留 `rolling-back` 而不报告成功。原 `test_conversations_api.py` 与 `test_database_deployment.py` 属于退役产品回归，保留源码并显式 skip；新路由和新领域迁移由当前测试覆盖。
 
