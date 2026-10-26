@@ -1,4 +1,7 @@
 {
+  "git": {
+    "deploymentEnabled": false
+  },
   "services": {
     "frontend": {
       "root": "src/frontend/",
