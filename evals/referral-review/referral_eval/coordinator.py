@@ -75,7 +75,9 @@ def attempts(ledger, plan):
     selected = {sample_hash(s) for s in plan.samples if s.rejection is None}
     if any(row["sample_hash"] not in selected for row in rows):
         raise ValueError("Unexpected ledger attempt")
-    return {r["sample_hash"]: dict(r) for r in rows}
+    # PostgreSQL SUM(bigint) returns numeric/Decimal; money stays integer
+    # micro-USD at the application boundary (including an empty zero sum).
+    return {r["sample_hash"]: dict(r, adjustment_microusd=int(r["adjustment_microusd"])) for r in rows}
 
 
 def recording(journal, plan, sample, row):

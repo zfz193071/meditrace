@@ -27,6 +27,7 @@ def test_late_correction_preserves_estimate_prices_and_original_month(engine):
     disabled = ledger(engine, now, REAL_AI_ENABLED=False, RR_MODEL_INPUT_MICROUSD_PER_MILLION_TOKENS=99999)
     correction = disabled.adjust(bid, original["id"], adjustment_key="late-response", usage=TOKENS)
     assert correction["actual_microusd"] == 2 and correction["delta_microusd"] == -1
+    assert type(correction["delta_microusd"]) is int
     assert disabled.adjust(bid, original["id"], adjustment_key="late-response", usage=TOKENS) == correction
     assert values(engine, m.evaluation_attempts) == [original]
     assert values(engine, m.evaluation_batches)[0]["spent_microusd"] == 2

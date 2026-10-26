@@ -10,6 +10,8 @@
 
 实现提交 `5aa9a03`。随后复核补充了「释放额度已被重用，晚到校正使总占用超限」的熔断保护，见 [修复记录](../../BUGFIX-EVALUATION-ADJUSTMENT-BUDGET.md)。校正专项 12 passed／12 skipped（17.44 秒），覆盖 batch／全站两种预算重用；最终 CI 结果另补。
 
+首轮 [PostgreSQL 17 CI](https://github.com/zfz193071/meditrace/actions/runs/40289119119/job/121459747618)：332 passed／1 failed（111.88 秒）。失败为真实隔离库 CLI 预览的 JSON 序列化：SUM(bigint) 在 PostgreSQL 返回 Decimal。已在领域边界无损转为整数，补充非零校正的 JSON 往返断言；详见 [修复记录](../../BUGFIX-EVALUATION-POSTGRES-COST-JSON.md)。
+
 ## 2026-10-26：隔离事务调度、持久录制与恢复
 
 实现提交：`bdc160d6de59f257b3adb7e73786c9ca4109b084`；槽位断言补充：`90cb281`（验证分支）。

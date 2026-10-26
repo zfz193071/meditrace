@@ -235,6 +235,8 @@ def test_late_usage_does_not_overwrite_final_estimate_or_recover_other_batch(eng
     assert result["samples"][0]["settlement_microusd"] == estimate["actual_microusd"]
     correction = values(engine, m.evaluation_adjustments)[0]
     assert result["samples"][0]["simulated_microusd"] == correction["actual_microusd"]
+    assert type(result["samples"][0]["adjustment_microusd"]) is int
+    assert json.loads(json.dumps(result)) == result
     assert recover(engine, setup) == result
     assert len(values(engine, m.evaluation_adjustments)) == 1
     rows = {r["id"]: r for r in values(engine, m.evaluation_attempts)}

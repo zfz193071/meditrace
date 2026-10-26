@@ -239,8 +239,8 @@ class EvaluationLedger:
                     raise ApiError(ErrorCode.USAGE_CONFLICT)
                 return dict(previous)
             actual = budget.cost(usage.prompt_tokens, usage.completion_tokens, batch["input_price"], batch["output_price"])
-            corrections = conn.execute(sa.select(sa.func.coalesce(sa.func.sum(m.evaluation_adjustments.c.delta_microusd), 0))
-                .where(m.evaluation_adjustments.c.attempt_id == attempt_id)).scalar_one()
+            corrections = int(conn.execute(sa.select(sa.func.coalesce(sa.func.sum(m.evaluation_adjustments.c.delta_microusd), 0))
+                .where(m.evaluation_adjustments.c.attempt_id == attempt_id)).scalar_one())
             delta = actual - (attempt["actual_microusd"] + corrections)
             for key in keys:
                 conn.execute(m.budget_buckets.update().where(m.budget_buckets.c.bucket_key == key)
