@@ -16,7 +16,7 @@ from uuid import NAMESPACE_URL, uuid5
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / 'src/backend'))
 from referral_review.config import Settings
-from referral_review.documents.parser import parse_pdf, parse_text
+from referral_review.documents.parser import parse_pdf, parse_text, PDF_PARSER_VERSION
 from referral_review.documents.text_rules import locate_quote
 from referral_review.schemas import DocumentPageResponse
 from referral_review.extraction.adapters import FakeAdapter, ExtractionError
@@ -25,6 +25,7 @@ from referral_review.extraction.service import extract, validate_output, DATE, U
 from referral_review.checklist import ChecklistManifest, evaluate
 from referral_review.checklist.contracts import CHECKLIST_VERSION
 from .metrics import score, aggregate
+from .files import fixture_bytes, unique_json
 
 CORPUS = ROOT / 'fixtures/referral-review'
 REJECTIONS = {'SCANNED_PAGE':'PDF_UNREADABLE_PAGE','UNREADABLE_NONEMPTY_PAGE':'PDF_UNREADABLE_PAGE',
@@ -52,39 +53,54 @@ def versions():
     files = sorted([p for directory in paths for p in directory.glob('*.py')]+[ROOT/'src/backend/referral_review/schemas/__init__.py', ROOT/'src/backend/referral_review/config.py'])
     digest=sha(''.join(str(p.relative_to(ROOT))+':'+sha(p.read_bytes())+'\n' for p in files).encode())
     return dict(evaluator='offline-eval-v1', implementation_sha256=digest, schema=SCHEMA_VERSION,
-                prompt=PROMPT_VERSION, checklist=CHECKLIST_VERSION, parser='pypdf-6.21.1/text-v1',
+                prompt=PROMPT_VERSION, checklist=CHECKLIST_VERSION, parser=PDF_PARSER_VERSION,
                 model='fake-extraction-v1', price_version=None)
 
 
 def load_cases(split):
-    manifest=read(CORPUS/'manifest.json'); freeze=read(CORPUS/'freeze.json')
-    if sha((CORPUS/'checklist.json').read_bytes()) != manifest['checklist_sha256'] or manifest['checklist_sha256'] != freeze['checklist_sha256']:
+    if split not in ('dev', 'test'): raise ValueError('Invalid split')
+    manifest=unique_json(fixture_bytes(CORPUS,'manifest.json'))
+    freeze=unique_json(fixture_bytes(CORPUS,'freeze.json'))
+    if sha(fixture_bytes(CORPUS,'checklist.json')) != manifest['checklist_sha256'] or manifest['checklist_sha256'] != freeze['checklist_sha256']:
         raise ValueError('Checklist hash mismatch')
-    cases=[]
+    cases=[]; seen=set()
     for entry in manifest['entries']:
+        if entry['key'] in seen: raise ValueError('Duplicate packet key')
+        seen.add(entry['key'])
         if entry['split'] != split: continue
+        body=fixture_bytes(CORPUS,entry['packet_path'])
         path=CORPUS/entry['packet_path']
-        if sha(path.read_bytes()) != entry['sha256']: raise ValueError('Packet hash mismatch')
+        if sha(body) != entry['sha256']: raise ValueError('Packet hash mismatch')
         if split=='test' and freeze['test_packets'].get(entry['key']) != entry['sha256']: raise ValueError('Frozen packet mismatch')
-        packet=read(path)
+        packet=unique_json(body)
         if packet.get('synthetic') is not True: raise ValueError('Synthetic corpus required')
+        if packet['key'] != entry['key']: raise ValueError('Packet identity mismatch')
         for doc in packet['documents']:
-            if sha((path.parent/doc['source_path']).read_bytes()) != doc['sha256']: raise ValueError('Packet-bound source hash mismatch')
+            if sha(packet_bytes(path.parent,doc['source_path'])) != doc['sha256']: raise ValueError('Packet-bound source hash mismatch')
             for page in doc['pages']:
-                if sha((path.parent/page['text_path']).read_bytes()) != page['text_hash']: raise ValueError('Packet-bound page hash mismatch')
+                if sha(packet_bytes(path.parent,page['text_path'])) != page['text_hash']: raise ValueError('Packet-bound page hash mismatch')
             for relative in [doc['source_path']]+[p['text_path'] for p in doc['pages']]:
                 file=path.parent/relative
-                if not file.resolve().is_relative_to(path.parent.resolve()): raise ValueError('Invalid fixture path')
-                if sha(file.read_bytes()) != manifest['files'][str(file.relative_to(CORPUS))]: raise ValueError('Source hash mismatch')
+                if sha(packet_bytes(path.parent,relative)) != manifest['files'][str(file.relative_to(CORPUS))]: raise ValueError('Source hash mismatch')
         cases.append((entry,packet,path.parent))
     if len(cases) != (10 if split=='dev' else 20): raise ValueError('Unexpected split size')
     return manifest,cases
 
 
+def packet_bytes(directory, relative):
+    # Always walk from the corpus root, including packet-directory components.
+    # A previously checked directory may have been replaced with a symlink.
+    relative = Path(relative)
+    if relative.is_absolute() or '..' in relative.parts or not relative.parts:
+        raise ValueError('Invalid fixture path')
+    return fixture_bytes(CORPUS, directory.relative_to(CORPUS) / relative)
+
+
 def parse_case(packet, directory):
     docs=[]; issue=None
     for d in packet['documents']:
-        raw=(directory/d['source_path']).read_bytes()
+        raw=packet_bytes(directory,d['source_path'])
+        if sha(raw) != d['sha256']: raise ValueError('Packet-bound source hash mismatch')
         parsed=(parse_pdf if d['kind']=='pdf' else parse_text)(raw)
         issue=issue or parsed.issue_code
         pages=[DocumentPageResponse(document_id=d['id'],page_number=p.page_number,normalized_text=p.normalized_text,
@@ -172,10 +188,12 @@ async def run(split='dev',provider='fake',recording=None,interrupt_after=None):
             output=record['output']
         else: record=None
         try:
-            if issue: status='rejected'; error=issue
+            if issue or record and record.get('input_rejection'):
+                status='rejected'; error=issue or record['input_rejection']
             elif interrupt_after is not None and index>=interrupt_after: status='failed'; error='EVALUATION_INTERRUPTED'
             else:
                 if record and record['execution_error'] and output is None: raise ExtractionError(record['execution_error'])
+                if record and output is None: raise ExtractionError('EVALUATION_RECORDING_MISSING_OUTPUT')
                 output=output if record else scripted_output(pages,baseline=provider=='baseline')
                 candidate=score(candidate_result(output,pages),packet['gold']['result'],page_map)
                 replay_provider=('baseline' if recording and recording['origin']=='baseline' else provider)
@@ -191,6 +209,7 @@ async def run(split='dev',provider='fake',recording=None,interrupt_after=None):
             original_elapsed_ms=record['elapsed_ms'] if record else None,page_count=len(pages),
             tokens=None,actual_cost_usd=None,estimated_cost_usd=None))
         records.append(dict(key=entry['key'],packet_sha256=entry['sha256'],output=output,
+            input_rejection=error if status=='rejected' else None,
             execution_error=error if status=='failed' else None,elapsed_ms=elapsed))
     summary=aggregate(rows)
     report_gates = dict(citation_integrity=summary['citation_integrity']['value']==1,

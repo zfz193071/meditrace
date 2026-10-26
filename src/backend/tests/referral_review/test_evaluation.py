@@ -158,3 +158,24 @@ def test_manifest_rewrite_cannot_detach_source_from_packet_hash(tmp_path,monkeyp
     monkeypatch.setattr(runner,'CORPUS',corpus)
     with pytest.raises(ValueError,match='Packet-bound source hash'):
         runner.load_cases('dev')
+
+
+def test_replay_retains_recorded_parser_rejection_after_parser_recovers(monkeypatch):
+    import referral_eval.runner as runner
+    manifest,cases=load_cases('dev')
+    case=next(c for c in cases if c[0]['key']=='dev-04')  # Text-only, deterministic fault injection.
+    monkeypatch.setattr(runner,'load_cases',lambda split: (manifest,[case]))
+    with monkeypatch.context() as patch:
+        patch.setattr(runner,'parse_case',lambda *args: ([], 'PDF_TIMEOUT'))
+        original,capture=asyncio.run(run())
+    replay,_=asyncio.run(run(provider='replay',recording=capture))
+    assert original['summary']['packets_total']==replay['summary']['packets_total']==1
+    assert replay['rows'][0]['status']=='rejected' and replay['rows'][0]['error']=='PDF_TIMEOUT'
+    assert replay['rows'][0]['metrics']['facts']['fn']>0
+    assert comparable(original)==comparable(replay)
+    # Old/incomplete captures have no recorded rejection; report the absence,
+    # never invent model output or crash when parsing now succeeds.
+    capture['records'][0].pop('input_rejection')
+    missing,_=asyncio.run(run(provider='replay',recording=capture))
+    assert missing['rows'][0]['status']=='failed'
+    assert missing['rows'][0]['error']=='EVALUATION_RECORDING_MISSING_OUTPUT'

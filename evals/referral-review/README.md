@@ -21,7 +21,27 @@ The default split is the ten development packets. All are retained: nine readabl
 
 `--compare` checks **each case's outcome, diagnostics and counts**, plus aggregate counts. A compensating regression in two different cases cannot hide behind unchanged totals. Version manifests show implementation hashes; replay under changed code is a new regression result, not new evidence about a real model. `--check-gates` exits nonzero for any unmet offline gate. Passing these provisional gates would still not establish release readiness.
 
-`--provider real` always fails before reading samples or creating an output directory, even with `--max-cost-usd`. The internal evaluation ledger now shares global day/month financial reservations with workspace runs, and uses the same two global dispatch slots, but the CLI still lacks operator authorization binding, synthetic-input validation and durable real recording/recovery. See [ledger scope](../../docs/referral-review/EVALUATION-LEDGER.md). A cost cap or configured API key cannot bypass these remaining MT-20 gates. No unlimited or direct-provider fallback exists. Real execution will also require operator gold review, explicit budget authorization, configured model/prices and shared budget availability.
+`--provider real` always fails before reading samples or creating an output directory, even with `--max-cost-usd`. The internal evaluation ledger now shares global day/month financial reservations with workspace runs, and uses the same two global dispatch slots, but the CLI still lacks transactional integration of the new plan/approval checks and durable real recording/recovery. See [ledger scope](../../docs/referral-review/EVALUATION-LEDGER.md). A cost cap or configured API key cannot bypass these remaining MT-20 gates. No unlimited or direct-provider fallback exists. Real execution will also require operator gold review, explicit budget authorization, configured model/prices and shared budget availability.
+
+## Prepare a review plan without spending
+
+`plan.py` parses only the pinned synthetic corpus and produces a new private (0600) plan file. It does not load provider credentials or database settings, create the future report directory, reserve funds, record human consent or send requests. Its summary explicitly reports `execution: disabled` and `approval: not_recorded`.
+
+This example uses **invented test prices, a synthetic operator and a proposed test cap**, not real pricing or authorization:
+
+```bash
+src/backend/.venv/bin/python evals/referral-review/plan.py \
+  --plan-file /tmp/referral-plan.json --output /tmp/referral-future-report \
+  --operator-id 00000000-0000-4000-8000-000000000001 \
+  --model synthetic-model --price-version synthetic-v1 \
+  --input-price 1000 --output-price 2000 --max-cost-usd 0.01
+```
+
+Prices are integer micro-USD per million tokens. The default selects all ten development packets; repeat `--packet dev-01` etc. for a subset. Rejected packets remain visible with zero planned provider cost. Frozen test selection requires `--split test --ack-test-exposure`. Existing plan files and report directories are rejected. An over-cap preview can be inspected, but approval validation rejects it; prepare a smaller selection or obtain a separately reviewed budget.
+
+The plan hash binds operator/batch, output directory, selected packet/request hashes, token bounds, prices, versions, Python implementation and dependency lockfiles. Internal checks reject changed approval parameters, runtime pricing/invitation, corpus, source files or implementation. `bound_request` checks the exact canonical request bytes; the transaction helper locks an active invited operator. None of these checks enables the real CLI, and they are not yet integrated with dispatch. Human gold review, actual budget consent, atomic ledger orchestration and durable recordings remain required.
+
+Corpus manifest/freeze roots are pinned in `planning.py`; changing them requires an intentional reviewed corpus revision, not automatic refresh. Reads reject traversal, links, special files and oversized inputs before reading contents, and parsing rechecks packet-bound hashes. Existing historical reports remain historical; newly generated versions use the actual parser constant.
 
 ## What the files mean
 
@@ -29,7 +49,7 @@ Each run produces:
 
 - `report.json`: versioned metrics, per-case differences, denominators, outcomes, local duration and unknown-cost fields; commit plus dirty-worktree flag, implementation SHA-256, Python/dependency environment, corpus and recording hashes.
 - `report.md`: readable result and blocker table.
-- `recording.json`: synthetic model-shaped output or an explicitly recorded error for every selected packet, bound to corpus and packet hashes. Only Fake/baseline origins are currently accepted. No provider secrets or real-provider recordings exist.
+- `recording.json`: synthetic model-shaped output or an explicitly recorded error for every selected packet, bound to corpus and packet hashes. New captures also retain input rejection reasons, so parser recovery cannot invent absent model output. An older capture with missing output and no rejection reason fails explicitly if parsing now succeeds. New parser failures remain visible during replay. Only Fake/baseline origins are currently accepted. No provider secrets or real-provider recordings exist.
 - `status.json`: running, complete or interrupted/failed status. A process interruption never creates a successful final report. An incomplete run without `report.json` is not valid metric evidence. A comparison/gate failure can have a completed report but retains failed command status.
 
 Local timing is wall time for parsing plus offline execution; its successful-sample p95 has an explicit sample count and failures/rejections remain reported. It is not model latency, and it cannot satisfy the ≥20 real-measurement gate. Fake Adapter token counters are discarded; real tokens, known/estimated cost, price version and human-verified citation support remain **null**, not invented zeros.
