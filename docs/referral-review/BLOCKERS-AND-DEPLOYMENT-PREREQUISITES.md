@@ -8,10 +8,10 @@
 - `./deploy-vercel.sh --check` 退出 0：已核对目标项目访问权限、前后端 Services、Hobby 套餐、生产 `DATABASE_URL` 变量存在及 231 个部署输入文件。证据：[本地预检日志](../../.vercel/deploy-20261026-092810.log)（本机文件，不随仓库提交）。预检未验证数据库连接或迁移状态。
 - 生产 `DEEPSEEK_API_KEY` 仍未配置。本次未发布、未迁移；MT-02 已通过隔离 CI 验收，线上功能及下方其他发布条件仍需逐项复核。
 - 首次 `git fetch origin` 后确认的 24 个本地提交及本次修复，现已推送到 `codex/referral-postgres-validation` 验证分支；远端生产 `main` 未更新。未跟踪的用户文件 `TASK-PREVISIT-SUMMARY.md` 保持不动。
-- 初次生产变量名称检查没有任何 `RR_*`、`BLOB_READ_WRITE_TOKEN` 或 `DEEPSEEK_API_KEY`。本轮已创建 [GitHub OAuth App](https://github.com/settings/applications/3964320)，精确回调为 `https://meditrace.baozaolaoba.top/api/v1/auth/github/callback`，没有开启 wildcard 或 device flow。Vercel production 已保存 `RR_GITHUB_CLIENT_ID`、`RR_SITE_ORIGIN`、`RR_GITHUB_CALLBACK_URL`、`RR_SESSION_ENCRYPTION_KEY` 与 `RR_MODE=sandbox`。客户端密钥已生成，但浏览器工具拒绝本地文件导出，操作者正在手动保存 `RR_GITHUB_CLIENT_SECRET`，尚待存在性复核；无密钥值写入本记录。其他存储、测试支付、真实模型及维护配置仍缺。
+- 初次生产变量名称检查没有任何 `RR_*`、`BLOB_READ_WRITE_TOKEN` 或 `DEEPSEEK_API_KEY`。本轮已创建 [GitHub OAuth App](https://github.com/settings/applications/3964320)，精确回调为 `https://meditrace.baozaolaoba.top/api/v1/auth/github/callback`，没有开启 wildcard 或 device flow。Vercel production 已保存 `RR_GITHUB_CLIENT_ID`、`RR_SITE_ORIGIN`、`RR_GITHUB_CALLBACK_URL`、`RR_SESSION_ENCRYPTION_KEY` 与 `RR_MODE=sandbox`。`RR_GITHUB_CLIENT_SECRET` 已通过浏览器表单保存；Vercel API 已复核六项 production 配置均存在，client secret 类型为 `sensitive`。聊天中曾暴露的密钥均已撤销，替代密钥未写入本地文件或本文档。其他存储、测试支付、真实模型及维护配置仍缺。
 - HTTPS 只读 GET `/api/v1/readiness` 仍返回 **404**（仅检查状态码，不读取旧资料），当前生产未通过新 readiness 验证，首次安全切换阻碍未解除。
 - 临时 PostgreSQL 17 [扩展数据库 job](https://github.com/zfz193071/meditrace/actions/runs/40255313217/job/121355790255) 为 **133 passed／0 skipped**（包含 SQLite／PostgreSQL 参数化），MT-02 的全部验收通过并改为 `DONE`；MT-10／11／12 的账本、跨进程和审核持久化证据同步补充。未使用生产数据库，本机 shell 仍无 `TEST_DATABASE_URL`，不再因此把 MT-02 记为受阻。
-- 当前工单状态：MT-01／02 `DONE`、MT-03／04 `BLOCKED`、MT-05—24 `TODO`。MT-03 缺人工标注签核，MT-04 缺真实 OAuth 配置与 consent；MT-20 真实评估账本、MT-21 首次安全生产基线及 MT-22 完整验收仍未完成。
+- 当前工单状态：MT-01／02 `DONE`、MT-03／04 `BLOCKED`、MT-05—24 `TODO`。MT-03 缺人工标注签核，MT-04 缺真实应用 OAuth 往返与 consent 验收；MT-20 真实评估账本、MT-21 首次安全生产基线及 MT-22 完整验收仍未完成。
 - Vercel 项目开启了 Git 自动部署且生产分支为 main。为防止推送绕过发布门槛，验证分支已设置 `git.deploymentEnabled: false`，实际推送后最近部署记录仍为既有生产版本。远端 main 尚未包含该保护，不向其推送未包含保护的提交。见 [修复记录](../../BUGFIX-VERCEL-GIT-AUTO-DEPLOY.md)。
 - 完整 CI 经退役测试步骤、pypdf 安全补丁及解析版本兼容修复后，在提交 `ef5d9e5` [全部通过](https://github.com/zfz193071/meditrace/actions/runs/40257964496)：后端 564 passed／69 skipped，另一个 PostgreSQL job 137 passed／0 skipped，前端 68 tests、构建／类型检查／前后端依赖审计均通过。详见 [最终 CI 证据](CI-2026-10-26.md)，不将普通 job 的 skipped 当作验收通过。
 
@@ -39,7 +39,7 @@
 | --- | --- | --- |
 | Vercel | 2026-10-26 已恢复 CLI 登录并通过 `--check`，核实项目访问权限、Services、Hobby、生产数据库变量存在及部署输入；生产域名 HTTPS、函数时限和完整 V1 环境配置仍需核对。`./deploy-vercel.sh --check` 成功后仍不代表可以发布。 | 登录已完成；代理继续检查和记录 |
 | PostgreSQL | MT-02 隔离 PostgreSQL 17 验收已通过，账本／运行竞争及审核持久化也补充了 CI 证据。生产 `DATABASE_URL` 实际连接、追加迁移、备份／恢复及其他业务的完整集成验收仍需核实。 | 无需用户提供测试库；操作者确认生产资源和备份，代理验证 |
-| GitHub OAuth | OAuth App 已创建，站点／client ID／callback／session key／sandbox 模式已存 Vercel；客户端 secret 待操作者保存并复核。真实登录、consent、退出及错误回跳仍未验收。 | 操作者保存 secret 并完成一次真实 consent；代理验证 |
+| GitHub OAuth | OAuth App 已创建，站点／client ID／callback／session key／sandbox 模式已存 Vercel；客户端 secret 已保存并核实为 production sensitive。真实登录、consent、退出及错误回跳仍未验收。 | 配置已完成；操作者完成真实应用 consent，代理验证 |
 | 私有文件 | 私有 Vercel Blob store、`RR_STORAGE_BACKEND=vercel`、最小权限 `BLOB_READ_WRITE_TOKEN`；真实写／授权读／越权拒绝／删除和孤立清理。 | 操作者提供资源；代理验证 |
 | 支付测试 | 仅 Stripe **test** key、固定 Price／金额／货币及 webhook secret；真实 test Checkout→签名 webhook→一次权益、重复／乱序／退款和多实例竞争。禁止 live 配置。 | 操作者配置测试账号；代理验证 |
 | 真实模型 | DeepSeek Key、模型 ID、经核实的价格版本和输入／输出单价、受邀内部 user UUID、正数日／月预算；先完成评估账本，再由操作者明确授权具体 `--max-cost-usd` 上限，使用合成资料进行真实测量。 | 代理先补实现；操作者给预算授权与受邀账号 |

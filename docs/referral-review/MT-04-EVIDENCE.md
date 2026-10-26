@@ -1,6 +1,6 @@
 # MT-04 认证实现与验收证据
 
-2026-10-26 更新：MT-02 已完成，MT-04 改为 `BLOCKED`。[OAuth App](https://github.com/settings/applications/3964320) 已创建且核对精确 callback；五项配套 Vercel production 配置已保存，client secret 待操作者手动保存后复核。真实应用 consent、登录／退出／错误回跳及平台日志验收仍未执行。最新资源状态见 [阻碍记录](BLOCKERS-AND-DEPLOYMENT-PREREQUISITES.md)，不以 GitHub 设置页面登录成功替代应用 OAuth 验收。
+2026-10-26 更新：MT-02 已完成，MT-04 改为 `BLOCKED`。[OAuth App](https://github.com/settings/applications/3964320) 已创建且核对精确 callback；六项 Vercel production OAuth 配置已保存并经 API 存在性复核，client secret 类型为 `sensitive`。真实应用 consent、登录／退出／错误回跳及平台日志验收仍未执行。最新资源状态见 [阻碍记录](BLOCKERS-AND-DEPLOYMENT-PREREQUISITES.md)，不以 GitHub 设置页面登录成功替代应用 OAuth 验收。
 
 日期：2026-10-20。认证代码和离线回归已通过；工单尚不可关闭。前置 MT-02 缺 PostgreSQL 实测，MT-04 自身缺真实 GitHub 配置、用户 consent 和完整登录往返。按依赖规则保留 `TODO`，不将模拟供应商响应记为外部验收。
 
@@ -46,7 +46,7 @@ MT-03 已先提交为 `24b710e`；本记录与 MT-04 实现一同提交，提交
 ## 待完成的验收
 
 1. MT-02 的独立 PostgreSQL 迁移和事务竞争验证。SQLite 不证明 PostgreSQL 并发行为。
-2. 按 [认证手册](AUTHENTICATION.md) 配置真实 GitHub OAuth，并由用户完成 consent、登录、安全回跳及退出，回填脱敏结果。当前仅检查配置是否存在，没有读取或记录实际密钥。
+2. 按 [认证手册](AUTHENTICATION.md) 配置真实 GitHub OAuth，并由用户完成 consent、登录、安全回跳及退出，回填脱敏结果。验收记录仅保留配置存在性及类型；密钥仅通过内存传入平台表单，不记录实际值。
 3. 实际浏览器的页面布局与托管平台敏感日志配置检查。组件测试与构建通过不替代这些检查。
 
 capabilities 继续为 false，readiness 继续为 503；身份代码通过离线测试不代表私人工作区、会员、受控 AI 或完整产品已交付。MT-03 的人工标注复核也仍待完成。
