@@ -1,5 +1,13 @@
 # MT-20 评估实施证据
 
+## 2026-10-26：晚到费用校正与隔离恢复 CLI
+
+新增 `rr_0009`／`EvaluationLedger.adjust`：原结算保留，追加绝对 usage 及差额，原 batch／日月桶同事务更新，幂等键绑定 token 对；数据库触发器禁止修改／删除校正。晚到录制以内容摘要幂等校正。恢复状态区分原结算、调整和有效合计，始终标为 Fake 演练。
+
+新增 `recover.py`：已有私有 journal 和计划、隔离 PostgreSQL ownership receipt、连接指纹／schema 随机标记／迁移版本均须匹配；默认 PostgreSQL 强制只读，写入需要 `--apply --confirm-plan`。无真实 Adapter、模型密钥读取、环境生产 DB 回退、自动建库／迁移、跨计划扫描或模型重试。具体命令和范围见 [账本手册](EVALUATION-LEDGER.md)。真实授权／gold、真实录制和 usage 来源、生产运维及完整报告仍缺，MT-20 不关闭。
+
+首轮本地定向测试（校正、调度、恢复 CLI、迁移）74 passed／61 skipped／3 failed（193.49 秒）；三项失败均为新增测试 usage 漏填必需的 total_tokens，已补齐测试输入，不放宽产品契约。修正后校正和 CLI 专项 19 passed／14 skipped（19.15 秒），13 项部署脚本回归通过；PostgreSQL 跳过项不视为通过，数据库并发和完整回归交由验证分支 CI 执行。
+
 ## 2026-10-26：隔离事务调度、持久录制与恢复
 
 实现提交：`bdc160d6de59f257b3adb7e73786c9ca4109b084`；槽位断言补充：`90cb281`（验证分支）。

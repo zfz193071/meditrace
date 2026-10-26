@@ -214,6 +214,48 @@ class EvaluationLedger:
             slots.release_evaluation(conn, attempt_id)
             return self._read(conn, attempt_id)
 
+    def adjust(self, batch_id, attempt_id, *, adjustment_key, usage, connection=None):
+        """Trusted absolute usage correction; never a public refund operation.
+
+        Keep the original settlement and apply only the delta to its original
+        day/month buckets. Replaying an older key never undoes a newer entry.
+        Disabled dispatch/current pricing do not prevent reconciling old costs.
+        """
+        if not isinstance(adjustment_key, str) or not 1 <= len(adjustment_key) <= 100:
+            raise ApiError(ErrorCode.SCHEMA_INVALID)
+        try:
+            usage = TokenUsage.model_validate(usage.model_dump() if isinstance(usage, TokenUsage) else usage)
+        except ValueError:
+            raise ApiError(ErrorCode.SCHEMA_INVALID) from None
+        with self._transaction(connection) as conn:
+            batch, attempt, _, keys = self._locked(conn, batch_id, attempt_id)
+            if attempt["state"] not in ("settled", "estimated_spent") or attempt["dispatched_at"] is None:
+                raise ApiError(ErrorCode.USAGE_CONFLICT)
+            previous = conn.execute(sa.select(m.evaluation_adjustments).where(
+                m.evaluation_adjustments.c.attempt_id == attempt_id,
+                m.evaluation_adjustments.c.adjustment_key == adjustment_key)).mappings().first()
+            if previous:
+                if (previous["prompt_tokens"], previous["completion_tokens"]) != (usage.prompt_tokens, usage.completion_tokens):
+                    raise ApiError(ErrorCode.USAGE_CONFLICT)
+                return dict(previous)
+            actual = budget.cost(usage.prompt_tokens, usage.completion_tokens, batch["input_price"], batch["output_price"])
+            corrections = conn.execute(sa.select(sa.func.coalesce(sa.func.sum(m.evaluation_adjustments.c.delta_microusd), 0))
+                .where(m.evaluation_adjustments.c.attempt_id == attempt_id)).scalar_one()
+            delta = actual - (attempt["actual_microusd"] + corrections)
+            for key in keys:
+                conn.execute(m.budget_buckets.update().where(m.budget_buckets.c.bucket_key == key)
+                    .values(spent_microusd=m.budget_buckets.c.spent_microusd + delta))
+            conn.execute(m.evaluation_batches.update().where(m.evaluation_batches.c.id == batch_id)
+                .values(spent_microusd=m.evaluation_batches.c.spent_microusd + delta))
+            if actual > attempt["upper_microusd"]:
+                conn.execute(m.usage_controls.update().where(m.usage_controls.c.key == "real_ai")
+                    .values(halted=True, reason="ACTUAL_EXCEEDS_RESERVATION"))
+            row = dict(id=uuid4(), attempt_id=attempt_id, adjustment_key=adjustment_key,
+                prompt_tokens=usage.prompt_tokens, completion_tokens=usage.completion_tokens,
+                actual_microusd=actual, delta_microusd=delta, created_at=self.clock())
+            conn.execute(m.evaluation_adjustments.insert().values(**row))
+            return row
+
     def recover(self, *, limit=100):
         """Bounded recovery only; never calls a provider or resets an attempt."""
         if type(limit) is not int or not 1 <= limit <= 100:

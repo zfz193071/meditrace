@@ -230,7 +230,13 @@ def test_late_usage_does_not_overwrite_final_estimate_or_recover_other_batch(eng
         setup[3][0] += timedelta(hours=24)
         estimate = settle(setup[0].batch_id, own["id"], outcome="unknown")
     result = recover(engine, setup)
-    assert result["samples"][0]["late_usage_pending"] is True
+    assert result["samples"][0]["late_usage_pending"] is False
+    assert result["samples"][0]["cost_status"] == "known"
+    assert result["samples"][0]["settlement_microusd"] == estimate["actual_microusd"]
+    correction = values(engine, m.evaluation_adjustments)[0]
+    assert result["samples"][0]["simulated_microusd"] == correction["actual_microusd"]
+    assert recover(engine, setup) == result
+    assert len(values(engine, m.evaluation_adjustments)) == 1
     rows = {r["id"]: r for r in values(engine, m.evaluation_attempts)}
     assert rows[own["id"]] == estimate
     assert rows[other_row["id"]]["state"] == "dispatched"

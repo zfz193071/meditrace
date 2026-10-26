@@ -397,6 +397,15 @@ evaluation_slots = sa.Table("rr_evaluation_slots", metadata,
     sa.UniqueConstraint("attempt_id"),
     sa.CheckConstraint("slot_number >= 0 AND slot_number < 2", name="slot"),
     sa.CheckConstraint("(attempt_id IS NULL AND lease_expires_at IS NULL) OR (attempt_id IS NOT NULL AND lease_expires_at IS NOT NULL)", name="lease"))
+evaluation_adjustments = sa.Table("rr_evaluation_adjustments", metadata,
+    uid(primary=True), uid("attempt_id", reference="rr_evaluation_attempts.id"),
+    sa.Column("adjustment_key", sa.String(100), nullable=False),
+    sa.Column("prompt_tokens", sa.BigInteger, nullable=False),
+    sa.Column("completion_tokens", sa.BigInteger, nullable=False),
+    sa.Column("actual_microusd", sa.BigInteger, nullable=False),
+    sa.Column("delta_microusd", sa.BigInteger, nullable=False), timestamp("created_at", created=True),
+    sa.UniqueConstraint("attempt_id", "adjustment_key"),
+    sa.CheckConstraint("actual_microusd >= 0 AND prompt_tokens >= 0 AND completion_tokens >= 0", name="amounts"))
 
 # Durable reviewer history, including every replaced handoff draft.
 review_events = sa.Table("rr_review_events", metadata,

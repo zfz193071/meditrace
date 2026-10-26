@@ -25,7 +25,7 @@ class Journal:
             info = os.fstat(self.directory)
             if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) & 0o077:
                 raise ValueError("Private journal directory required")
-            self.lock = os.open(".lock", os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK,
+            self.lock = os.open(".lock", os.O_RDWR | (0 if resume else os.O_CREAT) | os.O_NOFOLLOW | os.O_NONBLOCK,
                                 0o600, dir_fd=self.directory)
             if not stat.S_ISREG(os.fstat(self.lock).st_mode):
                 raise ValueError("Invalid journal lock")

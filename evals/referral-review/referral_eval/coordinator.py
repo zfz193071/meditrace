@@ -66,7 +66,11 @@ def attempts(ledger, plan):
             batch["input_price"], batch["output_price"]) != (
             plan.sha256, plan.max_cost_microusd, plan.model, plan.price_version, plan.input_price, plan.output_price):
             raise ValueError("Ledger belongs to a different plan")
-        rows = conn.execute(sa.select(m.evaluation_attempts).where(
+        corrections = sa.select(sa.func.coalesce(sa.func.sum(m.evaluation_adjustments.c.delta_microusd), 0)).where(
+            m.evaluation_adjustments.c.attempt_id == m.evaluation_attempts.c.id).scalar_subquery()
+        corrected = sa.exists().where(m.evaluation_adjustments.c.attempt_id == m.evaluation_attempts.c.id)
+        rows = conn.execute(sa.select(m.evaluation_attempts, corrections.label("adjustment_microusd"),
+                                     corrected.label("usage_corrected")).where(
             m.evaluation_attempts.c.batch_id == plan.batch_id)).mappings().all()
     selected = {sample_hash(s) for s in plan.samples if s.rejection is None}
     if any(row["sample_hash"] not in selected for row in rows):
@@ -87,6 +91,10 @@ def recording(journal, plan, sample, row):
     return receipt
 
 
+def receipt_key(receipt):
+    return "receipt:" + p.digest(receipt.model_dump(mode="json"))
+
+
 def reconcile(ledger, plan, journal):
     """Settle only this plan. No parsing, invitations, current prices or transport.
 
@@ -100,9 +108,10 @@ def reconcile(ledger, plan, journal):
             continue
         receipt = recording(journal, plan, sample, row)
         if receipt is not None:
-            # An estimate finalized after 24h cannot be overwritten by late usage.
-            # Leave that receipt for the future append-only correction workflow.
-            if row["state"] == "estimated_spent" and row["outcome"] == "unknown" and receipt.outcome != "unknown":
+            # Preserve the original estimate/outcome and append trusted late usage.
+            if row["state"] == "estimated_spent" and receipt.outcome != "unknown":
+                if receipt.usage is not None:
+                    ledger.adjust(plan.batch_id, row["id"], adjustment_key=receipt_key(receipt), usage=receipt.usage)
                 continue
             ledger.settle(plan.batch_id, row["id"], outcome=receipt.outcome, usage=receipt.usage)
         elif row["state"] not in TERMINAL and row["lease_expires_at"] <= ledger.clock():
@@ -117,10 +126,22 @@ def snapshot(ledger, plan, journal):
     for sample in plan.samples:
         row = rows.get(sample_hash(sample))
         receipt = recording(journal, plan, sample, row) if row else None
+        applied = False
+        if receipt and receipt.usage and row["state"] == "estimated_spent":
+            with ledger._transaction() as conn:
+                applied = conn.execute(sa.select(sa.exists().where(
+                    m.evaluation_adjustments.c.attempt_id == row["id"],
+                    m.evaluation_adjustments.c.adjustment_key == receipt_key(receipt)))).scalar_one()
+        base = row["actual_microusd"] if row else None
         samples.append(dict(key=sample.key, state=row["state"] if row else "rejected" if sample.rejection else "not_started",
             error=receipt.error if receipt else sample.rejection, outcome=row["outcome"] if row else None,
-            recorded=receipt is not None, simulated_microusd=row["actual_microusd"] if row else None,
-            late_usage_pending=bool(receipt and receipt.usage and row["state"] == "estimated_spent")))
+            recorded=receipt is not None, settlement_microusd=base,
+            adjustment_microusd=row["adjustment_microusd"] if row else 0,
+            simulated_microusd=base + row["adjustment_microusd"] if base is not None else None,
+            cost_status="known" if row and (row["state"] == "settled" or row["usage_corrected"]) else
+                        "estimated" if row and row["state"] == "estimated_spent" else
+                        "released" if row and row["state"] == "released" else "unsettled",
+            late_usage_pending=bool(receipt and receipt.usage and row["state"] == "estimated_spent" and not applied)))
     return dict(origin="fake", real_measurement=False, plan_sha256=plan.sha256, total=len(samples), samples=samples)
 
 

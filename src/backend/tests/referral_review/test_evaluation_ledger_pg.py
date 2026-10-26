@@ -46,6 +46,8 @@ def execute(payload):
                 s.record_dispatch(bid, run)
             elif operation == "settle":
                 s.settle(bid, run, outcome="succeeded", usage=TOKENS)
+            elif operation == "adjust":
+                s.adjust(bid, run, adjustment_key=sample, usage=TOKENS)
             else:
                 attempt(s, bid, sample)
             return "success"
@@ -102,6 +104,22 @@ def test_process_replays_claim_once_and_settle_once(pg):
     assert result.count("success") == 1 and result.count("USAGE_CONFLICT") == 2
     assert race(pg, [("settle", *task)] * 3) == ["success"] * 3
     assert all(b["reserved_microusd"] == 0 and b["spent_microusd"] == 2 for b in values(pg, m.budget_buckets))
+    assert values(pg, m.evaluation_batches)[0]["spent_microusd"] == 2
+
+
+@pytest.mark.parametrize("same_key", [True, False])
+def test_concurrent_adjustments_change_budget_once(pg, same_key):
+    s = ledger(pg)
+    bid = batch(s)
+    row = attempt(s, bid)
+    s.record_dispatch(bid, row["id"])
+    original = s.settle(bid, row["id"], outcome="failed")
+    tasks = [("adjust", bid, "one" if same_key else str(i), None, row["id"]) for i in range(3)]
+    assert race(pg, tasks) == ["success"] * 3
+    assert values(pg, m.evaluation_attempts) == [original]
+    assert len(values(pg, m.evaluation_adjustments)) == (1 if same_key else 3)
+    assert sum(r["delta_microusd"] for r in values(pg, m.evaluation_adjustments)) == -1
+    assert all(b["spent_microusd"] == 2 for b in values(pg, m.budget_buckets))
     assert values(pg, m.evaluation_batches)[0]["spent_microusd"] == 2
 
 
