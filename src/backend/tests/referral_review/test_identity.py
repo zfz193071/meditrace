@@ -19,8 +19,8 @@ def test_unconfigured_auth_is_anonymous_and_sign_in_fails_closed():
         assert client.get("/auth/github/start", follow_redirects=False).status_code == 503
 
 
-@pytest.fixture
-def auth_client(tmp_path):
+@pytest.fixture(params=["https://referral.example.test", "http://127.0.0.1:3000"])
+def auth_client(tmp_path, request):
     import base64
     import json
     from datetime import datetime, timezone
@@ -31,9 +31,12 @@ def auth_client(tmp_path):
     from referral_review.persistence.database import create_engine
     from referral_review.persistence.migrations import HEAD, upgrade
 
+    origin = request.param
+
     class GitHubTransport(BaseAdapter):
         subject = 12345
         fail = False
+        token_calls = 0
 
         def send(self, request, **kwargs):
             if self.fail:
@@ -43,10 +46,11 @@ def auth_client(tmp_path):
             response.request = request
             response.url = request.url
             if request.url == "https://github.com/login/oauth/access_token":
+                self.token_calls += 1
                 posted = parse_qs(request.body)
                 assert posted["client_secret"] == ["client-secret-sentinel"]
                 assert len(posted["code_verifier"][0]) == 43
-                assert posted["redirect_uri"] == ["https://referral.example.test/api/v1/auth/github/callback"]
+                assert posted["redirect_uri"] == [origin + "/api/v1/auth/github/callback"]
                 data = {"access_token": "provider-token-sentinel", "token_type": "bearer", "scope": ""}
             elif request.url == "https://api.github.com/user":
                 assert request.headers["Authorization"] == "Bearer provider-token-sentinel"
@@ -65,16 +69,16 @@ def auth_client(tmp_path):
     with engine.begin() as connection:
         upgrade(connection, HEAD)
     settings = Settings(RR_ENVIRONMENT="test", RR_MODE="sandbox",
-        RR_SITE_ORIGIN="https://referral.example.test",
+        RR_SITE_ORIGIN=origin,
         RR_GITHUB_CLIENT_ID="synthetic-client",
         RR_GITHUB_CLIENT_SECRET="client-secret-sentinel",
-        RR_GITHUB_CALLBACK_URL="https://referral.example.test/api/v1/auth/github/callback",
+        RR_GITHUB_CALLBACK_URL=origin + "/api/v1/auth/github/callback",
         RR_SESSION_ENCRYPTION_KEY=base64.urlsafe_b64encode(b"k" * 32).decode())
     transport = GitHubTransport()
     identity = Identity(engine, settings, github=GitHubOAuth(settings, http_adapter=transport),
                         clock=lambda: clock[0])
     with TestClient(create_app(settings, identity=identity),
-                    base_url="https://referral.example.test", follow_redirects=False) as client:
+                    base_url=origin, follow_redirects=False) as client:
         yield client, identity, clock, transport
     engine.dispose()
 
@@ -92,7 +96,8 @@ def test_github_login_creates_a_private_session_and_returns_to_safe_page(auth_cl
     client, _, _, _ = auth_client
     completed = sign_in(client)
     assert completed.status_code == 303 and completed.headers["location"] == "/workspace"
-    assert "HttpOnly" in completed.headers["set-cookie"] and "Secure" in completed.headers["set-cookie"]
+    assert "HttpOnly" in completed.headers["set-cookie"]
+    assert ("Secure" in completed.headers["set-cookie"]) == str(client.base_url).startswith("https:")
     session = client.get("/auth/session")
     body = session.json()
     assert body["user"]["display_name"] == "Synthetic Developer"
@@ -100,6 +105,33 @@ def test_github_login_creates_a_private_session_and_returns_to_safe_page(auth_cl
     assert session.headers["cache-control"] == "private, no-store"
     assert "provider-token-sentinel" not in session.text
     assert "client-secret-sentinel" not in session.text
+
+
+def test_github_issuer_callback_completes_real_provider_response_shape(auth_client):
+    client, _, _, transport = auth_client
+    started = client.get("/auth/github/start")
+    state = parse_qs(urlsplit(started.headers["location"]).query)["state"][0]
+    response = client.get("/auth/github/callback", params={"state": state,
+        "code": "synthetic-code", "iss": "https://github.com/login/oauth"})
+    assert response.headers["location"] == "/workspace"
+    assert client.get("/auth/session").json()["user"] is not None
+    assert transport.token_calls == 1
+
+
+@pytest.mark.parametrize("issuers", [
+    ["https://evil.example"], ["https://github.com"],
+    ["https://github.com/login/oauth/"], ["http://github.com/login/oauth"], [""],
+    ["https://github.com/login/oauth", "https://github.com/login/oauth"],
+])
+def test_untrusted_or_duplicate_issuer_never_reaches_token_exchange(auth_client, issuers):
+    client, _, _, transport = auth_client
+    started = client.get("/auth/github/start")
+    state = parse_qs(urlsplit(started.headers["location"]).query)["state"][0]
+    response = client.get("/auth/github/callback", params=[("state", state),
+        ("code", "synthetic-code"), *(("iss", issuer) for issuer in issuers)])
+    assert response.headers["location"] == "/login?error=oauth_failed"
+    assert client.get("/auth/session").json()["user"] is None
+    assert transport.token_calls == 0
 
 
 def test_logout_requires_origin_and_csrf_then_revokes_the_session(auth_client):
@@ -112,7 +144,7 @@ def test_logout_requires_origin_and_csrf_then_revokes_the_session(auth_client):
         "Origin": "https://evil.example", "X-CSRF-Token": csrf,
     }).status_code == 403
     assert client.post("/auth/logout", headers={
-        "Origin": "https://referral.example.test", "X-CSRF-Token": csrf,
+        "Origin": str(client.base_url).rstrip("/"), "X-CSRF-Token": csrf,
     }).status_code == 204
     client.cookies.set(identity.session_cookie, token)
     assert client.get("/auth/session").json()["user"] is None
@@ -165,7 +197,7 @@ def test_new_mutation_routes_are_csrf_protected_by_default_and_session_is_same_o
     assert client.get("/auth/session", headers={"Origin": "https://evil.example"}).status_code == 403
     csrf = client.get("/auth/session").json()["csrf_token"]
     assert client.post("/test-mutation", headers={
-        "Origin": "https://referral.example.test", "X-CSRF-Token": csrf,
+        "Origin": str(client.base_url).rstrip("/"), "X-CSRF-Token": csrf,
     }).json() == {"accepted": True}
     # Webhook-looking URLs do not acquire a blanket exemption.
     @client.app.post("/billing/webhook/other")
@@ -296,7 +328,7 @@ def test_mounted_auth_keeps_cookie_path_and_csrf_checks(auth_client):
     client, identity, _, _ = auth_client
     parent = FastAPI()
     parent.mount("/api/v1", create_app(identity.settings, identity=identity))
-    with TestClient(parent, base_url="https://referral.example.test", follow_redirects=False) as mounted:
+    with TestClient(parent, base_url=identity.settings.site_origin, follow_redirects=False) as mounted:
         started = mounted.get("/api/v1/auth/github/start")
         state = parse_qs(urlsplit(started.headers["location"]).query)["state"][0]
         completed = mounted.get("/api/v1/auth/github/callback", params={"state": state, "code": "synthetic-code"})
@@ -304,7 +336,7 @@ def test_mounted_auth_keeps_cookie_path_and_csrf_checks(auth_client):
         csrf = mounted.get("/api/v1/auth/session").json()["csrf_token"]
         assert mounted.post("/api/v1/auth/logout").status_code == 403
         assert mounted.post("/api/v1/auth/logout", headers={
-            "Origin": "https://referral.example.test", "X-CSRF-Token": csrf,
+            "Origin": str(client.base_url).rstrip("/"), "X-CSRF-Token": csrf,
         }).status_code == 204
 
 

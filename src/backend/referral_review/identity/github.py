@@ -10,6 +10,7 @@ from ..schemas import ErrorCode
 AUTHORIZE = "https://github.com/login/oauth/authorize"
 TOKEN = "https://github.com/login/oauth/access_token"
 PROFILE = "https://api.github.com/user"
+ISSUER = "https://github.com/login/oauth"
 
 
 @dataclass(frozen=True)

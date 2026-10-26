@@ -27,4 +27,5 @@ async def retired_api(request: Request, legacy_path: str = ""):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    from referral_review.operations.access_logging import access_log_config
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_config=access_log_config())

@@ -4,7 +4,7 @@ MT-04 提供 GitHub 登录、不透明会话、退出和共享资料归属校验
 
 ## 启用条件
 
-2026-10-26 配置进度：[MediTrace Referral Review Copilot OAuth App](https://github.com/settings/applications/3964320) 已创建，首页为 `https://meditrace.baozaolaoba.top`，callback 为 `https://meditrace.baozaolaoba.top/api/v1/auth/github/callback`，wildcard 和 device flow 关闭。生产站点、client ID、callback、session key 与 sandbox 模式已写入 Vercel；client secret 已通过浏览器表单保存；Vercel API 复核六项 production 配置均存在，`RR_GITHUB_CLIENT_SECRET` 类型为 `sensitive`。本次没有发布，资源创建不代表真实登录已验收。
+2026-10-26 配置进度：[MediTrace Referral Review Copilot OAuth App](https://github.com/settings/applications/3964320) 已创建，首页为 `https://meditrace.baozaolaoba.top`，callback 为 `https://meditrace.baozaolaoba.top/api/v1/auth/github/callback`，wildcard 和 device flow 关闭。生产站点、client ID、callback、session key 与 sandbox 模式已写入 Vercel；client secret 已通过浏览器表单保存；Vercel API 复核六项 production 配置均存在，`RR_GITHUB_CLIENT_SECRET` 类型为 `sensitive`。本次没有发布；独立本地环境已完成真实登录验收，生产环境尚未验收。
 
 聊天中曾暴露的客户端密钥均已撤销，替代密钥已保存到 Vercel。浏览器文件导出受限后，本轮通过工具编排在内存中将页面值传入 Vercel Secret 表单并保存，没有导出本地文件或在聊天、仓库中记录密钥值。后续手动轮换也应将 `RR_GITHUB_CLIENT_SECRET` 作为固定变量名，密钥仅填写到平台的 Value 字段或 CLI 的变量值提示中。
 
@@ -28,6 +28,36 @@ GitHub OAuth App 的 callback 必须精确等于 `RR_SITE_ORIGIN` 加 `/api/v1/a
 共享 `require_owner(request, connection, packet_id)` 必须在业务读写所用的同一事务内调用。按用户、会话、资料包顺序加锁；匿名／失效为 401，越权／不存在／已删除／已到期统一为 404。后续子资源查询必须限制到返回的 packet，不能只验证一个客户端传入的 owner ID。
 
 ## 人工 GitHub 验收
+
+### 已准备的独立本地环境（2026-10-26）
+
+[MediTrace Local OAuth Acceptance](https://github.com/settings/applications/3964380) 专供本机登录验收，homepage 为 `http://127.0.0.1:3000`，精确 callback 为该 origin 加 `/api/v1/auth/github/callback`，没有 wildcard 或 device flow。生产 App 及生产凭据不用于本地测试。
+
+`scripts/referral_auth_local.py prepare` 接收 JSON 格式的本地 client ID／secret（stdin 或隐藏输入），独占创建 `.scratch/rr-auth-local/`，生成独立 Fernet key，并将新 SQLite 库迁移到当前版本。该目录已被 gitignore 排除，目录 0700，凭据／数据库 0600；不加载 `.env`、不继承生产连接或付费模型开关。当前本机已完成此步骤，不要再次运行 prepare。
+
+本机检查命令（不启动服务、不访问 GitHub）：
+
+```bash
+src/backend/.venv/bin/python scripts/referral_auth_local.py check
+```
+
+按仓库手动服务规则，由操作者在仓库根目录的两个终端分别运行并保持窗口开启：
+
+```bash
+# 终端一：仅本机后端 127.0.0.1:8000
+src/backend/.venv/bin/python scripts/referral_auth_local.py backend
+```
+
+```bash
+# 终端二：仅本机前端 127.0.0.1:3000
+src/backend/.venv/bin/python scripts/referral_auth_local.py frontend
+```
+
+然后访问 `http://127.0.0.1:3000/login?return_path=/workspace`；不要混用 localhost，Origin 和 cookie 必须与配置一致。该环境不启用存储、Stripe 或真实 AI，仅用于认证验收；停止时由操作者在各自终端按 Ctrl-C。不要将终端中的密钥或 callback URL 发到聊天。日志修复及边界见 [BUGFIX](../../BUGFIX-OAUTH-LOCAL-ACCESS-LOGS.md)。
+
+2026-10-26 实测：用户明确授权代理启动两个服务，并亲自在 GitHub 完成 consent。真实登录、回跳、刷新、正常退出、退出后 401 以及非法回跳 422 已通过；本地会话现已退出。首次失败暴露了 `iss` 白名单缺项，已修复为精确 GitHub issuer 校验，详见 [修复记录](../../BUGFIX-GITHUB-OAUTH-ISSUER.md)及 [MT-04 证据](MT-04-EVIDENCE.md)。托管平台日志尚未验证。
+
+### 验收步骤
 
 仅在独立测试库准备好、迁移通过且配置齐全后执行。真实 consent 必须由用户完成，不记录密钥、授权码、state、cookie 或患者信息。
 

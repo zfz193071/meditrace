@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 
 from ..errors import ApiError
 from ..schemas import ErrorCode, SessionResponse
+from .github import ISSUER
 from .service import DATABASE_FAILURES
 
 
@@ -38,7 +39,12 @@ def auth_router(identity=None):
             raise ApiError(ErrorCode.SERVICE_NOT_READY)
         try:
             query = request.query_params
-            if any(len(query.getlist(k)) > 1 for k in query) or set(query) - {"code", "state", "error", "error_description", "error_uri"}:
+            if any(len(query.getlist(k)) > 1 for k in query) or set(query) - {"code", "state", "iss", "error", "error_description", "error_uri"}:
+                raise ApiError(ErrorCode.OAUTH_FAILED)
+            # RFC 9207: compare the decoded issuer exactly, before exchanging
+            # any code. This GitHub-only client also accepts legacy responses
+            # without iss; it never discovers endpoints from response input.
+            if "iss" in query and query["iss"] != ISSUER:
                 raise ApiError(ErrorCode.OAUTH_FAILED)
             login = identity.complete(state=query.get("state", ""),
                 nonce=request.cookies.get(identity.nonce_cookie, ""),
