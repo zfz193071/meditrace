@@ -9,6 +9,7 @@
 - CI 环境由仓库 workflow 固定：Python 3.12、Node.js 22、PostgreSQL 17。后端普通 job 使用 SQLite；独立数据库 job 使用临时 PostgreSQL 和随机隔离 schema。
 - 自动测试仅使用合成资料、Fake／replay 或模拟供应商；不配置付费模型密钥，不访问生产数据库，不发起浏览器 AI 对话。
 - MT-22 新增 API 闭环见 [`test_workflow_integration.py`](../../src/backend/tests/referral_review/test_workflow_integration.py)：本地 SQLite HTTP／HTTPS 两种配置 2 passed；无本地 `TEST_DATABASE_URL`，PostgreSQL 两个参数化用例本地跳过；远端 PostgreSQL job 已成功执行并通过零跳过检查。
+- 随后新增同一工作流的双账号资源隔离矩阵，见同一测试文件：另一账号的 packet、draft、revision、run、review、document metadata/page/original、snapshot、history、handoff 和 export 读取均返回 404；执行他人 run 和删除他人 packet 也均返回 404，且没有二次 Fake 派发。CI [run 40312565916](https://github.com/zfz193071/meditrace/actions/runs/40312565916) 的 `foundation` 与 `postgres-persistence` 均通过，PostgreSQL job 的零跳过门槛通过；本机没有 `TEST_DATABASE_URL`，本地 PG 参数仍跳过。
 
 ## Q01—Q20 证据与剩余工作
 
@@ -29,7 +30,7 @@
 | Q13 改版后重跑 | `test_workflow_integration.py`、`test_runs.py`、`test_reviews.py` | 旧快照保留、新版本重跑通过；更广泛的历史 UI 检查未完成 |
 | Q14 会员／额度限制 | `test_usage.py`、`test_runs.py`、`test_handoff.py`、`test_billing.py` | Fake 权益和额度边界已测；真实 Stripe 测试购买与真实模型阻断未验收 |
 | Q15 重复／乱序／退款支付 | `test_billing.py`、`test_billing_pg.py` | 假 Stripe 签名及 PostgreSQL 竞争通过；真实 Stripe test Checkout／webhook 往返未完成 |
-| Q16 跨账号隔离 | `test_packets.py`、`test_documents.py`、`test_runs.py`、`test_reviews.py`、`test_handoff.py` | 多模块 404 隐藏测试存在；所有资源的整合双账号验收报告未完成 |
+| Q16 跨账号隔离 | `test_packets.py`、`test_documents.py`、`test_runs.py`、`test_reviews.py`、`test_handoff.py`、`test_workflow_integration.py` | 集成工作流对核心资源读取及 run 执行／packet 删除做双账号 404 检查；SQLite 与隔离 PostgreSQL CI 通过。未覆盖的 API 变体及浏览器人工验收仍未完成 |
 | Q17 删除与运行竞争 | `test_lifecycle.py`、`test_lifecycle_pg.py` | Fake／PostgreSQL 清理竞争与补偿有证据；Vercel Blob 删除及托管调度未验收 |
 | Q18 无 AI／人工导出 | `test_handoff.py`、`test_fixtures.py` | Fake／人工导出路径有测试；示例页面无登录浏览器验收未完成 |
 | Q19 PDF 分页与 Unicode | `test_handoff.py` | 本地 PDF 解析／渲染测试通过；长文档多视口浏览器检查未完成 |
