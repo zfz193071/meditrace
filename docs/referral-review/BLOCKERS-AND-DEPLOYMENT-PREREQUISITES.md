@@ -22,6 +22,8 @@
 
 独立评估账本及共享日月费用预留已实施（`d45d810`），详见 [账本范围](EVALUATION-LEDGER.md)。本地后端 798 passed／97 skipped；[独立 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40267092317/job/121391749549) 196 passed／0 skipped，包含评估与工作区多进程竞争。[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317) 全通过：前端 69 tests、构建／类型检查及前后端审计通过，后端 CI 同为 798 passed／97 skipped。真实 CLI 仍拒绝派发，共享并发槽现已实现，仍缺授权与合成输入绑定、真实录制／恢复及晚到费用校正。未请求或消耗真实模型预算，未应用生产迁移，MT-20 不关闭。
 
+共享执行槽增量 `1efa200` 的[最新完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40276376704) 全通过：后端 818 passed／112 skipped；独立 PostgreSQL 17 job 223 passed／0 skipped（含两种数据库参数化），包含 Fake／real 工作区和评估四进程争用全站两槽、过期完成与新派发竞争。前端 69 tests、构建／类型检查及前后端审计通过。新增迁移 rr_0008 仅在隔离测试库验证，未应用生产。
+
 ## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 
 - `MT-01` 为 `DONE`；`MT-02` 因真实 PostgreSQL 迁移／并发验收为 `BLOCKED`；`MT-03` 因操作者尚未逐包签核候选标注为 `BLOCKED`。`MT-04`—`MT-24` 的 front matter 仍为 `TODO`；其中 04—21 和 23 已有不同程度代码／离线证据，不能据此提前关闭。
