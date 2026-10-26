@@ -1,8 +1,18 @@
 # Referral Review V1：当前阻碍与解除条件
 
-更新：2026-10-23。供新会话回答“遇到的阻碍有？”、“完成工单／部署还缺什么”时使用。**本页的实测状态是日期快照，不是永久结论。**回答前重新检查工单 front matter、最新证据、仓库状态、部署预检和只读线上探测；不要把代码已实施、离线通过或旧站可访问写成 V1 已验收／已部署。需求与关闭规则以 [开发基线](README.md)、[质量发布门槛](QUALITY-AND-RELEASE.md) 和各工单为准。
+更新：2026-10-26（复核登录、部署预检、生产变量名称、readiness、Git 状态及工单记录；未重新执行功能验收）。供新会话回答“遇到的阻碍有？”、“完成工单／部署还缺什么”时使用。**本页的实测状态是日期快照，不是永久结论。**回答前重新检查工单 front matter、最新证据、仓库状态、部署预检和只读线上探测；不要把代码已实施、离线通过或旧站可访问写成 V1 已验收／已部署。需求与关闭规则以 [开发基线](README.md)、[质量发布门槛](QUALITY-AND-RELEASE.md) 和各工单为准。
 
-## 2026-10-23 已核实状态
+## 2026-10-26 Vercel 登录与预检复核
+
+- 操作者完成 `vercel login` 浏览器授权，CLI 退出 0 并确认已登录；此前的登录失效阻碍已解除。
+- `./deploy-vercel.sh --check` 退出 0：已核对目标项目访问权限、前后端 Services、Hobby 套餐、生产 `DATABASE_URL` 变量存在及 231 个部署输入文件。证据：[本地预检日志](../../.vercel/deploy-20261026-092810.log)（本机文件，不随仓库提交）。预检未验证数据库连接或迁移状态。
+- 生产 `DEEPSEEK_API_KEY` 仍未配置。本次未发布、未迁移，未重新验收线上接口或工单；下方其他发布条件仍需逐项复核。
+- `git fetch origin` 成功后，本地 `main` 仍比 `origin/main` 领先 24 个提交；未提交的已跟踪改动仅为本页，未跟踪的用户文件 `TASK-PREVISIT-SUMMARY.md` 保持不动。
+- `vercel env ls production --scope lucyzhus-projects` 成功：变量名称中没有任何 `RR_*`、`BLOB_READ_WRITE_TOKEN` 或 `DEEPSEEK_API_KEY`。因此生产 V1 OAuth、私有文件、测试支付、受邀真实模型与维护配置尚不完整；这不代表供应商账号或资源一定尚未创建。本记录不保存变量值。
+- HTTPS 只读 GET `/api/v1/readiness` 仍返回 **404**（仅检查状态码，不读取旧资料），当前生产未通过新 readiness 验证，首次安全切换阻碍未解除。
+- 工单 front matter 复核仍为 MT-01 `DONE`、MT-02／03 `BLOCKED`、MT-04—24 `TODO`。MT-20 真实评估账本、MT-21 安全生产基线及 MT-22 全流程验收仍无完成记录。本次未运行功能测试或检查远端 CI 结果；仓库已提供临时 PostgreSQL CI job，本机 shell 的 `TEST_DATABASE_URL` 仍未设置。
+
+## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 
 - `MT-01` 为 `DONE`；`MT-02` 因真实 PostgreSQL 迁移／并发验收为 `BLOCKED`；`MT-03` 因操作者尚未逐包签核候选标注为 `BLOCKED`。`MT-04`—`MT-24` 的 front matter 仍为 `TODO`；其中 04—21 和 23 已有不同程度代码／离线证据，不能据此提前关闭。
 - `MT-21` 代码提交为 `2e4339f`：旧 HTTP API 返回 410、旧页面转退役说明、只读 readiness 和安全回退保护已有离线测试。缺前置 `MT-11`／`MT-17`／`MT-19`、真实 PostgreSQL、首次安全生产基线及线上验收。详见 [MT-21 证据](MT-21-EVIDENCE.md)。
@@ -24,7 +34,7 @@
 
 | 外部条件 | 需要的内容与实际验收 | 谁需参与 |
 | --- | --- | --- |
-| Vercel | 恢复 CLI 登录；核对当前项目权限、Services、Hobby、生产域名 HTTPS、函数时限、实际环境和部署输入。`./deploy-vercel.sh --check` 成功后仍不代表可以发布。 | 操作者完成登录；代理检查和记录 |
+| Vercel | 2026-10-26 已恢复 CLI 登录并通过 `--check`，核实项目访问权限、Services、Hobby、生产数据库变量存在及部署输入；生产域名 HTTPS、函数时限和完整 V1 环境配置仍需核对。`./deploy-vercel.sh --check` 成功后仍不代表可以发布。 | 登录已完成；代理继续检查和记录 |
 | PostgreSQL | 隔离测试 schema 或 CI 临时 PostgreSQL；生产 `DATABASE_URL`、追加迁移记录、备份／恢复条件。真实测试覆盖迁移、竞争、回滚、权限和幂等。 | 操作者确认生产资源；代理可建立临时测试环境 |
 | GitHub OAuth | `RR_SITE_ORIGIN`、client ID／secret、精确 callback `https://meditrace.baozaolaoba.top/api/v1/auth/github/callback`、session encryption key；实际登录、consent、退出和错误回跳。 | 操作者配置 OAuth App 并完成一次 consent；代理验证 |
 | 私有文件 | 私有 Vercel Blob store、`RR_STORAGE_BACKEND=vercel`、最小权限 `BLOB_READ_WRITE_TOKEN`；真实写／授权读／越权拒绝／删除和孤立清理。 | 操作者提供资源；代理验证 |
