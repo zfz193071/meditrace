@@ -42,6 +42,7 @@ jobs:
       - run: src/backend/.venv/bin/pip-audit -r src/backend/requirements.txt --no-deps --disable-pip
   postgres-persistence:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:17
@@ -67,4 +68,23 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --project src/backend --frozen
-      - run: src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review/test_persistence.py src/backend/tests/referral_review/test_pg_concurrency.py
+      - name: Verify PostgreSQL migrations, ledger, reviews and process races
+        run: >-
+          src/backend/.venv/bin/python -m pytest -q
+          src/backend/tests/referral_review/test_persistence.py
+          src/backend/tests/referral_review/test_pg_concurrency.py
+          src/backend/tests/referral_review/test_usage.py
+          src/backend/tests/referral_review/test_usage_pg.py
+          src/backend/tests/referral_review/test_reviews_persistence.py
+          src/backend/tests/referral_review/test_runs_pg.py
+          --junitxml=postgres-results.xml
+      - name: Require executed PostgreSQL cases without skips
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          cases = ET.parse("postgres-results.xml").findall(".//testcase")
+          assert cases, "PostgreSQL job produced no test cases"
+          assert any("postgresql" in case.get("name", "") for case in cases), "PostgreSQL parametrization missing"
+          assert not any(case.find("skipped") is not None for case in cases), "PostgreSQL acceptance cannot pass with skipped cases"
+          print(f"Verified {len(cases)} executed cases with zero skips")
+          PY
