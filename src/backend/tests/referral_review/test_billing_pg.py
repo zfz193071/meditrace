@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import base64
 import multiprocessing
 import os
+import secrets
 from uuid import uuid4
 
 import pytest
@@ -12,6 +13,7 @@ from pydantic import SecretStr
 from referral_review.billing import Billing
 from referral_review.config import Settings
 from referral_review.identity.service import Identity
+from referral_review.identity.service import hashed
 from referral_review.persistence import models as m
 from referral_review.persistence.database import create_engine
 from referral_review.persistence.migrations import HEAD, upgrade
@@ -27,8 +29,15 @@ def initialize(barrier):
 
 
 class FakeStripe:
-    def __init__(self, session):
+    def __init__(self, session=None):
         self.session = session
+
+    def create(self, order, detail):
+        session_id = "cs_test_" + order["id"].hex
+        return dict(id=session_id, livemode=False, mode="payment", client_reference_id=str(order["id"]),
+            metadata={"order_id": str(order["id"])}, amount_total=order["amount"], currency=order["currency"],
+            verified_price_id=order["price_id"], url="https://checkout.stripe.com/c/pay/" + session_id,
+            status="open", payment_status="unpaid", payment_intent=None)
 
     def resolve(self, kind, _object_id):
         result = dict(self.session)
@@ -40,7 +49,7 @@ class FakeStripe:
 
 
 def process(payload):
-    url, schema, event_id, session = payload
+    url, schema, operation, value, session = payload
     engine = create_engine(url, schema=schema)
     try:
         settings = Settings(RR_ENVIRONMENT="test", RR_MODE="sandbox", RR_SITE_ORIGIN="https://example.test",
@@ -48,10 +57,13 @@ def process(payload):
             RR_STRIPE_SECRET_KEY="sk_test_synthetic",
             RR_STRIPE_WEBHOOK_SECRET="whsec_synthetic", RR_STRIPE_PRICE_ID="price_synthetic",
             RR_STRIPE_AMOUNT_MINOR=500, RR_STRIPE_CURRENCY="usd")
-        service = Billing(Identity(engine, settings, clock=lambda: NOW), provider=FakeStripe(session))
+        identity = Identity(engine, settings, clock=lambda: NOW)
+        service = Billing(identity, provider=FakeStripe(session))
         _BARRIER.wait(timeout=20)
-        service.process_event(event_id)
-        return "success"
+        if operation == "event":
+            service.process_event(value)
+            return "success"
+        return str(service.create_checkout(value["token"], "/account", value["key"]).id)
     finally:
         engine.dispose()
 
@@ -96,9 +108,19 @@ def race(engine, session, event_ids):
     context = multiprocessing.get_context("spawn")
     barrier = context.Barrier(len(event_ids))
     with context.Pool(len(event_ids), initializer=initialize, initargs=(barrier,)) as pool:
-        payloads = [(engine.url.render_as_string(hide_password=False), schema, event_id, session)
+        payloads = [(engine.url.render_as_string(hide_password=False), schema, "event", event_id, session)
                     for event_id, _, _ in event_ids]
         return pool.map_async(process, payloads).get(timeout=60)
+
+
+def race_checkouts(engine, requests):
+    with engine.connect() as conn:
+        schema = conn.execute(sa.text("SELECT current_schema()")).scalar_one()
+    context = multiprocessing.get_context("spawn")
+    barrier = context.Barrier(len(requests))
+    with context.Pool(len(requests), initializer=initialize, initargs=(barrier,)) as pool:
+        url = engine.url.render_as_string(hide_password=False)
+        return pool.map_async(process, [(url, schema, "checkout", request, None) for request in requests]).get(timeout=60)
 
 
 def state(engine):
@@ -129,3 +151,20 @@ def test_concurrent_refund_and_paid_event_never_reactivate_entitlement(pg):
     assert len(members) <= 1
     assert all(member["revoked_at"] is not None for member in members)
     assert {event["state"] for event in stored} == {"processed"}
+
+
+def test_concurrent_distinct_checkout_keys_reuse_one_pending_order(pg):
+    owner, token = uuid4(), secrets.token_urlsafe(32)
+    with pg.begin() as conn:
+        conn.execute(m.users.insert().values(id=owner, github_subject=str(owner), display_name="Synthetic", created_at=NOW))
+        conn.execute(m.sessions.insert().values(user_id=owner, token_hash=hashed(token), csrf_secret=secrets.token_urlsafe(32),
+            expires_at=NOW + timedelta(days=1)))
+    results = race_checkouts(pg, [{"token": token, "key": f"checkout-{i}"} for i in range(3)])
+    assert len(set(results)) == 1
+    with pg.begin() as conn:
+        orders = conn.execute(sa.select(m.orders)).mappings().all()
+        details = conn.execute(sa.select(m.checkout_details)).mappings().all()
+        idempotency = conn.execute(sa.select(m.idempotency).where(m.idempotency.c.operation == "checkout")).mappings().all()
+    assert len(orders) == len(details) == 1
+    assert orders[0]["checkout_session_id"] == "cs_test_" + orders[0]["id"].hex
+    assert len(idempotency) == 3 and {row["resource_id"] for row in idempotency} == {orders[0]["id"]}
