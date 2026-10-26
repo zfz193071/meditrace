@@ -18,7 +18,7 @@ dependencies = [
   "cryptography>=50.0.2,<52",
   "fpdf2>=2.8.8,<3",
   "vercel-blob>=0.5.0,<0.6",
-  "pypdf==6.21.1",
+  "pypdf==6.21.2",
 ]
 
 [dependency-groups]

@@ -7,10 +7,10 @@ import resource
 import sys
 
 from .parser import (MAX_CONTENT_STREAM_BYTES, MAX_DOCUMENT_CODEPOINTS,
-                     MAX_PAGE_CODEPOINTS, MAX_PAGES)
+                     MAX_PAGE_CODEPOINTS, MAX_PAGES, PDF_PARSER_VERSION)
 from .text_rules import normalize_text, text_hash
 
-VERSION = "pypdf-6.21.1/text-v1"
+VERSION = PDF_PARSER_VERSION
 
 
 def _limits():

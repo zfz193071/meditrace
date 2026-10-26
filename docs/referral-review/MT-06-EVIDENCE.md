@@ -1,5 +1,7 @@
 # MT-06 离线实现与验收记录
 
+2026-10-26 补充：pypdf 已升级到 6.21.2 修复安全审计发现的 3 个漏洞，新解析结果使用 `pypdf-6.21.2/text-v1`。解析／上传／冻结语料回归 86 passed，依赖审计无已知漏洞；历史文档和冻结语料保留原来源版本。见 [修复与验证](../../BUGFIX-PYPDF-6-21-2-SECURITY.md)。下方 6.21.1 为初次实施时版本。
+
 日期：2026-10-21。状态：代码已实施，工单仍为 `TODO`；MT-05 尚未完成真实 Private Blob／PostgreSQL 验收，不能关闭前置依赖。
 
 实现：`text-v1` 将 CRLF／CR 统一为 LF，再做 NFC；offset 是 Unicode code point。PDF 由固定的 pypdf 6.21.1 子进程提取，20 秒墙钟上限、18 秒 CPU 上限、最多 25 页、每页 12,000 code point、每文件 30,000 code point、每页内容流 1 MB、子进程响应 200 KB。Linux 使用 512 MB 地址空间上限；macOS 拒绝该 rlimit 时依靠解压、内容流、CPU、墙钟和响应边界。解析失败保存 `rejected`、错误代码和可用的页号；原件和实际字节配额保持已结算。页面 API 仅对归属者开放，证据只可引用 ready 文档的 ready 页和精确 hash／code point 切片。

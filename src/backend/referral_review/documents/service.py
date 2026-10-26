@@ -22,7 +22,7 @@ from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
 from ..usage import rates
 from ..schemas import DocumentPageResponse, DocumentResponse, ErrorCode
-from .parser import MAX_DOCUMENT_CODEPOINTS, MAX_PAGES, parse_pdf, parse_text, rejected
+from .parser import MAX_DOCUMENT_CODEPOINTS, MAX_PAGES, PDF_PARSER_VERSION, parse_pdf, parse_text, rejected
 from .storage import LocalStore, MAX_BYTES, PrivateBlobStore, StorageUnavailable, object_key
 
 ACCOUNT_BYTES = 100 * 1024 * 1024
@@ -202,7 +202,7 @@ class Documents:
         try:
             parsed = parse_text(body) if kind == "text" else parse_pdf(body)
         except Exception:
-            parsed = rejected("PARSER_UNAVAILABLE", parser_version="text-v1" if kind == "text" else "pypdf-6.21.1/text-v1")
+            parsed = rejected("PARSER_UNAVAILABLE", parser_version="text-v1" if kind == "text" else PDF_PARSER_VERSION)
         with self.engine.begin() as conn:
             packet = self.identity.require_owner(conn, token, upload.packet_id)
             row = conn.execute(sa.select(m.documents).where(m.documents.c.id == upload.document_id,

@@ -52,7 +52,7 @@ def test_pdf_boundary_private_download_integrity_and_metadata(docs):
     assert data["byte_size"] == MAX_BYTES
     assert data["sha256"] == hashlib.sha256(body).hexdigest()
     assert data["parse_status"] == "rejected"
-    assert data["parser_version"] == "pypdf-6.21.1/text-v1"
+    assert data["parser_version"] == "pypdf-6.21.2/text-v1"
     assert data["parse_error_code"] == "PDF_DAMAGED"
     assert "storage_key" not in data and "owner_id" not in data
     client, documents, packet_id, *_ = docs

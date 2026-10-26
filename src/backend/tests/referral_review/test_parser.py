@@ -2,6 +2,7 @@
 
 import json
 from io import BytesIO
+from importlib.metadata import version
 from pathlib import Path
 import subprocess
 
@@ -46,6 +47,7 @@ def test_pasted_text_is_one_frozen_page():
 ])
 def test_pdf_corpus(name, expected, count):
     parsed = parser.parse_pdf((FIXTURES / name).read_bytes())
+    assert parsed.parser_version == f"pypdf-{version('pypdf')}/text-v1"
     assert parsed.issue_code == expected
     assert parsed.page_count == count
     if expected is None:

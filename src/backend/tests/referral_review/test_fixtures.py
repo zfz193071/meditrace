@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from referral_fixture_schema import Checklist, DemoReview, Gold, Manifest, Packet
 from referral_fixture_validation import local_path, validate_corpus, validate_packet, validate_public
-from referral_fixtures import FIXTURES, digest, occurrence_offset
+from referral_fixtures import FIXTURES, GENERATOR, digest, generated_differences, json_bytes, occurrence_offset
 
 
 def load_packet(key):
@@ -43,6 +43,24 @@ def test_public_states(key):
 
 def test_deterministic_regeneration():
     subprocess.run([sys.executable, str(ROOT / "scripts/referral_fixtures.py"), "--check"], check=True)
+
+
+def test_toolchain_upgrade_preserves_archived_provenance_without_hiding_content_drift():
+    import pypdf
+
+    archived = (FIXTURES / "manifest.json").read_bytes()
+    current = json.loads(archived)
+    current.update(parser_version=f"pypdf-{pypdf.__version__}/text-v1", generator_version=GENERATOR)
+    existing = {"manifest.json": archived, "source.pdf": b"frozen source"}
+    fresh = {"manifest.json": json_bytes(current), "source.pdf": b"frozen source"}
+    assert generated_differences(existing, fresh) == []
+    assert generated_differences(existing, fresh | {"source.pdf": b"changed source"}) == ["source.pdf"]
+    changed = copy.deepcopy(current)
+    changed["entries"][0]["sha256"] = "0" * 64
+    assert generated_differences(existing, fresh | {"manifest.json": json_bytes(changed)}) == ["manifest.json"]
+    unknown = json.loads(archived)
+    unknown["parser_version"] = "unverified-parser"
+    assert generated_differences(existing | {"manifest.json": json_bytes(unknown)}, fresh) == ["manifest.json"]
 
 
 def test_wrong_quote_offsets_and_hash_are_rejected():

@@ -15,6 +15,7 @@ MAX_CONTENT_STREAM_BYTES = 1_000_000
 MAX_WORKER_OUTPUT_BYTES = 200_000
 PARSER_TIMEOUT_SECONDS = 20
 BACKEND = Path(__file__).resolve().parents[2]
+PDF_PARSER_VERSION = "pypdf-6.21.2/text-v1"
 
 
 @dataclass(frozen=True)
@@ -38,7 +39,7 @@ class ParseResult:
         return "rejected" if self.issue_code else "ready"
 
 
-def rejected(code, page=None, *, parser_version="pypdf-6.21.1/text-v1", page_count=None):
+def rejected(code, page=None, *, parser_version=PDF_PARSER_VERSION, page_count=None):
     return ParseResult(parser_version, page_count, (), code, page)
 
 
@@ -78,7 +79,7 @@ def parse_pdf(body: bytes, *, timeout=PARSER_TIMEOUT_SECONDS, runner=None) -> Pa
         pages = tuple(ParsedPage(**page) for page in value["pages"])
         result = ParseResult(value["parser_version"], value["page_count"], pages,
                              value.get("issue_code"), value.get("issue_page"))
-        if (result.parser_version != "pypdf-6.21.1/text-v1" or
+        if (result.parser_version != PDF_PARSER_VERSION or
             result.page_count is not None and (result.page_count < 1 or result.page_count > 100_000) or
             result.status == "ready" and (result.page_count is None or len(pages) != result.page_count or
                                            any(p.parse_quality not in ("ready", "empty") for p in pages)) or
