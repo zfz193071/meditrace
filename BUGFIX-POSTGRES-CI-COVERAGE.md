@@ -8,7 +8,7 @@
 
 ## 修复
 
-扩展现有临时 PostgreSQL 17 job，包含上述四个现有测试文件，并生成 JUnit 结果。追加检查要求确实收集 PostgreSQL 参数化用例且没有 skipped，避免环境缺失时以绿色 job 冒充数据库验收。job 最长运行 15 分钟。
+扩展现有临时 PostgreSQL 17 job，包含上述四个现有测试文件，并补充通过共享 pg fixture 使用数据库的 `test_document_pg.py` 与 `test_lifecycle_pg.py`（上传配额及生命周期竞争）。生成 JUnit 结果，追加检查要求确实收集 PostgreSQL 参数化用例且没有 skipped，避免环境缺失时以绿色 job 冒充数据库验收。job 最长运行 15 分钟。
 
 所有数据仍在测试专属随机 schema；模型使用 Fake Adapter／合成用量，不调用真实供应商、不使用生产数据库。实际 CI 结果在 MT-02 及后续工单证据中记录。
 

@@ -67,11 +67,13 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --project src/backend --frozen
-      - name: Verify PostgreSQL migrations, ledger, reviews and process races
+      - name: Verify PostgreSQL migrations, storage, ledger, reviews and lifecycle races
         run: >-
           src/backend/.venv/bin/python -m pytest -q
           src/backend/tests/referral_review/test_persistence.py
           src/backend/tests/referral_review/test_pg_concurrency.py
+          src/backend/tests/referral_review/test_document_pg.py
+          src/backend/tests/referral_review/test_lifecycle_pg.py
           src/backend/tests/referral_review/test_usage.py
           src/backend/tests/referral_review/test_usage_pg.py
           src/backend/tests/referral_review/test_reviews_persistence.py
