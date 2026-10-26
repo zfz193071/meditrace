@@ -23,7 +23,7 @@
 | 后端依赖锁 | `scripts/check_backend_lock.py`：通过，使用仓库内 uv 缓存 |
 | shell 语法与 diff | `bash -n`、`git diff --check` 通过 |
 
-首次切换流程（2026-10-26）：已增加 `--first-cutover`，要求精确生产域名确认和操作者提供的备份参考。流程构建候选后执行审核过的追加迁移，验证暂存 readiness／旧路由 410，再 promote。迁移或暂存失败不切流；上线后验证失败保留新版本并标记 `first-cutover-unverified`，不回滚到旧公开接口版本。备份参考不会由脚本自动核验，迁移连接串须由受控环境提供。18 项离线 mock 测试通过；未连接生产、未迁移或发布。
+首次切换流程（2026-10-26）：已增加 `--first-cutover`，要求精确生产域名确认和操作者提供的备份参考。流程构建候选后执行审核过的追加迁移，验证暂存 readiness／旧路由 410，再 promote。迁移或暂存失败不切流；上线后验证失败保留新版本并标记 `first-cutover-unverified`，不回滚到旧公开接口版本。备份参考不会由脚本自动核验，迁移连接串须由受控环境提供。18 项离线 mock 测试通过；包含该实现的 [完整 CI](CI-2026-10-26.md) 两个 job 均通过；未连接生产、未迁移或发布。
 
 失败路径包括旧方法收到无效 JSON 仍为 410、旧服务未导入、线上 readiness／旧接口异常阻止 promote、缺安全回退基线时构建前阻断、回退命令失败时保留 `rolling-back` 而不报告成功。原 `test_conversations_api.py` 与 `test_database_deployment.py` 属于退役产品回归，保留源码并显式 skip；新路由和新领域迁移由当前测试覆盖。
 
