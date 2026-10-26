@@ -177,6 +177,19 @@ def test_reparse_cannot_follow_replaced_packet_ancestor(tmp_path, monkeypatch):
         runner.parse_case(packet, corpus / "dev" / "packet")
 
 
+def test_pinned_roots_check_exact_consumed_bytes(monkeypatch):
+    read = runner.fixture_bytes
+    calls = []
+    def changed(root, relative, **kwargs):
+        calls.append(str(relative))
+        body = read(root, relative, **kwargs)
+        return body + b"\n" if relative == "manifest.json" else body
+    monkeypatch.setattr(runner, "fixture_bytes", changed)
+    with pytest.raises(ValueError, match="Unreviewed corpus"):
+        runner.load_cases("dev", expected_manifest=p.MANIFEST_SHA256, expected_freeze=p.FREEZE_SHA256)
+    assert calls == ["manifest.json", "freeze.json"]  # No referenced file is consumed.
+
+
 def test_plan_reader_rejects_duplicate_keys_and_unknown_fields(preview, tmp_path):
     path = tmp_path / "plan.json"
     path.write_bytes(p.canonical(preview.model_dump(mode="json")))

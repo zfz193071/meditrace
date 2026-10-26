@@ -118,10 +118,8 @@ def build_plan(*, batch_id, operator_id, split, output, model, price_version,
                packet_keys=None, ack_test_exposure=False):
     if split == "test" and not ack_test_exposure:
         raise ValueError("Frozen test planning requires explicit exposure acknowledgement")
-    if runner.sha(fixture_bytes(runner.CORPUS, "manifest.json")) != MANIFEST_SHA256 or runner.sha(
-        fixture_bytes(runner.CORPUS, "freeze.json")) != FREEZE_SHA256:
-        raise ValueError("Unreviewed corpus revision")
-    manifest, cases = runner.load_cases(split)
+    # Check the exact bytes load_cases consumes, not a separate earlier read.
+    manifest, cases = runner.load_cases(split, expected_manifest=MANIFEST_SHA256, expected_freeze=FREEZE_SHA256)
     selected = set(packet_keys) if packet_keys is not None else {e["key"] for e, _, _ in cases}
     if (not selected or packet_keys is not None and len(selected) != len(packet_keys)
         or not selected.issubset({e["key"] for e, _, _ in cases})):

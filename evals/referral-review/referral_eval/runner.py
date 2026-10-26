@@ -57,10 +57,15 @@ def versions():
                 model='fake-extraction-v1', price_version=None)
 
 
-def load_cases(split):
+def load_cases(split, *, expected_manifest=None, expected_freeze=None):
     if split not in ('dev', 'test'): raise ValueError('Invalid split')
-    manifest=unique_json(fixture_bytes(CORPUS,'manifest.json'))
-    freeze=unique_json(fixture_bytes(CORPUS,'freeze.json'))
+    manifest_body=fixture_bytes(CORPUS,'manifest.json')
+    freeze_body=fixture_bytes(CORPUS,'freeze.json')
+    if (expected_manifest is not None and sha(manifest_body) != expected_manifest or
+        expected_freeze is not None and sha(freeze_body) != expected_freeze):
+        raise ValueError('Unreviewed corpus revision')
+    manifest=unique_json(manifest_body)
+    freeze=unique_json(freeze_body)
     if sha(fixture_bytes(CORPUS,'checklist.json')) != manifest['checklist_sha256'] or manifest['checklist_sha256'] != freeze['checklist_sha256']:
         raise ValueError('Checklist hash mismatch')
     cases=[]; seen=set()
