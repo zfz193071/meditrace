@@ -20,11 +20,11 @@
 
 ## 2026-10-26 MT-20 工程推进
 
-新增可审阅计划和授权参数预检：只处理固定合成语料，输出样本／预算／版本／目录及 hash，未记录实际人工授权，不连接供应商。源码与路径复读校验已加强。真实 runner 仍关闭，事务派发／录制恢复及人工 gold／预算条件不变。最新验证见 [MT-20 证据](MT-20-EVIDENCE.md)。本段不更新上方线上探测快照。
+新增可审阅计划和授权参数预检：只处理固定合成语料，输出样本／预算／版本／目录及 hash，未记录实际人工授权，不连接供应商。源码与路径复读校验已加强。真实 runner 仍关闭，事务派发／录制恢复及人工 gold／预算条件不变。提交 `8272a1f`／`e2277bc` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40279569965) 全通过：后端 849 passed／113 skipped；独立数据库 job 254 passed／0 skipped（含 SQLite／PostgreSQL 参数化）；前端 69 项、构建及审计通过。本机原有离线回归曾出现 PDF_TIMEOUT，未提高超时；详见 [MT-20 证据](MT-20-EVIDENCE.md)。本段不更新上方线上探测快照。
 
 独立评估账本及共享日月费用预留已实施（`d45d810`），详见 [账本范围](EVALUATION-LEDGER.md)。本地后端 798 passed／97 skipped；[独立 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40267092317/job/121391749549) 196 passed／0 skipped，包含评估与工作区多进程竞争。[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317) 全通过：前端 69 tests、构建／类型检查及前后端审计通过，后端 CI 同为 798 passed／97 skipped。真实 CLI 仍拒绝派发，共享并发槽现已实现，仍缺授权与合成输入绑定、真实录制／恢复及晚到费用校正。未请求或消耗真实模型预算，未应用生产迁移，MT-20 不关闭。
 
-共享执行槽增量 `1efa200` 的[最新完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40276376704) 全通过：后端 818 passed／112 skipped；独立 PostgreSQL 17 job 223 passed／0 skipped（含两种数据库参数化），包含 Fake／real 工作区和评估四进程争用全站两槽、过期完成与新派发竞争。前端 69 tests、构建／类型检查及前后端审计通过。新增迁移 rr_0008 仅在隔离测试库验证，未应用生产。
+共享执行槽增量 `1efa200` 的[该增量 CI](https://github.com/zfz193071/meditrace/actions/runs/40276376704) 全通过：后端 818 passed／112 skipped；独立 PostgreSQL 17 job 223 passed／0 skipped（含两种数据库参数化），包含 Fake／real 工作区和评估四进程争用全站两槽、过期完成与新派发竞争。前端 69 tests、构建／类型检查及前后端审计通过。新增迁移 rr_0008 仅在隔离测试库验证，未应用生产。
 
 ## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 

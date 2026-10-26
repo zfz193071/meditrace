@@ -2,11 +2,13 @@
 
 ## 2026-10-26：可审阅计划与授权参数预检
 
+实现提交：`8272a1f`，同字节 manifest 固定校验补充提交：`e2277bc5360af8e3938e43daa627157c9ffc0499`（验证分支）。
+
 新增 `plan.py`、`planning.py` 与有界文件读取：只预览固定合成语料，展示样本数、拒绝项、模型价格、预算和输出目录。计划绑定实际请求字节摘要、输入上界、版本、实现／依赖锁及操作者。授权参数预检会重建计划，拒绝旧参数、旧代码、变动输入和超过 cap 的选择；事务检查锁定有效邀请用户。文件明确未记录授权、执行禁用，不读凭据、不连数据库、不预留费用。
 
 这不是已集成的真实 runner：实际人工授权、每次派发与账本事务串联、真实录制／恢复仍待完成。人工 gold 和真实预算尚未授权，MT-20 维持 TODO。修复详情见 [读取前路径约束及解析器版本](../../BUGFIX-EVALUATION-INPUT-PREFLIGHT.md)。
 
-本地首轮预检专项 28 passed／1 skipped（PostgreSQL 未配置）；随后新增祖先目录替换回归，路径／复读专项 8 passed。原有离线评估本机首轮 15 passed／1 failed，单独复跑 14 passed／2 failed，实际观察到 PDF_TIMEOUT 和逐包计数差异；未修改断言或提高解析超时。另修复其暴露的空输出回放异常，追加解析拒绝录制及确定性恢复测试。完整验证结果将在对应 CI 完成后记录。
+本地首轮预检专项 28 passed／1 skipped（PostgreSQL 未配置）；随后新增祖先目录替换回归，路径／复读专项 8 passed；固定摘要消费字节补充后专项 9 passed。解析恢复回放故障注入 1 passed。原有离线评估本机首轮 15 passed／1 failed，单独复跑 14 passed／2 failed，实际观察到 PDF_TIMEOUT 和逐包计数差异；未修改断言或提高解析超时。另修复其暴露的空输出回放异常，追加解析拒绝录制及确定性恢复测试。[独立 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40279569965/job/121429638552) 已通过：254 passed／0 skipped（105.85 秒，包含 SQLite／PostgreSQL 参数化）。[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40279569965) 全通过：后端 849 passed／113 skipped（228.09 秒）；前端 15 suites／69 tests，lint／build／typecheck、前后端生产依赖审计、13 项部署脚本回归均通过。CI 中原有离线回放和新增规划测试全部通过，本机 PDF 超时记录仍保留。
 
 ## 2026-10-26：共享执行槽
 
