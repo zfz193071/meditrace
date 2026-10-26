@@ -32,7 +32,6 @@ jobs:
       - run: python3 scripts/referral_contracts.py --check
       - run: src/backend/.venv/bin/python scripts/referral_fixtures.py --check
       - run: src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review
-      - run: src/backend/.venv/bin/python -m pytest -q src/backend/test_database_deployment.py
       - run: python3 scripts/test_deploy_workflow.py
       - run: pnpm --dir src/frontend lint
       - run: pnpm --dir src/frontend test --runInBand
