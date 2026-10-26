@@ -54,9 +54,12 @@ def test_commit_before_transport_single_dispatch_and_keyless_replay(engine, setu
     adapter = fake()
     complete = adapter.complete
     async def observed(request):
-        assert values(engine, m.evaluation_attempts)[0]["state"] == "dispatched"
+        attempt = values(engine, m.evaluation_attempts)[0]
+        assert attempt["state"] == "dispatched"
         assert values(engine, m.evaluation_batches)[0]["reserved_microusd"] > 0
-        assert values(engine, m.evaluation_slots)[0]["attempt_id"] is not None
+        occupied = [s for s in values(engine, m.evaluation_slots) if s["attempt_id"] is not None]
+        assert len(occupied) == 1 and occupied[0]["attempt_id"] == attempt["id"]
+        assert occupied[0]["lease_expires_at"] > setup[3][0]
         return await complete(request)
     monkeypatch.setattr(adapter, "complete", observed)
     with session(engine, setup) as run:
