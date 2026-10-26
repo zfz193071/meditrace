@@ -28,6 +28,8 @@ MT-17 的[最新完整 CI](https://github.com/zfz193071/meditrace/actions/runs/4
 
 MT-21 首次安全切换流程提交 `46dcc8c` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40299944166) 中 `foundation` 与 `postgres-persistence` 均通过，部署工作流 18 项离线测试通过。仅实现并验证代码路径；未做生产备份、迁移、发布或线上验收，首次安全基线仍未建立。
 
+MT-22 新增 API 级完整闭环测试提交 `6153a39` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40301787734) 中 `foundation` 与 `postgres-persistence` 均通过。该项仅覆盖一条 Fake 工作流，不等于 MT-22 的全场景验收报告。
+
 实现 `5aa9a03`、预算补充 `e568b9e`、PostgreSQL 汇总类型修复 `ad48bf2` 的[最终完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40290077756) 全通过：后端 891 passed／154 skipped；独立数据库 job 337 passed／0 skipped（含两种数据库参数化），前端 69 项测试、构建／类型检查／审计通过。先前 CI 暴露的 JSON 类型问题及预算重用保护已记录，不能据此将 MT-20 或完整 V1 记为已验收。
 
 事务调度与持久录制恢复现已接通隔离 Fake 演练：操作者检查、费用预留及派发标记同事务，录制先于结算，恢复不重复调用；无数据库／Key 回放保留缺失及失败样本。仅 test 环境和内置 Fake，未开启真实供应商入口，也未记录实际预算授权。此轮无迁移或线上操作。实现 `bdc160d`／测试修正 `90cb281` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40282732849) 全通过：后端 870 passed／136 skipped，独立数据库 job 298 passed／0 skipped（含 SQLite／PostgreSQL 参数化），前端 69 项及构建／审计通过；首轮查询顺序断言误判的原因和修复保留在 [MT-20 证据](MT-20-EVIDENCE.md)。
