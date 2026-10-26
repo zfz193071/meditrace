@@ -115,7 +115,7 @@ def implementation_hash():
 
 def build_plan(*, batch_id, operator_id, split, output, model, price_version,
                input_price, output_price, max_cost_usd, output_limit=6000,
-               packet_keys=None, ack_test_exposure=False):
+               packet_keys=None, ack_test_exposure=False, require_new_output=True):
     if split == "test" and not ack_test_exposure:
         raise ValueError("Frozen test planning requires explicit exposure acknowledgement")
     # Check the exact bytes load_cases consumes, not a separate earlier read.
@@ -132,7 +132,7 @@ def build_plan(*, batch_id, operator_id, split, output, model, price_version,
         raise ValueError("Positive integer prices required")
     cap = cap_microusd(max_cost_usd)
     output = str(Path(output).resolve())
-    if Path(output).exists():
+    if require_new_output and Path(output).exists():
         raise ValueError("Report output directory must be new")
     samples = []
     for entry, packet, directory in cases:
@@ -160,11 +160,12 @@ def build_plan(*, batch_id, operator_id, split, output, model, price_version,
         samples=tuple(samples))
 
 
-def rebuild(plan):
+def rebuild(plan, *, require_new_output=True):
     return build_plan(batch_id=plan.batch_id, operator_id=plan.operator_id, split=plan.split, output=plan.output,
         model=plan.model, price_version=plan.price_version, input_price=plan.input_price, output_price=plan.output_price,
         max_cost_usd=f"{plan.max_cost_microusd // 1_000_000}.{plan.max_cost_microusd % 1_000_000:06d}",
-        output_limit=plan.output_limit, packet_keys=[s.key for s in plan.samples], ack_test_exposure=True)
+        output_limit=plan.output_limit, packet_keys=[s.key for s in plan.samples], ack_test_exposure=True,
+        require_new_output=require_new_output)
 
 
 def read_plan(path):
@@ -185,7 +186,7 @@ def bound_request(plan, sample_key, revision):
 
 
 def validate_approval_binding(plan, *, approved_sha256, approved_max_cost_usd, operator_id, settings,
-                              ack_test_exposure=False):
+                              ack_test_exposure=False, require_new_output=True):
     """Check explicit approval parameters; does not assert a human has approved.
 
     The real runner remains closed. Callers cannot infer provider permission
@@ -207,7 +208,7 @@ def validate_approval_binding(plan, *, approved_sha256, approved_max_cost_usd, o
         raise ValueError("Model or prices changed")
     if plan.upper_microusd > plan.max_cost_microusd:
         raise ValueError("Selected samples exceed approved cap; prepare a smaller selection")
-    current = rebuild(plan)
+    current = rebuild(plan, require_new_output=require_new_output)
     if current.sha256 != plan.sha256:
         raise ValueError("Inputs or implementation changed; prepare a new plan")
 

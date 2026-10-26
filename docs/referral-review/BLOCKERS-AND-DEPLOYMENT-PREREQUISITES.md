@@ -20,6 +20,8 @@
 
 ## 2026-10-26 MT-20 工程推进
 
+事务调度与持久录制恢复现已接通隔离 Fake 演练：操作者检查、费用预留及派发标记同事务，录制先于结算，恢复不重复调用；无数据库／Key 回放保留缺失及失败样本。仅 test 环境和内置 Fake，未开启真实供应商入口，也未记录实际预算授权。此轮无迁移或线上操作。验证见 [MT-20 证据](MT-20-EVIDENCE.md)。
+
 新增可审阅计划和授权参数预检：只处理固定合成语料，输出样本／预算／版本／目录及 hash，未记录实际人工授权，不连接供应商。源码与路径复读校验已加强。真实 runner 仍关闭，事务派发／录制恢复及人工 gold／预算条件不变。提交 `8272a1f`／`e2277bc` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40279569965) 全通过：后端 849 passed／113 skipped；独立数据库 job 254 passed／0 skipped（含 SQLite／PostgreSQL 参数化）；前端 69 项、构建及审计通过。本机原有离线回归曾出现 PDF_TIMEOUT，未提高超时；详见 [MT-20 证据](MT-20-EVIDENCE.md)。本段不更新上方线上探测快照。
 
 独立评估账本及共享日月费用预留已实施（`d45d810`），详见 [账本范围](EVALUATION-LEDGER.md)。本地后端 798 passed／97 skipped；[独立 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40267092317/job/121391749549) 196 passed／0 skipped，包含评估与工作区多进程竞争。[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40267092317) 全通过：前端 69 tests、构建／类型检查及前后端审计通过，后端 CI 同为 798 passed／97 skipped。真实 CLI 仍拒绝派发，共享并发槽现已实现，仍缺授权与合成输入绑定、真实录制／恢复及晚到费用校正。未请求或消耗真实模型预算，未应用生产迁移，MT-20 不关闭。
@@ -44,7 +46,7 @@
 
 ## 正式部署完整 V1 的条件
 
-`MT-24` 要求 `MT-01`—`MT-23` **全部 DONE**、[Q01—Q20](QUALITY-AND-RELEASE.md) 和发布门槛全通过。尤其 `MT-20` 独立账本及全站日月费用预留已实施，共享派发槽也已实现，但已补计划／授权参数预检，仍缺实际授权记录与派发事务、真实录制／恢复集成；当前真实 runner 主动拒绝派发，Fake／replay 不能替代真实成绩。`MT-22` 还须完成整条任务链、双账号权限、PostgreSQL 并发、故障、三视口／键盘／PDF、依赖审计并写 `acceptance-report.md`。`MT-23` 求职材料初稿需按最终实测复核。
+`MT-24` 要求 `MT-01`—`MT-23` **全部 DONE**、[Q01—Q20](QUALITY-AND-RELEASE.md) 和发布门槛全通过。尤其 `MT-20` 独立账本及全站日月费用预留已实施，共享派发槽也已实现，计划检查、事务派发及持久录制恢复已接通隔离 Fake 演练，仍缺实际授权／gold 来源和真实入口、恢复 CLI／完整报告、晚到费用校正；当前真实 runner 主动拒绝派发，Fake／replay 不能替代真实成绩。`MT-22` 还须完成整条任务链、双账号权限、PostgreSQL 并发、故障、三视口／键盘／PDF、依赖审计并写 `acceptance-report.md`。`MT-23` 求职材料初稿需按最终实测复核。
 
 | 外部条件 | 需要的内容与实际验收 | 谁需参与 |
 | --- | --- | --- |

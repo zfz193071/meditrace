@@ -214,3 +214,20 @@ def test_upgrade_from_previous_head_preserves_existing_ledger(empty_engine):
         after = dict(conn.execute(sa.select(m.memberships).where(m.memberships.c.id == g["member"])).mappings().one())
         assert before == after
         assert conn.execute(sa.select(sa.func.count()).select_from(m.evaluation_batches)).scalar_one() == 0
+
+
+def test_caller_transaction_owns_all_financial_and_dispatch_writes(engine):
+    s = ledger(engine)
+    bid = uuid4()
+    with pytest.raises(RuntimeError):
+        with s._transaction() as conn:
+            s.open_batch(bid, plan_hash=PLAN, max_cost_usd="0.01", connection=conn)
+            row = s.reserve(bid, sample_hash=SAMPLE, input_bound=1000, output_limit=1000, connection=conn)
+            s.record_dispatch(bid, row["id"], connection=conn)
+            s.settle(bid, row["id"], outcome="succeeded", usage=TOKENS, connection=conn)
+            raise RuntimeError("caller rolls back everything")
+    for table in (m.evaluation_batches, m.evaluation_attempts, m.evaluation_buckets, m.evaluation_slots, m.budget_buckets):
+        assert values(engine, table) == []
+    with engine.connect() as conn:
+        with pytest.raises(ValueError, match="Caller-owned transaction"):
+            s.open_batch(bid, plan_hash=PLAN, max_cost_usd="0.01", connection=conn)

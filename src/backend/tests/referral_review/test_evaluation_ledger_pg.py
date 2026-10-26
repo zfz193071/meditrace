@@ -9,6 +9,8 @@ import sqlalchemy as sa
 from referral_review.errors import ApiError
 from referral_review.persistence import models as m
 from referral_review.persistence.database import create_engine
+from referral_review.usage import rates
+from referral_review.schemas import ErrorCode
 from test_evaluation_ledger import ledger, batch, attempt, SAMPLE
 from test_usage import graph, service, values, TOKENS
 from test_usage_pg import pg
@@ -30,7 +32,15 @@ def execute(payload):
         s = ledger(engine, [now])
         _BARRIER.wait(timeout=20)
         try:
-            if operation == "workspace":
+            if operation in ("guarded_dispatch", "rollback_guarded_dispatch"):
+                with s._transaction() as conn:
+                    rates.lock_user(conn, owner)
+                    s.open_batch(bid, plan_hash="a" * 64, max_cost_usd="0.01", connection=conn)
+                    row = s.reserve(bid, sample_hash=sample, input_bound=1000, output_limit=1000, connection=conn)
+                    s.record_dispatch(bid, row["id"], connection=conn)
+                    if operation == "rollback_guarded_dispatch":
+                        raise ApiError(ErrorCode.USAGE_CONFLICT)
+            elif operation == "workspace":
                 service(engine, [owner], [now]).reserve(owner, run, input_bound=1000, output_limit=1000)
             elif operation == "dispatch":
                 s.record_dispatch(bid, run)
@@ -128,3 +138,18 @@ def test_expired_evaluation_completion_racing_new_claim_preserves_live_lease(pg)
     assert result == ["success", "success"]
     assert active_holders(pg, now[0]) == 1
     assert any(r["attempt_id"] == new["id"] for r in values(pg, m.evaluation_slots))
+
+
+@pytest.mark.parametrize("rollback", [False, True])
+def test_user_guard_and_composed_transaction_commit_once_across_processes(pg, rollback):
+    g = graph(pg)
+    bid = uuid4()
+    other = "rollback_guarded_dispatch" if rollback else "guarded_dispatch"
+    result = race(pg, [("guarded_dispatch", bid, SAMPLE, g["owner"], None),
+                       (other, bid, SAMPLE, g["owner"], None)])
+    assert sorted(result) == ["USAGE_CONFLICT", "success"]
+    assert len(values(pg, m.evaluation_attempts)) == 1
+    assert values(pg, m.evaluation_attempts)[0]["state"] == "dispatched"
+    assert values(pg, m.evaluation_batches)[0]["reserved_microusd"] == 3
+    assert all(b["reserved_microusd"] == 3 for b in values(pg, m.budget_buckets))
+    assert active_holders(pg, NOW) == 1

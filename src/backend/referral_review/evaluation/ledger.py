@@ -49,7 +49,13 @@ class EvaluationLedger:
         self.engine, self.settings, self.clock = engine, settings, clock
 
     @contextmanager
-    def _transaction(self):
+    def _transaction(self, connection=None):
+        if connection is not None:
+            if not connection.in_transaction() or connection.engine is not self.engine:
+                raise ValueError("Caller-owned transaction on the ledger engine required")
+            require_current_schema(connection)
+            yield connection
+            return
         with self.engine.connect().execution_options(sqlite_immediate=True) as conn, conn.begin():
             require_current_schema(conn)
             yield conn
@@ -78,12 +84,12 @@ class EvaluationLedger:
         if any(batch[key] != value for key, value in self._pricing().items()):
             raise ApiError(ErrorCode.USAGE_CONFLICT)
 
-    def open_batch(self, batch_id, *, plan_hash, max_cost_usd):
+    def open_batch(self, batch_id, *, plan_hash, max_cost_usd, connection=None):
         """Idempotent identity binds a cap and plan; it cannot raise an old cap."""
         fingerprint(plan_hash)
         cap = cap_microusd(max_cost_usd)
         self._configuration()
-        with self._transaction() as conn:
+        with self._transaction(connection) as conn:
             rates.ensure(conn, m.evaluation_batches, dict(id=batch_id, plan_hash=plan_hash,
                 cap_microusd=cap, created_at=self.clock(), **self._pricing()))
             batch = self._batch(conn, batch_id)
@@ -92,13 +98,13 @@ class EvaluationLedger:
             self._same_pricing(batch)
             return dict(batch)
 
-    def reserve(self, batch_id, *, sample_hash, input_bound, output_limit=6000):
+    def reserve(self, batch_id, *, sample_hash, input_bound, output_limit=6000, connection=None):
         fingerprint(sample_hash)
         if (type(input_bound) is not int or not 0 < input_bound <= 16000
             or type(output_limit) is not int or not 0 < output_limit <= 6000):
             raise ApiError(ErrorCode.SCHEMA_INVALID)
         self._configuration()
-        with self._transaction() as conn:
+        with self._transaction(connection) as conn:
             batch = self._batch(conn, batch_id)
             self._same_pricing(batch)
             previous = conn.execute(sa.select(m.evaluation_attempts).where(
@@ -138,7 +144,7 @@ class EvaluationLedger:
         budget.lock_buckets(conn, keys)
         return batch, attempt, control, keys
 
-    def record_dispatch(self, batch_id, attempt_id):
+    def record_dispatch(self, batch_id, attempt_id, *, connection=None):
         """Atomically claim a shared global slot and a one-way dispatch marker.
 
         Commit before transport; a crash after this marker must be cost-unknown,
@@ -146,7 +152,7 @@ class EvaluationLedger:
         This is not operator/invitation/synthetic-input authorization.
         """
         self._configuration()
-        with self._transaction() as conn:
+        with self._transaction(connection) as conn:
             batch, attempt, control, keys = self._locked(conn, batch_id, attempt_id)
             self._same_pricing(batch)
             if control["halted"]:
@@ -161,7 +167,7 @@ class EvaluationLedger:
                          .values(state="dispatched", dispatched_at=now, lease_expires_at=lease))
             return self._read(conn, attempt_id)
 
-    def settle(self, batch_id, attempt_id, *, outcome, usage=None):
+    def settle(self, batch_id, attempt_id, *, outcome, usage=None, connection=None):
         if outcome not in ("succeeded", "failed", "cancelled", "unknown"):
             raise ApiError(ErrorCode.SCHEMA_INVALID)
         if usage is not None:
@@ -172,7 +178,7 @@ class EvaluationLedger:
         if usage is not None and outcome in ("unknown", "cancelled"):
             raise ApiError(ErrorCode.SCHEMA_INVALID)
         digest = hashlib.sha256(json.dumps({"outcome": outcome, "usage": usage.model_dump() if usage else None}, sort_keys=True).encode()).hexdigest()
-        with self._transaction() as conn:
+        with self._transaction(connection) as conn:
             batch, attempt, _, keys = self._locked(conn, batch_id, attempt_id)
             if attempt["state"] in TERMINAL:
                 if attempt["settlement_hash"] != digest:

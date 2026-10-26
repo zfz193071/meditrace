@@ -1,5 +1,14 @@
 # MT-20 评估实施证据
 
+## 2026-10-26：隔离事务调度、持久录制与恢复
+
+`coordinator.py` 接通计划／用户检查、原子 batch／费用／槽／派发提交、提交后 Fake 调用、先录制后结算，以及不重试模型的恢复。`journal.py` 使用私有目录、排他锁、校验和、fsync 和不可覆盖发布；绑定整个计划。无 Key／数据库的 replay 保留全部所选样本和原／当前实现来源。仅可显式注入隔离测试 engine，必须 test 环境及内置 Fake；未增加 CLI／HTTP 执行入口，没有实际人工授权或真实模型费用。范围与未完成项见 [账本手册](EVALUATION-LEDGER.md)。
+
+- 首轮新调度专项：18 passed／18 skipped；后续组合 `test_evaluation_coordinator.py test_evaluation_ledger.py test_evaluation_planning.py`：80 passed／40 skipped（96.55 秒）。跳过仅因本机未配置 PostgreSQL，不能当作通过。
+- 补充晚到 usage 保留估算、恢复不涉及其他 batch、合法校验和但错误 attempt 绑定及价格变更检查：3 passed／3 skipped。
+- 数据库进程用例新增用户锁及组合派发事务竞争／回滚；新调度模块已加入 PostgreSQL CI，完整运行结果待提交后补齐。
+- 没有新增迁移、启停服务、操作生产数据、真实模型调用或改动历史评估报告。MT-20 保持 TODO；后续仍须实际授权与 gold、真实 Adapter 入口、恢复 CLI／完整报告及追加费用校正。
+
 ## 2026-10-26：可审阅计划与授权参数预检
 
 实现提交：`8272a1f`，同字节 manifest 固定校验补充提交：`e2277bc5360af8e3938e43daa627157c9ffc0499`（验证分支）。
