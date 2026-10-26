@@ -2,11 +2,13 @@
 
 ## 2026-10-26：隔离事务调度、持久录制与恢复
 
+实现提交：`bdc160d6de59f257b3adb7e73786c9ca4109b084`；槽位断言补充：`90cb281`（验证分支）。
+
 `coordinator.py` 接通计划／用户检查、原子 batch／费用／槽／派发提交、提交后 Fake 调用、先录制后结算，以及不重试模型的恢复。`journal.py` 使用私有目录、排他锁、校验和、fsync 和不可覆盖发布；绑定整个计划。无 Key／数据库的 replay 保留全部所选样本和原／当前实现来源。仅可显式注入隔离测试 engine，必须 test 环境及内置 Fake；未增加 CLI／HTTP 执行入口，没有实际人工授权或真实模型费用。范围与未完成项见 [账本手册](EVALUATION-LEDGER.md)。
 
 - 首轮新调度专项：18 passed／18 skipped；后续组合 `test_evaluation_coordinator.py test_evaluation_ledger.py test_evaluation_planning.py`：80 passed／40 skipped（96.55 秒）。跳过仅因本机未配置 PostgreSQL，不能当作通过。
 - 补充晚到 usage 保留估算、恢复不涉及其他 batch、合法校验和但错误 attempt 绑定及价格变更检查：3 passed／3 skipped。
-- 数据库进程用例新增用户锁及组合派发事务竞争／回滚；新调度模块已加入 PostgreSQL CI，完整运行结果待提交后补齐。
+- 数据库进程用例新增用户锁及组合派发事务竞争／回滚；新调度模块已加入 PostgreSQL CI，首轮 [PostgreSQL CI](https://github.com/zfz193071/meditrace/actions/runs/40282363008/job/121438257984) 为 297 passed／1 failed：新测试错误地依赖未排序的槽位行序，已改为验证唯一占用、对应持有者及有效租约，见 [修复记录](../../BUGFIX-EVALUATION-POSTGRES-SLOT-ASSERTION.md)。修正后本机定向 1 passed／1 skipped；[最终 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40282732849/job/121439391929) 已通过：298 passed／0 skipped（120.14 秒，含 SQLite／PostgreSQL 参数化）。用户锁与组合事务的多进程竞争、回滚及持久恢复均已实际执行；[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40282732849) 全通过：后端 870 passed／136 skipped（187.64 秒）；前端 15 suites／69 tests、lint／build／typecheck、前后端生产依赖审计和 13 项部署脚本回归均通过。
 - 没有新增迁移、启停服务、操作生产数据、真实模型调用或改动历史评估报告。MT-20 保持 TODO；后续仍须实际授权与 gold、真实 Adapter 入口、恢复 CLI／完整报告及追加费用校正。
 
 ## 2026-10-26：可审阅计划与授权参数预检
