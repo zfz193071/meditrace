@@ -50,6 +50,8 @@
 
 录制恢复用录制内容 hash 作为幂等键。状态输出分别保留 `settlement_microusd`、`adjustment_microusd`、合计 `simulated_microusd` 和 `cost_status`；估算经过校正后费用可以是 known，但历史任务状态及 outcome 不改写。所有数值仍为 Fake 演练，不代表供应商实收。
 
+校正还检查 batch 和原预算桶的总占用：先前释放的金额可能已经被另一个请求预留，因此即使新费用没超过原上界，只要总占用超限也须熔断，禁止已有预留继续派发。复现及回归见 [预算重用修复](../../BUGFIX-EVALUATION-ADJUSTMENT-BUDGET.md)。
+
 新 `recover.py` 默认预览，PostgreSQL 强制 `SET TRANSACTION READ ONLY`。只接受 `TEST_DATABASE_URL` 及 `referral_review.persistence.test_database create` 生成的私有 ownership receipt，核对连接指纹、随机 schema、数据库内随机标记和当前迁移版本；不回退到 `DATABASE_URL`，不创建／迁移／删除数据库，不读取模型密钥。CLI 当前仅支持已有隔离 PostgreSQL 演练库；SQLite 继续由内部测试 API 覆盖。恢复允许使用原计划及原价格，不要求当前实现 hash 相同，也不授权再次执行。
 
 在仓库根目录、已有隔离演练数据及 journal 的前提下运行（占位路径须替换）：

@@ -247,9 +247,19 @@ class EvaluationLedger:
                     .values(spent_microusd=m.budget_buckets.c.spent_microusd + delta))
             conn.execute(m.evaluation_batches.update().where(m.evaluation_batches.c.id == batch_id)
                 .values(spent_microusd=m.evaluation_batches.c.spent_microusd + delta))
+            # A previous refund may already have funded another reservation.
+            # Even usage within the original upper bound can then exceed a cap.
+            cap_exceeded = batch["reserved_microusd"] + batch["spent_microusd"] + delta > batch["cap_microusd"]
+            for key in keys:
+                bucket = conn.execute(sa.select(m.budget_buckets).where(
+                    m.budget_buckets.c.bucket_key == key)).mappings().one()
+                cap_exceeded |= bucket["reserved_microusd"] + bucket["spent_microusd"] > bucket["limit_microusd"]
             if actual > attempt["upper_microusd"]:
                 conn.execute(m.usage_controls.update().where(m.usage_controls.c.key == "real_ai")
                     .values(halted=True, reason="ACTUAL_EXCEEDS_RESERVATION"))
+            elif cap_exceeded:
+                conn.execute(m.usage_controls.update().where(m.usage_controls.c.key == "real_ai",
+                    m.usage_controls.c.halted.is_(False)).values(halted=True, reason="ADJUSTMENT_EXCEEDS_BUDGET"))
             row = dict(id=uuid4(), attempt_id=attempt_id, adjustment_key=adjustment_key,
                 prompt_tokens=usage.prompt_tokens, completion_tokens=usage.completion_tokens,
                 actual_microusd=actual, delta_microusd=delta, created_at=self.clock())

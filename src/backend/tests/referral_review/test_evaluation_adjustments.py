@@ -71,6 +71,26 @@ def test_only_dispatched_terminal_attempts_allow_correction(engine, state):
     assert values(engine, m.evaluation_adjustments) == []
 
 
+@pytest.mark.parametrize("cap", ["batch", "global"])
+def test_correction_halts_when_previously_released_budget_was_reused(engine, cap):
+    s = ledger(engine)
+    bid = batch(s, "0.000005" if cap == "batch" else "0.000006")
+    first = attempt(s, bid)
+    s.record_dispatch(bid, first["id"])
+    original = s.settle(bid, first["id"], outcome="succeeded", usage=TOKENS)
+    if cap == "global":
+        with engine.begin() as conn: conn.execute(m.budget_buckets.update().values(limit_microusd=5))
+    pending = attempt(s, bid, "c" * 64)
+    s.adjust(bid, first["id"], adjustment_key="correction",
+             usage=dict(prompt_tokens=1000, completion_tokens=1000, total_tokens=2000))
+    control = values(engine, m.usage_controls)[0]
+    assert control["halted"] and control["reason"] == "ADJUSTMENT_EXCEEDS_BUDGET"
+    with pytest.raises(ApiError, match="BUDGET_EXHAUSTED"):
+        s.record_dispatch(bid, pending["id"])
+    assert next(r for r in values(engine, m.evaluation_attempts) if r["id"] == first["id"]) == original
+    assert values(engine, m.evaluation_batches)[0]["reserved_microusd"] == 3
+
+
 def test_settled_correction_and_caller_rollback_are_atomic(engine):
     s = ledger(engine)
     bid = batch(s)
