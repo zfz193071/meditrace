@@ -12,6 +12,10 @@
 
 首轮 [PostgreSQL 17 CI](https://github.com/zfz193071/meditrace/actions/runs/40289119119/job/121459747618)：332 passed／1 failed（111.88 秒）。失败为真实隔离库 CLI 预览的 JSON 序列化：SUM(bigint) 在 PostgreSQL 返回 Decimal。已在领域边界无损转为整数，补充非零校正的 JSON 往返断言；详见 [修复记录](../../BUGFIX-EVALUATION-POSTGRES-COST-JSON.md)。
 
+预算补充提交 `e568b9e` 的第二轮数据库 CI 为 336 passed／1 failed（132.68 秒），唯一失败仍为上述序列化。修复提交 `ad48bf2e957f6bd269259b88037ce2963bfcfa77` 的[最终 PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40290077756/job/121462794184) **337 passed／0 skipped（102.90 秒）**，含 SQLite／PostgreSQL 参数化；新迁移、并发校正、预算重用熔断、真实隔离库 CLI 预览／apply／重复恢复和数据库强制只读均已执行。整数修复本机定向为 2 passed／2 skipped；没有放宽断言或将金额变为字符串。
+
+[最终完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40290077756) 两个 job 均成功：后端 **891 passed／154 skipped（268.02 秒）**，前端 15 suites／69 tests，lint／build／typecheck，前后端生产依赖审计、契约／锁文件／固定语料检查和 13 项部署脚本回归全部通过。普通 job 的 PostgreSQL 跳过由上述独立数据库 job 实际验证，不把跳过计为通过。只推送验证分支；未操作生产数据库、启停服务、部署或调用真实模型。
+
 ## 2026-10-26：隔离事务调度、持久录制与恢复
 
 实现提交：`bdc160d6de59f257b3adb7e73786c9ca4109b084`；槽位断言补充：`90cb281`（验证分支）。
