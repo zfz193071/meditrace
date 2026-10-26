@@ -362,6 +362,36 @@ usage_adjustments = sa.Table("rr_usage_adjustments", metadata,
     sa.UniqueConstraint("reservation_id", "adjustment_key"),
     sa.CheckConstraint("actual_microusd >= 0", name="amount"))
 
+# Internal synthetic evaluation accounting. No patient text, credentials or user
+# links; evaluation caps are independent of purchased workspace membership units.
+evaluation_batches = sa.Table("rr_evaluation_batches", metadata,
+    uid(primary=True), sa.Column("plan_hash", sa.String(64), nullable=False),
+    sa.Column("cap_microusd", sa.BigInteger, nullable=False),
+    sa.Column("reserved_microusd", sa.BigInteger, nullable=False, server_default="0"),
+    sa.Column("spent_microusd", sa.BigInteger, nullable=False, server_default="0"),
+    sa.Column("model", sa.String(200), nullable=False), sa.Column("price_version", sa.String(100), nullable=False),
+    sa.Column("input_price", sa.BigInteger, nullable=False), sa.Column("output_price", sa.BigInteger, nullable=False),
+    timestamp("created_at", created=True),
+    sa.CheckConstraint("cap_microusd > 0 AND reserved_microusd >= 0 AND spent_microusd >= 0 AND input_price > 0 AND output_price > 0", name="amounts"))
+evaluation_attempts = sa.Table("rr_evaluation_attempts", metadata,
+    uid(primary=True), uid("batch_id", reference="rr_evaluation_batches.id"),
+    sa.Column("sample_hash", sa.String(64), nullable=False),
+    sa.Column("input_bound", sa.Integer, nullable=False), sa.Column("output_limit", sa.Integer, nullable=False),
+    sa.Column("upper_microusd", sa.BigInteger, nullable=False), sa.Column("actual_microusd", sa.BigInteger),
+    sa.Column("state", sa.String(24), nullable=False), sa.Column("outcome", sa.String(16)),
+    sa.Column("prompt_tokens", sa.BigInteger), sa.Column("completion_tokens", sa.BigInteger),
+    timestamp("created_at", created=True), timestamp("lease_expires_at"),
+    timestamp("dispatched_at", nullable=True), timestamp("unknown_at", nullable=True), timestamp("settled_at", nullable=True),
+    sa.Column("settlement_hash", sa.String(64)),
+    sa.UniqueConstraint("batch_id", "sample_hash"),
+    state("state", "reserved dispatched retained_unknown settled released estimated_spent"),
+    sa.CheckConstraint("input_bound > 0 AND input_bound <= 16000 AND output_limit > 0 AND output_limit <= 6000 AND upper_microusd > 0 AND (actual_microusd IS NULL OR actual_microusd >= 0)", name="amounts"),
+    sa.CheckConstraint("(prompt_tokens IS NULL AND completion_tokens IS NULL) OR (prompt_tokens >= 0 AND completion_tokens >= 0 AND prompt_tokens IS NOT NULL AND completion_tokens IS NOT NULL)", name="tokens"),
+    sa.Index("ix_rr_evaluation_recovery", "state", "lease_expires_at"))
+evaluation_buckets = sa.Table("rr_evaluation_buckets", metadata,
+    uid("attempt_id", primary=True, reference="rr_evaluation_attempts.id"),
+    sa.Column("bucket_key", sa.String(80), sa.ForeignKey("rr_budget_buckets.bucket_key"), primary_key=True))
+
 # Durable reviewer history, including every replaced handoff draft.
 review_events = sa.Table("rr_review_events", metadata,
     uid(primary=True), uid("packet_id"), uid("revision_id"), uid("run_id", nullable=True), uid("actor_id"),

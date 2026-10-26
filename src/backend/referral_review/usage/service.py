@@ -5,7 +5,7 @@ Lock order: user -> packet -> run -> membership -> global control -> budget keys
 Reservation replay is NOT permission to dispatch again; MT-11 owns dispatch CAS.
 """
 from contextlib import nullcontext
-from datetime import timedelta, timezone
+from datetime import timedelta
 import hashlib
 import json
 from uuid import uuid4
@@ -19,22 +19,9 @@ from ..persistence import models as m
 from ..persistence.migrations import require_current_schema
 from ..persistence.repository import NotFound, owned_packet, require_transaction
 from ..schemas import ErrorCode, MembershipResponse
-from . import rates
+from . import rates, budget
+from .budget import cost, bucket_limits
 
-
-def cost(input_tokens, output_tokens, input_price, output_price):
-    if any(type(v) is not int or v < 0 for v in (input_tokens, output_tokens, input_price, output_price)):
-        raise ApiError(ErrorCode.SCHEMA_INVALID)
-    value = (input_tokens * input_price + output_tokens * output_price + 999_999) // 1_000_000
-    if value > 2**62:
-        raise ApiError(ErrorCode.SERVICE_NOT_READY)
-    return value
-
-
-def bucket_limits(settings, now):
-    now = now.astimezone(timezone.utc)
-    return {f"day:{now:%Y-%m-%d}": settings.daily_budget_microusd,
-            f"month:{now:%Y-%m}": settings.monthly_budget_microusd}
 
 
 class Usage:
@@ -81,9 +68,7 @@ class Usage:
             raise ApiError(ErrorCode.REAL_AI_NOT_ALLOWED)
 
     def _control(self, conn):
-        rates.ensure(conn, m.usage_controls, {"key": "real_ai", "halted": False})
-        return conn.execute(sa.select(m.usage_controls).where(m.usage_controls.c.key == "real_ai")
-                            .with_for_update()).mappings().one()
+        return budget.control(conn)
 
     def _prior(self, conn, run_id):
         return conn.execute(sa.select(m.usage_reservations).where(m.usage_reservations.c.run_id == run_id)).mappings().first()
@@ -134,15 +119,7 @@ class Usage:
             input_price = self.settings.input_microusd_per_million if real else 0
             output_price = self.settings.output_microusd_per_million if real else 0
             upper = cost(input_bound, output_limit, input_price, output_price)
-            keys = bucket_limits(self.settings, self.clock()) if real else {}
-            if real and self._control(conn)["halted"]:
-                raise ApiError(ErrorCode.BUDGET_EXHAUSTED)
-            for key, limit in sorted(keys.items()):
-                rates.ensure(conn, m.budget_buckets, {"bucket_key": key, "limit_microusd": limit})
-                bucket = conn.execute(sa.select(m.budget_buckets).where(m.budget_buckets.c.bucket_key == key)
-                                      .with_for_update()).mappings().one()
-                if limit <= 0 or bucket["reserved_microusd"] + bucket["spent_microusd"] + upper > min(limit, bucket["limit_microusd"]):
-                    raise ApiError(ErrorCode.BUDGET_EXHAUSTED)
+            keys = budget.reserve(conn, self.settings, self.clock(), upper) if real else {}
             lease = self.clock() + timedelta(seconds=240)
             for scope, capacity in ((f"account:{owner}", 1), ("global", 2)):
                 for slot in range(capacity):
@@ -157,9 +134,6 @@ class Usage:
             rid = uuid4()
             conn.execute(m.memberships.update().where(m.memberships.c.id == member["id"])
                          .values(reserved_units=m.memberships.c.reserved_units + 1))
-            for key in sorted(keys):
-                conn.execute(m.budget_buckets.update().where(m.budget_buckets.c.bucket_key == key)
-                             .values(reserved_microusd=m.budget_buckets.c.reserved_microusd + upper))
             conn.execute(m.usage_reservations.insert().values(id=rid, run_id=run_id, owner_id=owner,
                 membership_id=member["id"], units=1, cost_upper_bound_microusd=upper, state="reserved",
                 price_version=self.settings.price_version if real else "fake-no-provider-cost", created_at=self.clock()))
@@ -184,9 +158,7 @@ class Usage:
             self._control(conn)
         keys = conn.execute(sa.select(m.usage_buckets.c.bucket_key).where(
             m.usage_buckets.c.reservation_id == reservation["id"]).order_by(m.usage_buckets.c.bucket_key)).scalars().all()
-        for key in keys:
-            conn.execute(sa.select(m.budget_buckets.c.bucket_key).where(m.budget_buckets.c.bucket_key == key)
-                         .with_for_update()).one()
+        budget.lock_buckets(conn, keys)
         return run, reservation, detail, keys
 
     def _release_slots(self, conn, owner, run_id):
@@ -240,13 +212,7 @@ class Usage:
             else:
                 actual = cost(usage.prompt_tokens, usage.completion_tokens, detail["input_price"], detail["output_price"])
                 state = "settled"
-            if actual > reservation["cost_upper_bound_microusd"]:
-                conn.execute(m.usage_controls.update().where(m.usage_controls.c.key == "real_ai")
-                             .values(halted=True, reason="ACTUAL_EXCEEDS_RESERVATION"))
-            for key in keys:
-                conn.execute(m.budget_buckets.update().where(m.budget_buckets.c.bucket_key == key).values(
-                    reserved_microusd=m.budget_buckets.c.reserved_microusd - reservation["cost_upper_bound_microusd"],
-                    spent_microusd=m.budget_buckets.c.spent_microusd + actual))
+            budget.settle(conn, keys, reservation["cost_upper_bound_microusd"], actual)
             conn.execute(m.memberships.update().where(m.memberships.c.id == reservation["membership_id"]).values(
                 reserved_units=m.memberships.c.reserved_units - 1,
                 consumed_units=m.memberships.c.consumed_units + (1 if outcome == "succeeded" else 0)))

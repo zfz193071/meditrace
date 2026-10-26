@@ -213,7 +213,7 @@ async def run(split='dev',provider='fake',recording=None,interrupt_after=None):
         environment=dict(python=platform.python_version(),system=platform.system(),pydantic=version('pydantic'),pypdf=version('pypdf')),
         versions=version_info,recorded_versions=recording['versions'] if recording else None,
         requires_new_real_evaluation=True,release_status='BLOCKED',
-        blockers=['Operator gold review pending','No authorized real-model evaluation or independent evaluation ledger',
+        blockers=['Operator gold review pending','No authorized real-model evaluation; real runner dispatch/recording integration pending',
                   'Frozen release gates and 20 real latency measurements not established'],
         offline_gates=report_gates,frozen_test_exposed=split=='test',summary=summary,latency=measured,rows=rows,
         cost=dict(measurement='not measured; offline synthetic output',input_tokens=None,output_tokens=None,actual_usd=None,estimated_usd=None,unknown_packets=len(rows)))
@@ -259,7 +259,7 @@ def main():
     parser.add_argument('--compare',type=Path,help='Fail if factual/finding counts differ from this report')
     args=parser.parse_args()
     if args.provider=='real':
-        parser.error('Real evaluation disabled: an authorized cap alone is insufficient; the independent evaluation ledger must integrate shared global reservation controls before dispatch. No request sent.')
+        parser.error('Real evaluation disabled: an authorized cap alone is insufficient; the accounting ledger still requires shared dispatch slots, operator authorization and recording/recovery integration before real execution. No request sent.')
     if args.split=='test' and not args.ack_test_exposure: parser.error('Frozen test inspection requires --ack-test-exposure; do not tune against inspected tests.')
     if args.recording and args.provider!='replay': parser.error('--recording is only valid with --provider replay')
     if args.provider=='replay' and not args.recording: parser.error('--recording is required for replay')

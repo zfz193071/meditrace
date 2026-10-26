@@ -1,4 +1,15 @@
-# MT-20 离线评估基线实施证据
+# MT-20 评估实施证据
+
+## 2026-10-26：独立费用账本基础层
+
+新增 `evaluation/ledger.py`、共享 `usage/budget.py`、追加迁移 `rr_0007` 及 SQLite／PostgreSQL 参数化、多进程竞争测试。评估 cap、原子共享日月预留、单次派发财务标记、幂等结算、unknown 保留与有界恢复已实施。实现及未完成边界见 [账本手册](EVALUATION-LEDGER.md)。
+
+- 定向测试 `test_evaluation_ledger.py test_usage.py test_persistence.py`：97 passed／74 skipped；跳过的是本机未配置的 PostgreSQL，不计为通过。
+- PostgreSQL CI 已加入评估与工作区混合竞争、同一 batch 预算竞争及重复派发／结算；远端结果在验证完成后记录。
+- `--provider real` 继续拒绝，正数 cap 也不能打开；无供应商调用、模型费用、线上发布或生产迁移。
+- 剩余工程工作：真实 CLI 的授权／合成输入绑定、共享并发槽、录制与报告／恢复接入、晚到 usage 的追加校正；仍须人工 gold、明确预算和真实冻结集测量。前置未关闭，MT-20 仍为 TODO。
+
+## 2026-10-22：离线报告历史证据
 
 日期：2026-10-22。前一票 MT-16 已提交：`0bfb26d`。本票完成离线 runner、指标、开发集报告、replay 和 `/evaluation` 展示；**没有完成整张 MT-20 的真实评估验收**。前置尚未关闭，front matter 保留 TODO；真实阶段受阻，缺项详见下方。
 
@@ -44,7 +55,7 @@
 
 截图和审计：[MT-20 evidence](evidence/MT-20/)。浏览器工具：扩展的 `scripts/referral_demo_qa.cjs` 加载 `#evaluation`，`scripts/referral_evaluation_browser_qa.cjs <file-URL>` 做只读检查。静态报告 metadata 更新后重新生成了公开汇总，计数与页面结构不变。
 
-## 未完成项及验收状态
+## 2026-10-22 当时未完成项（账本进度以上方更新为准）
 
 - 30 份语料／10–20 划分已存在，但人工 gold 复核仍缺；本次只跑 dev，未执行冻结集质量评估，也不重新声称冻结材料对开发者未见。
 - 真实 runner 的**独立评估账本与全站预留集成尚未实现**。真实模式现在明确拒绝所有派发，包含给了 cap 的情况；这是安全关闭而非“费用上限已完整实现”。后续须复用 MT-10／11 预留、派发 CAS、结算／unknown 保留，另加评估独立额度和异常恢复测试，不能直接调用 DeepSeek Adapter。
