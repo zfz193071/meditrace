@@ -86,6 +86,7 @@ jobs:
           src/backend/tests/referral_review/test_billing_pg.py
           src/backend/tests/referral_review/test_reviews_persistence.py
           src/backend/tests/referral_review/test_runs_pg.py
+          src/backend/tests/referral_review/test_workflow_integration.py
           --junitxml=postgres-results.xml
       - name: Require executed PostgreSQL cases without skips
         run: |
