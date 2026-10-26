@@ -14,7 +14,9 @@
 - 当前工单状态：MT-01／02 `DONE`、MT-03／04 `BLOCKED`、MT-05—24 `TODO`。MT-03 缺人工标注签核，MT-04 已完成本地真实 OAuth 往返及用户 consent，仍缺托管平台日志验收；MT-20 真实评估账本、MT-21 首次安全生产基线及 MT-22 完整验收仍未完成。
 - MT-04 本地验收资源已准备：独立 [Local OAuth App](https://github.com/settings/applications/3964380)、loopback 精确 callback、0700 私有目录及 0600 凭据／SQLite 库，迁移 `rr_0006`，就绪检查通过。新增手动启动脚本和 OAuth access log 脱敏修复，75 项后端定向测试及 1 项前端日志回归通过；后续已获用户明确授权启动服务，用户亲自完成 consent；修复 GitHub `iss` 兼容问题后真实登录／回跳／刷新／退出通过，最新身份回归 86 passed。操作及环境边界见 [认证手册](AUTHENTICATION.md)。此环境不启用存储、支付或真实模型，不替代 Vercel 线上验收。
 - Vercel 项目开启了 Git 自动部署且生产分支为 main。为防止推送绕过发布门槛，验证分支已设置 `git.deploymentEnabled: false`，实际推送后最近部署记录仍为既有生产版本。远端 main 尚未包含该保护，不向其推送未包含保护的提交。见 [修复记录](../../BUGFIX-VERCEL-GIT-AUTO-DEPLOY.md)。
-- 完整 CI 经退役测试步骤、pypdf 安全补丁及解析版本兼容修复后，在提交 `ef5d9e5` [全部通过](https://github.com/zfz193071/meditrace/actions/runs/40257964496)：后端 564 passed／69 skipped，另一个 PostgreSQL job 137 passed／0 skipped，前端 68 tests、构建／类型检查／前后端依赖审计均通过。详见 [最终 CI 证据](CI-2026-10-26.md)，不将普通 job 的 skipped 当作验收通过。
+- 历史 CI 经退役测试步骤、pypdf 安全补丁及解析版本兼容修复后，在提交 `ef5d9e5` [全部通过](https://github.com/zfz193071/meditrace/actions/runs/40257964496)：后端 564 passed／69 skipped，另一个 PostgreSQL job 137 passed／0 skipped，前端 68 tests、构建／类型检查／前后端依赖审计均通过。详见 [最终 CI 证据](CI-2026-10-26.md)，不将普通 job 的 skipped 当作验收通过。
+
+- 最新 OAuth 修复提交 `381850a` 的 [完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40264116229) 全通过：后端 767 passed／73 skipped；独立 PostgreSQL job 141 passed／0 skipped；前端 15 suites／69 tests、构建、类型检查及依赖审计通过。共享认证 fixture 的 HTTP／HTTPS 参数化也扩展了下游 API 用例覆盖，计数不能视为新增功能数。
 
 ## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 

@@ -12,6 +12,8 @@
 - 运行中前后端日志检查未见 callback query、cookie 或 Authorization 凭据头；合成 query 通过真实前端代理后也未进入日志。原始敏感网络内容未保存到仓库或文件。
 - 本次其余定向验证：隔离环境／日志与初始身份测试 **75 passed**；旧入口及运维测试 **119 passed**；Next 日志测试 **1 passed**，修改文件 ESLint 通过。未运行模型、创建资料包、购买会员、修改生产库或部署。
 
+提交 `381850a` 的 [完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40264116229) 已全部通过：后端 767 passed／73 skipped；独立 PostgreSQL job 141 passed／0 skipped；前端 15 suites／69 tests，构建、类型检查及生产依赖审计均通过。详见 [CI 记录](CI-2026-10-26.md)。
+
 以下是同日准备阶段与早期历史记录，状态以上述实测为准。
 
 2026-10-26 本地验收准备：已创建独立 [Local OAuth App](https://github.com/settings/applications/3964380)，精确 callback 使用 `http://127.0.0.1:3000/api/v1/auth/github/callback`。专用脚本已创建私有凭据和独立 SQLite 数据库，显式迁移至 `rr_0006`；`check` 返回 ready，不连接生产库。等待操作者按仓库规则启动两个服务及完成 consent，尚未取得真实往返证据。HTTPS／HTTP loopback 身份与环境隔离／日志测试 **75 passed**，Next 开发日志回归 **1 passed**。发现并修复框架 access log 输出 callback query 的问题，见 [BUGFIX](../../BUGFIX-OAUTH-LOCAL-ACCESS-LOGS.md)。
