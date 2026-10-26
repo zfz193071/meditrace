@@ -44,4 +44,4 @@
 
 ## 2026-10-26：PostgreSQL 回调竞争验收补充
 
-新增独立 `test_billing_pg.py`，使用 PostgreSQL 临时 schema、独立进程和 Fake Stripe 响应，竞争四个不同成功事件处理同一订单、一次付款与退款事件同时处理，以及三个不同幂等键同时创建 Checkout。检查一笔付款只发一份权益，退款最终撤销且并发 paid 快照不能复活，不同请求仍共用同一订单和 Session。没有真实 Stripe、HTTP provider、OAuth、模型调用或生产数据；仅补数据库并发证据，不关闭 MT-17。用例已加入 PostgreSQL 17 CI 的零跳过检查。本地未设置 `TEST_DATABASE_URL`，专项结果 3 skipped，明确不计为通过。上一提交 `301b50d` 的[CI](https://github.com/zfz193071/meditrace/actions/runs/40296191590) 在增加 Checkout 用例前已通过：PostgreSQL 339 passed／0 skipped；新的三项竞争测试待最新 CI 执行。
+新增独立 `test_billing_pg.py`，使用 PostgreSQL 临时 schema、独立进程和 Fake Stripe 响应，竞争四个不同成功事件处理同一订单、一次付款与退款事件同时处理，以及三个不同幂等键同时创建 Checkout。检查一笔付款只发一份权益，退款最终撤销且并发 paid 快照不能复活，不同请求仍共用同一订单和 Session。没有真实 Stripe、HTTP provider、OAuth、模型调用或生产数据；仅补数据库并发证据，不关闭 MT-17。用例已加入 PostgreSQL 17 CI 的零跳过检查。本地未设置 `TEST_DATABASE_URL`，专项结果 3 skipped，明确不计为通过。提交 `b2e45db` 的[PostgreSQL 17 job](https://github.com/zfz193071/meditrace/actions/runs/40297989217/job/121488646875) **340 passed／0 skipped（91.03 秒）**；[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40297989217) 全通过：后端 891 passed／157 skipped，前端 15 suites／69 tests、构建／类型检查／审计及部署脚本回归通过。
