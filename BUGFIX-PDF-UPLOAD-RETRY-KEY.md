@@ -21,7 +21,7 @@
 - `pnpm --dir src/frontend typecheck` 通过。
 - 受影响组件和测试的 ESLint 检查通过。
 - 后端 PDF 重放集成验证同 key／字节只返回原文档，内容改变返回 409，存储原件和业务状态不变；详见 [MT-22](docs/referral-review/tickets/MT-22.md)。
-- 完整 CI 的构建及审计结果待回填。未启动／停止服务，未进行浏览器 AI 测试或生产发布。
+- 修复提交 `08aba8e` 的[完整 CI 40433418902](https://github.com/zfz193071/meditrace/actions/runs/40433418902) 两个 job 全通过：前端 15 suites／71 tests，build／typecheck／lint、前后端依赖审计通过；普通后端 913 passed／179 skipped，独立 PostgreSQL job 384 passed／0 skipped。未启动／停止服务，未进行浏览器 AI 测试或生产发布。
 
 ## 边界
 
