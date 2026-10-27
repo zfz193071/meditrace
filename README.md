@@ -2,11 +2,11 @@
 
 A synthetic-data portfolio prototype for staff checking referral documents: find missing information or conflicting details, inspect the source evidence, record a human decision, and export a versioned handoff.
 
-**Start here:** [Try the public demo](https://meditrace-portfolio-mvp.vercel.app/demo/) · [80-second captioned walkthrough](https://meditrace-portfolio-mvp.vercel.app/walkthrough.mp4) · [Run locally](#try-the-demo) · [Evaluation and failures](evals/referral-review/README.md) · [Deployed source](https://github.com/zfz193071/meditrace/tree/3588c027ba06358501879cd1613bf806ebb16a61)
+**Start here:** [Try the public demo](https://meditrace-portfolio-mvp.vercel.app/demo/) · [80-second captioned walkthrough](https://meditrace-portfolio-mvp.vercel.app/walkthrough.mp4) · [Run locally](#try-the-demo) · [Evaluation and failures](evals/referral-review/README.md) · [Deployed source](https://github.com/zfz193071/meditrace/tree/018c7d2524be65dc5d27ddc93448130f0d5906fc)
 
-**Status:** the standalone synthetic demo was published and verified on 2026-10-27. The English landing page, three fixed demos and offline evaluation are public. Full V1 backend/private-workspace acceptance remains incomplete. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual synthetic UI, not live model inference. [Public deployment evidence](docs/portfolio/STATIC-DEMO.md#public-release--2026-10-27).
+**Status:** the standalone synthetic demo was published and verified on 2026-10-27. The English landing page, three fixed demos and offline evaluation are public. Full V1 backend/private-workspace acceptance remains incomplete. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual synthetic UI, not live model inference. [Final release evidence](docs/portfolio/STATIC-DEMO.md#final-mvp-materials--2026-10-27).
 
-**Current delivery target:** a small portfolio MVP for sharing in Discord job-search conversations. The independently published demo, review/export walkthrough and English sharing material are provided in the [portfolio pack](docs/portfolio/README.md). Public uploads, payments, real-model evaluation and full SaaS operations are deferred. See the [current scope](docs/referral-review/README.md).
+**MVP delivery complete:** a small portfolio for sharing in Discord job-search conversations. The independently published demo, review/export walkthrough and English sharing material are provided in the [portfolio pack](docs/portfolio/README.md). Public uploads, payments, real-model evaluation and full SaaS operations are deferred. See the [current scope](docs/referral-review/README.md).
 
 ## Try the demo
 

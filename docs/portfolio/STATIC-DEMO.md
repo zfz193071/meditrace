@@ -1,6 +1,6 @@
 # Standalone portfolio build
 
-**Public demo:** [meditrace-portfolio-mvp.vercel.app/demo/](https://meditrace-portfolio-mvp.vercel.app/demo/). Published and verified 2026-10-27; [release record](#public-release--2026-10-27).
+**Public demo:** [meditrace-portfolio-mvp.vercel.app/demo/](https://meditrace-portfolio-mvp.vercel.app/demo/). Published and verified 2026-10-27; [final release record](#final-mvp-materials--2026-10-27).
 
 This implements the public-demo packaging step of the [current four-package MVP scope](../referral-review/README.md). It does not deploy the full V1 application.
 
@@ -16,7 +16,7 @@ The build stages an explicit allowlist of routes: `/`, `/demo/`, `/project/`, `/
 
 Verification checks the exported HTML route allowlist and every root-relative HTML link/script/style reference. CI builds and verifies the same artifact. This is build evidence, not browser interaction or public deployment evidence. Shared frontend API helpers can exist in bundles; the demo supplies its local transport rather than a live backend.
 
-Public deployment and core-flow verification are now recorded below. Remaining MVP work is final recruiting material and video review. Do not publish through the root full-service deployment config or replace the existing production service with this artifact.
+Public deployment and core-flow verification are now recorded below. The final recruiting material and video review are also complete; see the final release below. Do not publish through the root full-service deployment config or replace the existing production service with this artifact.
 
 ## Browser verification without a local server
 
@@ -71,3 +71,16 @@ node scripts/portfolio_browser_qa.cjs artifacts/portfolio/build-EXAMPLE/site 946
 ```
 
 The release helper follows Vercel's [Build Output API](https://vercel.com/docs/build-output-api/configuration), stages only static files outside the checkout, declares the four page routes and a real 404 fallback, and performs no deployment itself. Public verification is pinned to this independent origin. Live browser mode permits only GET requests for files present in the supplied artifact; other page requests are blocked.
+
+## Final MVP materials — 2026-10-27
+
+The four scoped portfolio packages are delivered. This adds the final 926-character English [sharing post](OUTREACH.md), refreshed video captions/frames and a public video link on the homepage. No recruiting message was sent; full V1 tickets retain their existing acceptance status.
+
+- Source: [`018c7d2`](https://github.com/zfz193071/meditrace/tree/018c7d2524be65dc5d27ddc93448130f0d5906fc). Artifact: `build-cwyy3epl`; static build, TypeScript, resource checks and targeted lint passed. Local and live browser core-flow checks passed again.
+- Deployment `dpl_2p796FxHA34KoTcZYch2nPHnTHA5` is READY and aliased to the same independent MVP domain. Only the static portfolio project was updated.
+- [28 anonymous HTTPS checks](evidence/final-2026-10-27/http.json) passed, including byte equality for `/walkthrough.mp4`. Public pages/assets match the artifact, bare page redirects work, private/API/unknown routes return 404.
+- [Live browser audit](evidence/final-2026-10-27/browser.json): three cases, keyboard flow, three viewports, export/reset and client navigation passed; 90 known static requests, no runtime errors or model requests. [Mobile homepage](evidence/final-2026-10-27/mobile-home.png) was visually reviewed.
+- [Public video](https://meditrace-portfolio-mvp.vercel.app/walkthrough.mp4): 79.933 seconds, 1280×720 H.264, 626,036 bytes. Eight shots and burned-in English captions reviewed; entire file decoded successfully by FFmpeg. SHA-256: `ab921b65d90b45310b5093f6047daf8ae01581e7b2d386a39d792cab95039a3f`.
+- Browser fetch returned `200 video/mp4`, the expected byte count and advertised H.264 support. Background Chrome deferred playback, so interactive browser playback is **not** marked passed. This limitation is separate from the complete decoder and public-byte checks; no browser was foregrounded.
+
+The full application [CI run 40466386897](https://github.com/zfz193071/meditrace/actions/runs/40466386897) passed both `foundation` and `postgres-persistence` jobs for this exact source commit. Full V1, real-provider quality and independent user trials remain outside this MVP delivery.
