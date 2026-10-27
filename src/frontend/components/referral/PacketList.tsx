@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { workspaceApi as api, operationKey, errorMessage, type PacketList as List } from "../../lib/referral-api/workspace";
 import { type Access, expiryLabel, useUnsavedChanges } from "./WorkspaceGate";
 
@@ -8,40 +8,59 @@ export function PacketList({ csrf, onError }: Access) {
   const [title, setTitle] = useState("");
   const [ack, setAck] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const createKey = useRef<string | null>(null);
-  const mounted = useRef(true);
+  const requestVersion = useRef(0);
+  const locked = useRef(false);
+  const invalidate = useCallback(() => { ++requestVersion.current; locked.current = false; }, []);
   useUnsavedChanges(Boolean(title.trim()));
-  async function load(cursor?: string) {
-    setBusy(true); setError("");
-    try { const next = await api.list(cursor); if (mounted.current) setList(previous => cursor && previous ? { ...next, items: [...previous.items, ...next.items] } : next); }
-    catch (e) { if (mounted.current) { setError(errorMessage(e)); onError(e); } }
-    finally { if (mounted.current) setBusy(false); }
+  async function perform(work: (current: () => boolean) => Promise<void>) {
+    if (locked.current) return;
+    locked.current = true;
+    const version = ++requestVersion.current;
+    const current = () => version === requestVersion.current;
+    setBusy(true); setError(""); setNotice("");
+    try { await work(current); }
+    catch (e) { if (current()) { setError(errorMessage(e)); onError(e); } }
+    finally { if (current()) { locked.current = false; setBusy(false); } }
   }
-  useEffect(() => { mounted.current = true; void load(); return () => { mounted.current = false; }; }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  async function create() {
-    if (busy || !ack || !title.trim()) return;
-    setBusy(true); setError("");
-    createKey.current ??= operationKey();
-    try {
+  async function readList(cursor: string | undefined, current: () => boolean) {
+    const next = await api.list(cursor);
+    if (current()) setList(previous => cursor && previous ? { ...next, items: [...previous.items, ...next.items] } : next);
+  }
+  function load(cursor?: string) { return perform(current => readList(cursor, current)); }
+  useEffect(() => {
+    void load();
+    return invalidate;
+  }, [invalidate]); // eslint-disable-line react-hooks/exhaustive-deps
+  function create() {
+    if (!ack || !title.trim()) return;
+    return perform(async current => {
+      createKey.current ??= operationKey();
       const packet = await api.create({ title: title.trim(), synthetic_data_ack: true }, csrf, createKey.current);
+      if (!current()) return;
       setTitle(""); setAck(false); createKey.current = null;
       setList(previous => ({ items: [packet, ...(previous?.items ?? []).filter(p => p.id !== packet.id)], next_cursor: previous?.next_cursor ?? null }));
-    } catch (e) { setError(errorMessage(e)); onError(e); }
-    finally { setBusy(false); }
+    });
   }
-  async function remove(id: string) {
-    setBusy(true); setError("");
-    try { await api.remove(id, csrf); setDeleting(null); await load(); }
-    catch (e) { setError(errorMessage(e)); onError(e); }
-    finally { setBusy(false); }
+  function remove(id: string) {
+    return perform(async current => {
+      await api.remove(id, csrf);
+      if (!current()) return;
+      setDeleting(null);
+      setList(previous => previous ? { ...previous, items: previous.items.filter(packet => packet.id !== id) } : previous);
+      setNotice("Packet access ended. Stored files are queued for cleanup.");
+      await readList(undefined, current);
+    });
   }
   return <>
     <div className="rr-heading"><div><h1>Your referral packets</h1><p>Prepare sources, check gaps, then review the handoff.</p></div><button disabled={busy} onClick={() => load()}>Refresh list</button></div>
     <p>Packets expire 7 days after creation. Unused uploads expire after 24 hours. Deletion ends access immediately;
       all versions and review history are queued for cleanup within a 24-hour target. Downloaded copies and provider backups may remain.</p>
     {error && <p className="rr-alert" role="alert">{error}</p>}
+    {notice && <p role="status">{notice}</p>}
     <section className="rr-card"><h2>Create a packet</h2>
       <form onSubmit={event => { event.preventDefault(); void create(); }} className="rr-form">
         <label htmlFor="packet-title">Packet title</label><input id="packet-title" maxLength={200} required value={title} disabled={busy} onChange={e => { setTitle(e.target.value); createKey.current = null; }} placeholder="e.g. Synthetic referral - October" />
