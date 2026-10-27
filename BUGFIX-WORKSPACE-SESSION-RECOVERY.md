@@ -41,3 +41,10 @@ Jest Mock；未发起浏览器登录／AI 操作、模型请求或部署。保�
 9–77 ms；不能据此断言所有时序问题已排除。未放宽测试超时或修改 Demo 用例，
 所有临时探针已移除，当前会话修复已恢复。该本地失败不计通过，远端完整 CI
 另行记录，不将这次对照称为演示页面 bug 已修复。
+
+代码 `512689a` 的[完整 CI 40457437815](https://github.com/zfz193071/meditrace/actions/runs/40457437815)
+两个 job 均通过：前端 **20 suites／127 tests**（含未改动的 Demo 用例），普通
+后端 **934 passed／179 skipped**，独立 PostgreSQL **405 passed／0 skipped**，
+构建／类型检查／lint、契约／fixture、18 项部署脚本测试及依赖审计通过。
+本地 typecheck 与修改文件 ESLint 也通过。CI 成功不撤销上述本地时序限制，
+不将普通后端的跳过项计作验收通过。

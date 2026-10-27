@@ -4,7 +4,7 @@
 
 ## 被测版本与环境
 
-- 最新被测代码：`14b382e1cc0bdbf48133febe1a5230ea5b552c48`；[完整 CI 40454849223](https://github.com/zfz193071/meditrace/actions/runs/40454849223) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **19 suites／114 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
+- 最新被测代码：`512689a09f9e0b48d1d9f631146d54b9a123bf08`；[完整 CI 40457437815](https://github.com/zfz193071/meditrace/actions/runs/40457437815) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **20 suites／127 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
 - 初版闭环代码为 `2b967eda50a8d33b5586a38f934508fbc9d729f6`，证据文档提交 `ed9973e`；[历史 CI 40310916116](https://github.com/zfz193071/meditrace/actions/runs/40310916116) 的两个 job 均成功。
 - CI 环境由仓库 workflow 固定：Python 3.12、Node.js 22、PostgreSQL 17。后端普通 job 使用 SQLite；独立数据库 job 使用临时 PostgreSQL 和随机隔离 schema。
 - 自动测试仅使用合成资料、Fake／replay 或模拟供应商；不配置付费模型密钥，不访问生产数据库，不发起浏览器 AI 对话。
@@ -53,6 +53,8 @@
 2026-10-27 核对状态增量对应 Q10／Q11：显式操作开始／完成后忽略旧轮询结果和错误，终态停止定时查询；执行等待仍可查询，响应丢失不自动重执行，pending 到 running 保持五分钟上限。新增 9 项组件回归，首批 6 项在旧实现全部失败，本地及上述完整 CI 通过。见 [修复记录](../../BUGFIX-RUN-STATUS-POLLING.md)。仅使用 Jest Mock API，不替代实际网络／供应商及人工验收。
 
 2026-10-27 资料包列表增量对应 Q09／Q11／Q17：删除确认后立即移除入口，即使刷新失败也保留删除结果与创建草稿；未确认响应不宣称删除成功。同步锁阻止连续提交，操作代次隔离卸载后的错误／读取及 StrictMode 旧列表。新增 7 项组件回归，旧实现 6 项失败；本地与上述完整 CI 通过。细节见 [修复记录](../../BUGFIX-PACKET-LIST-RECOVERY.md)。未实际删除资料，不替代 Blob 物理清理或人工验收。
+
+2026-10-27 会话恢复增量对应 Q11／Q16：临时检查失败保留仍有效的会话与输入，先应用身份再读取配置；退出／换账号／401／403／到期清空旧编辑区，迟到响应不恢复失效身份。新增 12 项 Gate 与 1 项实际工作区回归，远端 127 项全通过。本地全量 126 passed／1 failed，既有 Demo 超时在上一提交代码对照也复现，未修改其时限或断言；本地 typecheck／lint 通过。诊断与内存保留边界见 [修复记录](../../BUGFIX-WORKSPACE-SESSION-RECOVERY.md)，不替代实际登录、断网和托管环境验收。
 
 ## 外部验收与阻碍
 
