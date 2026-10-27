@@ -7,7 +7,8 @@ jest.mock("../../lib/referral-api/workspace", () => ({
   workspaceApi: { membership: jest.fn(), capabilities: jest.fn(), checkout: jest.fn(), order: jest.fn() },
   errorMessage: () => "Request failed; retry safely", operationKey: () => "stable-operation-key",
 }));
-const order = { id: "00000000-0000-0000-0000-000000000001", state: "pending", environment: "test", amount: 500,
+type Order = Awaited<ReturnType<typeof api.order>>;
+const order: Order = { id: "00000000-0000-0000-0000-000000000001", state: "pending", environment: "test", amount: 500,
   currency: "usd", return_path: "/workspace", checkout_url: "https://checkout.stripe.com/c/pay/cs_test_demo" };
 beforeEach(() => {
   jest.resetAllMocks();
@@ -15,6 +16,95 @@ beforeEach(() => {
   (api.capabilities as jest.Mock).mockResolvedValue({ payments_available: true });
 });
 afterEach(() => jest.useRealTimers());
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: Error) => void;
+  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+}
+
+it("clears the previous paid order while another order loads, fails, and retries", async () => {
+  const next = deferred<typeof order>();
+  const second: Order = { ...order, id: "00000000-0000-0000-0000-000000000002", state: "revoked", return_path: "/account" };
+  jest.mocked(api.order).mockResolvedValueOnce({ ...order, state: "paid" }).mockReturnValueOnce(next.promise).mockResolvedValueOnce(second);
+  const view = render(<PaymentReturn orderId={order.id} />);
+  await screen.findByText("Server order: paid");
+  view.rerender(<PaymentReturn orderId={second.id} />);
+  expect(screen.queryByText("Server order: paid")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Return to saved work" })).not.toBeInTheDocument();
+  expect(screen.getByText("Checking server status…")).toBeInTheDocument();
+  await act(async () => { next.reject(new Error("Order inaccessible")); });
+  expect(screen.getByRole("alert")).toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Sign in and return to this order" })).toHaveAttribute("href", `/api/v1/auth/github/start?return_path=${encodeURIComponent(`/account/payment?order=${second.id}`)}`);
+  fireEvent.click(screen.getByRole("button", { name: "Refresh order status" }));
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await screen.findByText("Server order: revoked");
+  expect(screen.getByRole("link", { name: "Return to saved work" })).toHaveAttribute("href", "/account");
+  expect(api.order).toHaveBeenNthCalledWith(3, second.id);
+  expect(api.checkout).not.toHaveBeenCalled();
+});
+
+it("clears an earlier order error when navigating and ignores its late response", async () => {
+  const old = deferred<typeof order>();
+  const next = deferred<typeof order>();
+  jest.mocked(api.order).mockRejectedValueOnce(new Error()).mockReturnValueOnce(old.promise).mockReturnValueOnce(next.promise);
+  const view = render(<PaymentReturn orderId={order.id} />);
+  await screen.findByRole("alert");
+  fireEvent.click(screen.getByRole("button", { name: "Refresh order status" }));
+  const second: Order = { ...order, id: "00000000-0000-0000-0000-000000000002", state: "expired" };
+  view.rerender(<PaymentReturn orderId={second.id} />);
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await act(async () => { next.resolve(second); });
+  await act(async () => { old.resolve({ ...order, state: "paid" }); });
+  expect(screen.getByText("Server order: expired")).toBeInTheDocument();
+  expect(screen.queryByText("Server order: paid")).not.toBeInTheDocument();
+});
+
+it("withdraws an earlier paid status during refresh and after a failed read", async () => {
+  const refresh = deferred<typeof order>();
+  jest.mocked(api.order).mockResolvedValueOnce({ ...order, state: "paid" }).mockReturnValueOnce(refresh.promise);
+  render(<PaymentReturn orderId={order.id} />);
+  await screen.findByText("Server order: paid");
+  fireEvent.click(screen.getByRole("button", { name: "Refresh order status" }));
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(screen.queryByText(/Payment was verified/)).not.toBeInTheDocument();
+  await act(async () => { refresh.reject(new Error()); });
+  expect(screen.getByRole("alert")).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Return to saved work" })).not.toBeInTheDocument();
+});
+
+it("clears order details if a subsequent pending poll loses access", async () => {
+  jest.useFakeTimers();
+  jest.mocked(api.order).mockResolvedValueOnce(order).mockRejectedValueOnce(new Error());
+  render(<PaymentReturn orderId={order.id} />);
+  await act(async () => {});
+  expect(screen.getByText("Server order: pending")).toBeInTheDocument();
+  await act(async () => { jest.advanceTimersByTime(3000); });
+  expect(screen.getByRole("alert")).toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Return to saved work" })).not.toBeInTheDocument();
+  await act(async () => { jest.advanceTimersByTime(60_000); });
+  expect(api.order).toHaveBeenCalledTimes(2);
+});
+
+it("cancels old polling and ignores a late error after changing orders", async () => {
+  jest.useFakeTimers();
+  const old = deferred<typeof order>();
+  const second: Order = { ...order, id: "00000000-0000-0000-0000-000000000002", state: "paid" };
+  jest.mocked(api.order).mockResolvedValueOnce(order).mockReturnValueOnce(old.promise).mockResolvedValueOnce(second);
+  const view = render(<PaymentReturn orderId={order.id} />);
+  await act(async () => {});
+  await act(async () => { jest.advanceTimersByTime(3000); });
+  view.rerender(<PaymentReturn orderId={second.id} />);
+  await act(async () => {});
+  await act(async () => { old.reject(new Error()); jest.advanceTimersByTime(60_000); });
+  expect(screen.getByText("Server order: paid")).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(api.order).toHaveBeenCalledTimes(3);
+  expect(api.checkout).not.toHaveBeenCalled();
+});
 
 it("uses explicit checkout with a stable retry key and never auto-generates", async () => {
   (api.checkout as jest.Mock).mockRejectedValueOnce(new Error()).mockResolvedValueOnce(order);

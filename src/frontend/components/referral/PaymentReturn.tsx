@@ -7,6 +7,10 @@ import { safeBillingReturn } from "./BillingPanel";
 
 type Order = components["schemas"]["OrderResponse"];
 export default function PaymentReturn({ orderId }: { orderId: string }) {
+  return <OrderStatus key={orderId} orderId={orderId} />;
+}
+
+function OrderStatus({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState("");
   const [cycle, setCycle] = useState(0);
@@ -22,7 +26,7 @@ export default function PaymentReturn({ orderId }: { orderId: string }) {
         setOrder(saved); setError("");
         if (saved.state === "pending" && ++count < 10) timer = setTimeout(poll, 3000);
         else setWaiting(false);
-      } catch (e) { if (!stopped) { setError(errorMessage(e)); setWaiting(false); } }
+      } catch (e) { if (!stopped) { setOrder(null); setError(errorMessage(e)); setWaiting(false); } }
     }
     void poll();
     return () => { stopped = true; clearTimeout(timer); };
@@ -36,7 +40,7 @@ export default function PaymentReturn({ orderId }: { orderId: string }) {
       {order?.state === "pending" && <p>Payment has not been confirmed. If you cancelled or payment is delayed, your saved materials remain available. Do not pay again while this order is pending.</p>}
       {order?.state === "paid" && <p>Payment was verified. Check your account for current membership and credits.</p>}
       {order && ["refunded", "revoked", "expired", "failed"].includes(order.state) && <p>This order does not grant active membership. Saved material and manual review are unaffected.</p>}
-      {waiting ? <p>Checking server status…</p> : <button className="rounded border px-4 py-2" onClick={() => { setWaiting(true); setCycle(c => c + 1); }}>Refresh order status</button>}
+      {waiting ? <p>Checking server status…</p> : <button className="rounded border px-4 py-2" onClick={() => { setOrder(null); setError(""); setWaiting(true); setCycle(c => c + 1); }}>Refresh order status</button>}
       {order && <a className="block underline" href={safeBillingReturn(order.return_path)}>Return to saved work</a>}
       <a className="block underline" href="/account">Account / sign in</a>
       {error && <a className="block underline" href={`/api/v1/auth/github/start?return_path=${encodeURIComponent(`/account/payment?order=${orderId}`)}`}>Sign in and return to this order</a>}
