@@ -69,6 +69,7 @@ def main():
             shutil.copyfile(FRONTEND / name, target)
         for name in ("components", "lib"):
             shutil.copytree(FRONTEND / name, stage / name)
+        shutil.copyfile(ROOT / "docs/portfolio/media/referral-demo-rough-cut.mp4", stage / "public/walkthrough.mp4")
         (stage / "node_modules").symlink_to(FRONTEND / "node_modules", target_is_directory=True)
         (stage / "next.config.js").write_text(
             'module.exports = { output: "export", trailingSlash: true, reactStrictMode: true };\n'

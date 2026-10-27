@@ -6,7 +6,9 @@
   "frame_count": 1199,
   "caption_cues": 8,
   "captions": "burned-in English; sidecar SRT",
-  "audio": "none; silent rough cut",
-  "source": "Actual offline UI states; still-frame holds and edits, not a continuous screen recording",
-  "bytes": 626276
+  "audio": "none; silent walkthrough",
+  "source": "Actual synthetic UI states; still-frame holds and edits, not a continuous screen recording",
+  "bytes": 626036,
+  "full_decode": "passed",
+  "sha256": "ab921b65d90b45310b5093f6047daf8ae01581e7b2d386a39d792cab95039a3f"
 }

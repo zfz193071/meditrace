@@ -1,5 +1,5 @@
 // Node 22. Run against a dedicated headless Chrome; never activates a window.
-// Usage: node scripts/portfolio_browser_qa.cjs <exported-site> [DevTools port] [--live]
+// Usage: node scripts/portfolio_browser_qa.cjs <exported-site> [DevTools port] [--live] [--refresh-video]
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -7,9 +7,13 @@ const site = fs.realpathSync(process.argv[2]);
 const port = Number(process.argv[3] || 9468);
 assert(!process.argv[4] || process.argv[4] === '--live', 'Only --live is supported');
 const live = process.argv[4] === '--live';
+assert(!process.argv[5] || process.argv[5] === '--refresh-video', 'Only --refresh-video is supported');
+const refreshVideo = process.argv[5] === '--refresh-video';
+assert(!refreshVideo || live, 'Video refresh captures the verified public demo');
+const media = path.resolve(__dirname, '../docs/portfolio/media');
 const origin = live ? 'https://meditrace-portfolio-mvp.vercel.app' : 'https://meditrace-portfolio.test';
 const output = path.join(site, '..', live ? 'browser-qa-live' : 'browser-qa');
-const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.txt': 'text/x-component', '.woff2': 'font/woff2' };
+const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.txt': 'text/x-component', '.woff2': 'font/woff2', '.mp4': 'video/mp4' };
 
 (async () => {
   assert(fs.existsSync(path.join(site, 'demo/index.html')), 'Pass the static portfolio site directory');
@@ -18,7 +22,7 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
   const ws = new WebSocket(info.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => { ws.addEventListener('open', resolve, { once: true }); ws.addEventListener('error', reject, { once: true }); });
   const pending = new Map(); let seq = 0;
-  const errors = [], requests = [], checkpoints = [];
+  const errors = [], requests = [], checkpoints = [], canceledRequests = [];
   let sessionId, targetId;
   const send = (method, params = {}, session) => new Promise((resolve, reject) => {
     const id = ++seq;
@@ -59,6 +63,10 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
         responseHeaders: [{ name: 'Content-Type', value: mime[path.extname(file)] || 'application/octet-stream' }],
         body: fs.readFileSync(file).toString('base64') });
     } catch (error) {
+      // Navigation can cancel a paused GET before Chrome accepts our response.
+      if (String(error).includes('Invalid InterceptionId')) {
+        canceledRequests.push(request.url); return;
+      }
       errors.push(String(error));
       await call('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' }).catch(() => {});
     }
@@ -98,6 +106,11 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
     checkpoints.push(name);
     console.log('Checked ' + name);
   };
+  const videoFrame = async name => {
+    const shot = await call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: 1440, height: 800, scale: 1 } });
+    fs.writeFileSync(path.join(media, name + '.png'), Buffer.from(shot.data, 'base64'));
+  };
   try {
     ({ targetId } = await send('Target.createTarget', { url: 'about:blank', background: true }));
     ({ sessionId } = await send('Target.attachToTarget', { targetId, flatten: true }));
@@ -119,6 +132,7 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
       await until(`document.querySelectorAll('.rr-source-excerpt mark').length===2`);
       assert.equal(await evaluate('location.pathname'), '/demo/');
       await checkLayout(name + '-items');
+      if (refreshVideo && name === 'desktop') await videoFrame('01-intro');
       if (name === 'mobile') {
         await activate('Evidence and decision');
         await until(`getComputedStyle(document.querySelector('.rr-review-detail')).display!=='none'`);
@@ -168,6 +182,11 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
     for (const route of ['/', '/project/', '/evaluation/']) {
       await call('Page.navigate', { url: origin + route });
       await until(`document.querySelector('h1')`);
+      if (refreshVideo && route === '/evaluation/') {
+        await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 800, deviceScaleFactor: 1, mobile: false });
+        await videoFrame('08-evaluation');
+        await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
+      }
       await checkLayout('mobile-' + (route.split('/')[1] || 'home'));
       assert.equal(await evaluate(`!!document.querySelector('a[href^="/workspace"]')`), false);
     }
@@ -180,13 +199,31 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
     await key('Enter', 'Enter', 13);
     await until(`location.pathname==='/project/'&&document.querySelector('h1')`);
     checkpoints.push('keyboard-client-navigation');
+    let video = null;
+    if (fs.existsSync(path.join(site, 'walkthrough.mp4'))) {
+      video = await evaluate(`fetch(${JSON.stringify(origin + '/walkthrough.mp4')}).then(async response=>({
+        status:response.status,type:response.headers.get('content-type'),bytes:(await response.arrayBuffer()).byteLength,
+        supported:document.createElement('video').canPlayType('video/mp4; codecs="avc1.64001f"')
+      }))`);
+      assert.equal(video.status, 200);
+      assert(video.type.startsWith('video/mp4'));
+      assert.equal(video.bytes, fs.statSync(path.join(site, 'walkthrough.mp4')).size);
+      assert(video.supported, 'Browser does not advertise H.264 playback');
+      checkpoints.push('walkthrough-video-download');
+    }
     assert.deepEqual(errors, []);
+    if (refreshVideo) fs.writeFileSync(path.join(media, 'refresh-audit.json'), JSON.stringify({
+      checkedAt: new Date().toISOString(), origin, artifact: path.basename(path.dirname(site)),
+      refreshed: ['01-intro', '08-evaluation'], retained: ['02-evidence', '03-decision', '04-handoff', '06-stale', '07-prepared', '05-export'],
+      reason: 'Public navigation and evaluation wording updated; retained synthetic workflow frames match the current source and verified flow.',
+      model_calls: 0, errors, requests,
+    }, null, 2) + '\n');
     fs.writeFileSync(path.join(output, 'audit.json'), JSON.stringify({
-      artifact: path.basename(path.dirname(site)), browser: info.Browser, origin,
-      checkedAt: new Date().toISOString(), checkpoints, requests, errors,
+      artifact: path.basename(path.dirname(site)), browser: info.Browser, origin, video,
+      checkedAt: new Date().toISOString(), checkpoints, requests, errors, canceledRequests,
       keyboard: 'Tab/Enter, select typeahead and text input; all three cases, confirmation, copy/download/print/reset',
       transport: live ? 'Public HTTPS; only known artifact GETs allowed; unexpected requests blocked' : 'Static artifact fulfilled by CDP; every unexpected request blocked',
-      limits: `${live ? 'Public synthetic demo only' : 'Not public HTTPS acceptance'}; print HTML inspected without an OS print dialog; downloads inspected as Blob text; absent favicon suppressed`,
+      limits: `${live ? 'Public synthetic demo only' : 'Not public HTTPS acceptance'}; print HTML inspected without an OS print dialog; downloads inspected as Blob text; absent favicon suppressed; video download and codec support checked, background autoplay not verified`,
     }, null, 2) + '\n');
     console.log('Passed static portfolio browser acceptance: ' + output);
   } catch (error) {

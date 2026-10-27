@@ -2,11 +2,11 @@
 
 A synthetic-data portfolio prototype for staff checking referral documents: find missing information or conflicting details, inspect the source evidence, record a human decision, and export a versioned handoff.
 
-**Start here:** [Try the public demo](https://meditrace-portfolio-mvp.vercel.app/demo/) · [80-second captioned rough cut](docs/portfolio/media/referral-demo-rough-cut.mp4) · [Run locally](#try-the-demo) · [Evaluation and failures](evals/referral-review/README.md) · [Deployed source](https://github.com/zfz193071/meditrace/tree/3588c027ba06358501879cd1613bf806ebb16a61)
+**Start here:** [Try the public demo](https://meditrace-portfolio-mvp.vercel.app/demo/) · [80-second captioned walkthrough](https://meditrace-portfolio-mvp.vercel.app/walkthrough.mp4) · [Run locally](#try-the-demo) · [Evaluation and failures](evals/referral-review/README.md) · [Deployed source](https://github.com/zfz193071/meditrace/tree/3588c027ba06358501879cd1613bf806ebb16a61)
 
-**Status:** the standalone synthetic demo was published and verified on 2026-10-27. The English landing page, three fixed demos and offline evaluation are public. Full V1 backend/private-workspace acceptance remains incomplete. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual offline UI, not live model inference; its final review remains pending. [Public deployment evidence](docs/portfolio/STATIC-DEMO.md#public-release--2026-10-27).
+**Status:** the standalone synthetic demo was published and verified on 2026-10-27. The English landing page, three fixed demos and offline evaluation are public. Full V1 backend/private-workspace acceptance remains incomplete. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual synthetic UI, not live model inference. [Public deployment evidence](docs/portfolio/STATIC-DEMO.md#public-release--2026-10-27).
 
-**Current delivery target:** a small portfolio MVP for sharing in Discord job-search conversations. The independently published demo and review/export walkthrough are verified; final English outreach material and video review remain. Public uploads, payments, real-model evaluation and full SaaS operations are deferred. See the [current scope](docs/referral-review/README.md).
+**Current delivery target:** a small portfolio MVP for sharing in Discord job-search conversations. The independently published demo, review/export walkthrough and English sharing material are provided in the [portfolio pack](docs/portfolio/README.md). Public uploads, payments, real-model evaluation and full SaaS operations are deferred. See the [current scope](docs/referral-review/README.md).
 
 ## Try the demo
 
@@ -93,11 +93,11 @@ Choose a new evaluation output directory for each run. The evaluation CLI curren
 
 ## Delivery limits and contribution provenance
 
-OAuth/Private Blob/Stripe and PostgreSQL acceptance, operator annotation review, authorized real evaluation, complete integration and final deployment remain outstanding. The current source retires legacy diagnosis, chat and blockchain HTTP endpoints with 410 responses; this has only been verified offline and has not been deployed. Historical tables and implementation files remain in the repository.
+Full V1 release remains incomplete: hosted OAuth/Private Blob/Stripe acceptance, production operations, operator annotation review and authorized real evaluation are separate work. Isolated PostgreSQL concurrency and persistence have CI evidence; that is not production-database acceptance. The current source retires legacy diagnosis, chat and blockchain HTTP endpoints with 410 responses; this has only been verified offline and has not been deployed. Historical tables and implementation files remain in the repository.
 
 Development has used an AI coding assistant for implementation, tests and documentation under project instructions. Automated checks and reviewed artifacts are linked; they do not prove that the project owner personally wrote or independently reviewed every line. The [interview and authorship guide](docs/portfolio/INTERVIEW.md) separates repository evidence from personal claims that require confirmation.
 
-[Portfolio materials](docs/portfolio/README.md) include the captioned rough cut, technical walkthrough, role-specific project bullets and unsent outreach drafts. They remain drafts until the owner verifies their personal claims and the remaining acceptance gates are completed.
+[Portfolio materials](docs/portfolio/README.md) include the captioned walkthrough, a ready-to-copy English Discord post, technical rehearsal material and optional role-specific project bullets. The main sharing post uses project facts; personal CV claims require the owner’s own review. No recruiting messages have been sent.
 
 ## License
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Render an explicitly edited, silent rough cut of captured synthetic UI states."""
+"""Render an explicitly edited, silent walkthrough of captured synthetic UI states."""
 import json
+import hashlib
 from pathlib import Path
 import subprocess
 
@@ -14,7 +15,7 @@ SHOTS=[
  ('06-stale','In the missing-report case, load a prepared source revision.\nThe earlier result becomes read-only; no model is called.'),
  ('07-prepared','Load the prepared result for the added synthetic report.\nThe new result has no attachment finding and does not inherit old decisions.'),
  ('05-export','Export the reviewed version-2 handoff with source references.\nThis is an actual local text export, not a server or clinical approval.'),
- ('08-evaluation','Offline baseline, Fake and replay counts expose failures and limitations.\nReal-model evaluation, operator review and final release are still pending.'),
+ ('08-evaluation','Offline baseline, Fake and replay counts expose failures and limitations.\nReal-model quality and clinical usefulness have not been measured.'),
 ]
 
 def stamp(seconds): return f'00:{seconds//60:02}:{seconds%60:02},000'
@@ -28,7 +29,7 @@ def main():
     concat='ffconcat version 1.0\n'+''.join(f"file '{name}.png'\nduration 10\n" for name,_ in SHOTS)+f"file '{SHOTS[-1][0]}.png'\n"
     (MEDIA/'shots.ffconcat').write_text(concat)
     filters=("scale=1280:720,drawbox=x=0:y=0:w=1280:h=28:color=0x18323d:t=fill,"
-        "drawtext=text='OFFLINE SYNTHETIC DEMO  |  EDITED ROUGH CUT  |  NO AI CALLS':fontcolor=white:fontsize=16:x=20:y=5,"
+        "drawtext=text='SYNTHETIC DEMO  |  EDITED STILL FRAMES  |  NO AI CALLS':fontcolor=white:fontsize=16:x=20:y=5,"
         "drawbox=x=0:y=620:w=1280:h=100:color=0x18323d:t=fill,"
         "subtitles=referral-demo-en.srt:force_style='Fontname=Arial,Fontsize=11,PrimaryColour=&H00FFFFFF,Outline=0,Shadow=0,Alignment=2,MarginV=10'")
     subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-f','concat','-safe','0','-i','shots.ffconcat',
@@ -36,8 +37,12 @@ def main():
     probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_format','-show_streams','-of','json','referral-demo-rough-cut.mp4'],cwd=MEDIA))
     video=next(s for s in probe['streams'] if s['codec_type']=='video')
     assert 60<=float(probe['format']['duration'])<=90
+    subprocess.run(['ffmpeg','-v','error','-xerror','-i','referral-demo-rough-cut.mp4','-f','null','-'],cwd=MEDIA,check=True)
+    subprocess.run(['ffmpeg','-v','error','-y','-i','referral-demo-rough-cut.mp4','-vf','fps=1/10,scale=640:360,tile=2x4',
+        '-frames:v','1','contact-sheet.png'],cwd=MEDIA,check=True)
     result=dict(duration_seconds=float(probe['format']['duration']),width=video['width'],height=video['height'],codec=video['codec_name'],
-        frame_count=int(video['nb_frames']),caption_cues=len(SHOTS),captions='burned-in English; sidecar SRT',audio='none; silent rough cut',
-        source='Actual offline UI states; still-frame holds and edits, not a continuous screen recording',bytes=int(probe['format']['size']))
+        frame_count=int(video['nb_frames']),caption_cues=len(SHOTS),captions='burned-in English; sidecar SRT',audio='none; silent walkthrough',
+        source='Actual synthetic UI states; still-frame holds and edits, not a continuous screen recording',bytes=int(probe['format']['size']),
+        full_decode='passed',sha256=hashlib.sha256((MEDIA/'referral-demo-rough-cut.mp4').read_bytes()).hexdigest())
     (MEDIA/'media-check.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()

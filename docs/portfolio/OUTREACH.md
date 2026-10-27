@@ -1,28 +1,29 @@
-# Unsent outreach drafts
+# Discord sharing copy
 
-Do not post until the owner verifies personal claims and replaces every bracketed field. The independent synthetic MVP demo was verified on 2026-10-27; full V1 remains incomplete. Links below identify the deployed source revision. This file does not authorize sending messages.
+The short post below is ready to copy after checking the destination channel's rules. It uses verified project facts, discloses AI coding assistance, and makes no claim about employment history, seniority, location, work rights or independently authored code. No message has been sent.
 
-## Discord project / job-interest draft
+## Short English post
 
-> Hi everyone — I'm interested in AI application and full-stack engineering opportunities [location / work arrangement, only if confirmed].
+> Hi everyone — I'm looking for AI application and full-stack engineering opportunities.
 >
-> My portfolio project, MediTrace, explores referral-document review: compare source evidence, record human decisions and export a handoff that preserves unresolved questions. It is a synthetic-data prototype built with Next.js, TypeScript and FastAPI, with AI coding assistance.
+> I'm sharing MediTrace, my portfolio project developed with AI coding assistance. It lets you compare synthetic referral documents, inspect source evidence, record reviewer decisions and export a handoff that preserves unresolved questions.
 >
-> The fixed demo needs no model call. The repository also includes development-only baseline/Fake/replay evaluation, including a case where a valid quote comes from a historical template and is misleading without its context. Real-model evaluation and full release acceptance are still pending; this is not a clinical system.
+> The public demo has three prepared cases, with no signup or live model calls. The repository also includes FastAPI backend work and offline evaluation. This is a portfolio prototype, not a clinical product; real-model quality has not been measured.
 >
-> Short walkthrough: [verified video link]
 > Demo: https://meditrace-portfolio-mvp.vercel.app/demo/
-> Code: https://github.com/zfz193071/meditrace/tree/3588c027ba06358501879cd1613bf806ebb16a61
-> Evaluation: https://meditrace-portfolio-mvp.vercel.app/evaluation/
+> 80-second walkthrough (edited still frames): https://meditrace-portfolio-mvp.vercel.app/walkthrough.mp4
+> Code and README: https://github.com/zfz193071/meditrace/tree/codex/referral-postgres-validation
 >
-> I'd welcome feedback on [specific module you have personally reviewed] and conversations about relevant roles. [Add location / work-rights requirements only after confirmation.]
+> I'd welcome feedback on the evidence-to-review workflow and conversations about relevant roles.
 
-## Short project description
+## One-sentence project description
 
-> MediTrace is an AI-assisted portfolio prototype for evidence-linked referral-document review. It combines source citations, version-aware human decisions and handoff export, with inspectable offline evaluation and explicit limitations. The demo uses fictional, precomputed material; it does not diagnose patients or demonstrate clinical validation.
+MediTrace is an AI-assisted portfolio prototype for evidence-linked referral review, with a public synthetic demo, human decisions and handoff export; it makes no clinical or real-model-quality claim.
 
-## Short recruiter message
+## If someone asks about your contribution
 
-> Hello [name], I'm interested in [specific role]. A relevant portfolio example is MediTrace, a Next.js/FastAPI synthetic document-review prototype with source evidence, human confirmation and reproducible offline evaluation. Here is a short walkthrough: [verified link]. I can discuss [personally reviewed contribution] and its remaining limitations. Could we clarify [specific role-fit question]?
+The implementation, tests and documentation were developed with an AI coding assistant under project direction. The repository contains the engineering evidence. Describe only the specific modules, decisions and tests you have personally reviewed or performed; the project record does not establish that you wrote or independently reviewed every line.
 
-Avoid claims such as “production-ready,” “95% clinical accuracy,” “HIPAA compliant,” “already integrated with HealthLink,” “saves doctors X hours,” or “eligible to work in New Zealand” unless there is separate, current evidence. The offline percentages are not model or clinical accuracy.
+Technical rehearsal material: [interview guide](INTERVIEW.md). [Evaluation limits](https://meditrace-portfolio-mvp.vercel.app/evaluation/), [release evidence](STATIC-DEMO.md), [video provenance](VIDEO.md).
+
+Optional employment, availability, location or work-rights details can be added by the owner when accurate. They are not needed to share this project post. Role-specific CV bullets remain optional personal-review templates, not statements required for the MVP delivery.

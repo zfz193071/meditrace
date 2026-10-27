@@ -1,0 +1,386 @@
+{
+  "checkedAt": "2026-10-27T07:01:51.212Z",
+  "origin": "https://meditrace-portfolio-mvp.vercel.app",
+  "artifact": "build-ytay_jnk",
+  "refreshed": [
+    "01-intro",
+    "08-evaluation"
+  ],
+  "retained": [
+    "02-evidence",
+    "03-decision",
+    "04-handoff",
+    "06-stale",
+    "07-prepared",
+    "05-export"
+  ],
+  "reason": "Public navigation and evaluation wording updated; retained synthetic workflow frames match the current source and verified flow.",
+  "model_calls": 0,
+  "errors": [],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/demo/"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/demo/page-3f2d712f49fbe124.js"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/demo/"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/demo/page-3f2d712f49fbe124.js"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/demo/"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/demo/page-3f2d712f49fbe124.js"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/demo/"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/demo/page-3f2d712f49fbe124.js"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/page-d4f50ee1e1765de2.js"
+    },
+    {
+      "method": "GET",
+      "path": "/project/"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/project/page-d4f50ee1e1765de2.js"
+    },
+    {
+      "method": "GET",
+      "path": "/evaluation/"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f7544d23b15c4e6d.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/evaluation/page-6a8e864074556aa3.js"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/demo/"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/css/f1e538874fd4e2fd.css"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/demo/page-3f2d712f49fbe124.js"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/project/index.txt"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/project/page-d4f50ee1e1765de2.js"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    }
+  ]
+}

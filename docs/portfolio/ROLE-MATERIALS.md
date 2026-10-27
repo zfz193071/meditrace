@@ -12,7 +12,7 @@ MediTrace is a synthetic-data referral-review prototype that combines structured
 
 - Developed an AI-assisted document-review prototype with typed extraction boundaries, exact source anchoring and a human decision layer; demonstrated with fictional referral packets.
 - Added an offline evaluation workflow with per-case TP/FP/FN, separate citation-integrity/support counters, negative-case false positives and replay provenance; retained historical-context and annotation-disagreement cases in the report.
-- Implemented backend execution and usage-control paths for guarded dispatch, idempotent operations and conservative unknown-cost handling; explicitly tracked outstanding PostgreSQL and real-provider acceptance.
+- Implemented backend execution and usage-control paths for guarded dispatch, idempotent operations and conservative unknown-cost handling; explicitly recorded isolated PostgreSQL CI evidence and outstanding production/real-provider acceptance.
 
 Evidence: [extraction](../../src/backend/referral_review/extraction/service.py), [evaluation](../../evals/referral-review/README.md), [run/usage evidence](../referral-review/MT-11-EVIDENCE.md). The word “developed” describes a project contribution and should be qualified with the AI-assisted workflow and your personally verified role.
 
@@ -20,7 +20,7 @@ Evidence: [extraction](../../src/backend/referral_review/extraction/service.py),
 
 **Short project description**
 
-MediTrace is a Next.js/React/TypeScript and FastAPI portfolio prototype for checking referral documents. It includes an English landing page, a no-login local demo, a shared evidence/review UI, version-aware human decisions and handoff export. The authenticated backend has separate configuration and acceptance requirements.
+MediTrace is a Next.js/React/TypeScript and FastAPI portfolio prototype for checking referral documents. It includes an English landing page, a published no-login synthetic demo, a shared evidence/review UI, version-aware human decisions and handoff export. The authenticated backend has separate configuration and acceptance requirements.
 
 **Candidate project bullets — use after reviewing the implementation**
 
