@@ -2,7 +2,7 @@
 
 import os
 
-if os.environ.get("RR_TEST_NETWORK_GUARD") == "1":
+if os.environ.get("MEDITRACE_TEST_NETWORK_GUARD") == "1":
     from network_guard import install
 
     install()

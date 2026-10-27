@@ -114,7 +114,7 @@ def test_explicit_bootstrap_for_standalone_replay(tmp_path):
     guard_path = Path(__file__).resolve().parents[1] / "offline"
     result = subprocess.run(
         [sys.executable, "-c", "import network_guard; assert network_guard._installed; print('guard active')"],
-        cwd=tmp_path, env={**os.environ, "PYTHONPATH": str(guard_path), "RR_TEST_NETWORK_GUARD": "1"},
+        cwd=tmp_path, env={**os.environ, "PYTHONPATH": str(guard_path), "MEDITRACE_TEST_NETWORK_GUARD": "1"},
         capture_output=True, text=True, timeout=20,
     )
     assert result.returncode == 0, result.stderr

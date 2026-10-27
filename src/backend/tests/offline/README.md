@@ -8,13 +8,13 @@ also fails on blocked attempts whose exceptions the application caught.
 `expects_network_block` permits deliberate probes to observe the exception;
 it never disables blocking.
 
-The conftest exports `RR_TEST_NETWORK_GUARD=1` and prepends this directory to
+The conftest exports `MEDITRACE_TEST_NETWORK_GUARD=1` and prepends this directory to
 `PYTHONPATH`. Ordinary Python children and multiprocessing spawn workers inherit
 `sitecustomize.py`, which installs the guard before application imports. To use
 the same protection for a standalone fixture/replay command from the repo root:
 
 ```sh
-RR_TEST_NETWORK_GUARD=1 PYTHONPATH="$PWD/src/backend/tests/offline" \
+MEDITRACE_TEST_NETWORK_GUARD=1 PYTHONPATH="$PWD/src/backend/tests/offline" \
   src/backend/.venv/bin/python scripts/referral_fixtures.py --check
 ```
 

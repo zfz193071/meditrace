@@ -12,7 +12,7 @@ sys.path.insert(0, _guard_path)
 import network_guard  # noqa: E402
 
 network_guard.install()
-os.environ["RR_TEST_NETWORK_GUARD"] = "1"
+os.environ["MEDITRACE_TEST_NETWORK_GUARD"] = "1"
 _python_paths = os.environ.get("PYTHONPATH", "").split(os.pathsep)
 os.environ["PYTHONPATH"] = os.pathsep.join([_guard_path, *[p for p in _python_paths if p and p != _guard_path]])
 

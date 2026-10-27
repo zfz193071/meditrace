@@ -32,11 +32,11 @@ jobs:
       - run: pnpm --dir src/frontend install --frozen-lockfile
       - run: python3 scripts/referral_contracts.py --check
         env:
-          RR_TEST_NETWORK_GUARD: "1"
+          MEDITRACE_TEST_NETWORK_GUARD: "1"
           PYTHONPATH: ${{ github.workspace }}/src/backend/tests/offline
       - run: src/backend/.venv/bin/python scripts/referral_fixtures.py --check
         env:
-          RR_TEST_NETWORK_GUARD: "1"
+          MEDITRACE_TEST_NETWORK_GUARD: "1"
           PYTHONPATH: ${{ github.workspace }}/src/backend/tests/offline
       - run: src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review
       - run: python3 scripts/test_deploy_workflow.py
