@@ -4,7 +4,7 @@
 
 ## 被测版本与环境
 
-- 最新被测代码：`4d19aec719c87ef165a956b69ef9a29390ae2fdb`；[完整 CI 40441851253](https://github.com/zfz193071/meditrace/actions/runs/40441851253) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **17 suites／93 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
+- 最新被测代码：`6acbf86f572a7648c81f436d2caccb251c8cdb18`；[完整 CI 40445193439](https://github.com/zfz193071/meditrace/actions/runs/40445193439) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **17 suites／98 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
 - 初版闭环代码为 `2b967eda50a8d33b5586a38f934508fbc9d729f6`，证据文档提交 `ed9973e`；[历史 CI 40310916116](https://github.com/zfz193071/meditrace/actions/runs/40310916116) 的两个 job 均成功。
 - CI 环境由仓库 workflow 固定：Python 3.12、Node.js 22、PostgreSQL 17。后端普通 job 使用 SQLite；独立数据库 job 使用临时 PostgreSQL 和随机隔离 schema。
 - 自动测试仅使用合成资料、Fake／replay 或模拟供应商；不配置付费模型密钥，不访问生产数据库，不发起浏览器 AI 对话。
@@ -47,6 +47,8 @@
 2026-10-27 手工备注增量对应 Q09／Q11／Q18：在不丢弃本地输入的情况下读取已保存备注及其他人工字段，读取前后资料／审核版本一致才允许再次保存；可明确采用服务器备注并确认。新增 9 项回归包含写入已成功但响应丢失、确认失败不显示导出成功、初次／恢复读取失败、并发变化和卸载后迟到错误；本地与上述完整 CI 通过。没有浏览器 AI 操作、自动写入或本地持久化。刷新及资料版本变化的边界见 [修复记录](../../BUGFIX-MANUAL-NOTE-RECOVERY.md)；不作为三视口、真实断网或人工验收证据。
 
 2026-10-27 审核写入增量对应 Q09／Q11／Q13：保存／确认未结束时禁用事项切换、丢弃编辑和历史导航；同步标记拦截同一次更新中的连续点击。只读历史刷新保持可用，失败保留输入，确认成功正常展示快照。新增 5 项回归，本地前端 **17 suites／93 tests passed**；命令、远端证据和页面关闭等边界见 [修复记录](../../BUGFIX-REVIEW-PENDING-NAVIGATION.md)。未执行浏览器 AI 操作或真实模型调用。
+
+2026-10-27 支付返回页增量对应 Q11／Q15：按订单 ID 隔离状态，切换时清空旧结果；刷新或轮询失败撤下旧支付提示与返回链接，继续忽略失效请求并停止旧轮询。新增 5 项组件测试（旧实现 4 项失败），本地及上述完整 CI 均通过。细节与人工复核步骤见 [修复记录](../../BUGFIX-PAYMENT-RETURN-STATE.md)。不替代真实 Stripe test Checkout／webhook 验收，不新增订单或模型调用。
 
 ## 外部验收与阻碍
 

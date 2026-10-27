@@ -54,6 +54,8 @@ MT-22 已新增[部分验收报告](acceptance-report.md)，逐项列出 Q01—Q
 
 共享执行槽增量 `1efa200` 的[该增量 CI](https://github.com/zfz193071/meditrace/actions/runs/40276376704) 全通过：后端 818 passed／112 skipped；独立 PostgreSQL 17 job 223 passed／0 skipped（含两种数据库参数化），包含 Fake／real 工作区和评估四进程争用全站两槽、过期完成与新派发竞争。前端 69 tests、构建／类型检查及前后端审计通过。新增迁移 rr_0008 仅在隔离测试库验证，未应用生产。
 
+2026-10-27 支付返回页增量：切换订单、刷新或轮询失败时撤下旧订单信息，隔离迟到响应，避免显示上一订单已支付或错误返回链接。代码 `6acbf86` 的[完整 CI 40445193439](https://github.com/zfz193071/meditrace/actions/runs/40445193439) 两个 job 均成功：前端 **17 suites／98 tests**，普通后端 **934 passed／179 skipped**，独立 PostgreSQL **405 passed／0 skipped**，构建／类型检查／lint、契约／fixture、18 项部署脚本测试和依赖审计通过。见 [修复记录](../../BUGFIX-PAYMENT-RETURN-STATE.md)。没有访问 Stripe、调用真实模型或生产部署；不更新线上配置快照，MT-17／MT-22 保持 TODO。
+
 ## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 
 - `MT-01` 为 `DONE`；`MT-02` 因真实 PostgreSQL 迁移／并发验收为 `BLOCKED`；`MT-03` 因操作者尚未逐包签核候选标注为 `BLOCKED`。`MT-04`—`MT-24` 的 front matter 仍为 `TODO`；其中 04—21 和 23 已有不同程度代码／离线证据，不能据此提前关闭。

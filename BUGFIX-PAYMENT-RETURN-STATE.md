@@ -23,6 +23,15 @@
 成功隔离、已支付订单刷新失败、pending 轮询失去访问权限，以及切换后的
 迟到错误与旧轮询停止。旧实现其中 4 项失败，1 项已有保护通过。
 
-本地验证与远端 CI 结果记录在 [MT-22](docs/referral-review/tickets/MT-22.md)。
+本地前端 **17 suites／98 tests**、typecheck 与定向 ESLint 通过。代码
+`6acbf86` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40445193439)
+两个 job 均通过：前端 **98 tests**，普通后端 **934 passed／179 skipped**，
+独立 PostgreSQL **405 passed／0 skipped**，构建、契约／fixture、部署脚本测试
+与依赖审计通过。完整记录见 [MT-22](docs/referral-review/tickets/MT-22.md)。
 这是模拟 API 的组件验收；没有访问 Stripe、进行真实支付或浏览器 AI 测试。
 真实 Stripe test Checkout／webhook、托管会话及人工验收仍待完成。
+
+具备测试账号和已有测试订单后，可人工复核：先查看已支付订单，再通过应用内
+导航打开另一订单，确认等待期间不显示旧支付结果／返回链接；模拟读取失败，
+确认显示错误并能明确重试；恢复后应只显示当前订单及其已保存工作链接。
+本次未执行这些浏览器步骤，也不要求为此创建新的付款或触发核对。
