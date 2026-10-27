@@ -25,6 +25,11 @@
 五分钟上限、执行响应丢失后的查询及卸载清理。API 全部为 Jest Mock，
 没有启动浏览器、访问后端或调用模型。
 
-完整本地与远端验证结果见 [MT-22](docs/referral-review/tickets/MT-22.md)。
+本地前端 **18 suites／107 tests**、typecheck 与定向 ESLint 通过。代码
+`6c3a3bd` 的[完整 CI 40446782653](https://github.com/zfz193071/meditrace/actions/runs/40446782653)
+两个 job 均成功：普通后端 **934 passed／179 skipped**，独立 PostgreSQL
+**405 passed／0 skipped**，前端 **107 tests**，构建／类型检查／lint、契约／fixture、
+18 项部署脚本测试和前后端依赖审计通过。普通 job 跳过不计验收通过。
+完整记录见 [MT-22](docs/referral-review/tickets/MT-22.md)。
 本修复只解决同一前端组件内的请求顺序，不更改服务端状态机、幂等或费用账本。
 真实网络故障、供应商未知状态及人工全流程验收仍需单独完成。
