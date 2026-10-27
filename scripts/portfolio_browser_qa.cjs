@@ -1,12 +1,14 @@
 // Node 22. Run against a dedicated headless Chrome; never activates a window.
-// Usage: node scripts/portfolio_browser_qa.cjs <exported-site> [DevTools port]
+// Usage: node scripts/portfolio_browser_qa.cjs <exported-site> [DevTools port] [--live]
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const site = fs.realpathSync(process.argv[2]);
 const port = Number(process.argv[3] || 9468);
-const origin = 'https://meditrace-portfolio.test';
-const output = path.join(site, '..', 'browser-qa');
+assert(!process.argv[4] || process.argv[4] === '--live', 'Only --live is supported');
+const live = process.argv[4] === '--live';
+const origin = live ? 'https://meditrace-portfolio-mvp.vercel.app' : 'https://meditrace-portfolio.test';
+const output = path.join(site, '..', live ? 'browser-qa-live' : 'browser-qa');
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.txt': 'text/x-component', '.woff2': 'font/woff2' };
 
 (async () => {
@@ -33,6 +35,10 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
     }
     if (!sessionId || message.sessionId !== sessionId) return;
     if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails);
+    if (live && message.method === 'Network.responseReceived' && message.params.response.status >= 400)
+      errors.push({ status: message.params.response.status, url: message.params.response.url });
+    if (live && message.method === 'Network.loadingFailed' && !message.params.canceled)
+      errors.push({ networkError: message.params.errorText });
     if (message.method !== 'Fetch.requestPaused') return;
     const { requestId, request } = message.params;
     try {
@@ -48,6 +54,7 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
         await call('Fetch.fulfillRequest', { requestId, responseCode: 204 }); return;
       }
       assert(fs.existsSync(file), `Missing static resource: ${url.pathname}`);
+      if (live) { await call('Fetch.continueRequest', { requestId }); return; }
       await call('Fetch.fulfillRequest', { requestId, responseCode: 200,
         responseHeaders: [{ name: 'Content-Type', value: mime[path.extname(file)] || 'application/octet-stream' }],
         body: fs.readFileSync(file).toString('base64') });
@@ -94,8 +101,8 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
   try {
     ({ targetId } = await send('Target.createTarget', { url: 'about:blank', background: true }));
     ({ sessionId } = await send('Target.attachToTarget', { targetId, flatten: true }));
-    await call('Runtime.enable'); await call('Page.enable');
-    // All page HTTP(S) requests are fulfilled locally or rejected, never continued.
+    await call('Runtime.enable'); await call('Page.enable'); await call('Network.enable');
+    // Offline: fulfill locally. Live: allow only GETs for known files at the fixed MVP origin.
     await call('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
     await send('Browser.setDownloadBehavior', { behavior: 'deny' });
     await call('Page.addScriptToEvaluateOnNewDocument', { source: `
@@ -175,11 +182,11 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
     checkpoints.push('keyboard-client-navigation');
     assert.deepEqual(errors, []);
     fs.writeFileSync(path.join(output, 'audit.json'), JSON.stringify({
-      artifact: path.basename(path.dirname(site)), browser: info.Browser,
+      artifact: path.basename(path.dirname(site)), browser: info.Browser, origin,
       checkedAt: new Date().toISOString(), checkpoints, requests, errors,
       keyboard: 'Tab/Enter, select typeahead and text input; all three cases, confirmation, copy/download/print/reset',
-      transport: 'Static artifact fulfilled by CDP; every unexpected request blocked',
-      limits: 'Not public HTTPS acceptance; print HTML inspected without an OS print dialog; downloads inspected as Blob text',
+      transport: live ? 'Public HTTPS; only known artifact GETs allowed; unexpected requests blocked' : 'Static artifact fulfilled by CDP; every unexpected request blocked',
+      limits: `${live ? 'Public synthetic demo only' : 'Not public HTTPS acceptance'}; print HTML inspected without an OS print dialog; downloads inspected as Blob text; absent favicon suppressed`,
     }, null, 2) + '\n');
     console.log('Passed static portfolio browser acceptance: ' + output);
   } catch (error) {

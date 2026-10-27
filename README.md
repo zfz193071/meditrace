@@ -2,11 +2,11 @@
 
 A synthetic-data portfolio prototype for staff checking referral documents: find missing information or conflicting details, inspect the source evidence, record a human decision, and export a versioned handoff.
 
-**Start here:** [80-second captioned rough cut](docs/portfolio/media/referral-demo-rough-cut.mp4) · [Run the demo locally](#try-the-demo) · [Evaluation and failures](evals/referral-review/README.md) · [Code](https://github.com/zfz193071/meditrace)
+**Start here:** [Try the public demo](https://meditrace-portfolio-mvp.vercel.app/demo/) · [80-second captioned rough cut](docs/portfolio/media/referral-demo-rough-cut.mp4) · [Run locally](#try-the-demo) · [Evaluation and failures](evals/referral-review/README.md) · [Deployed source](https://github.com/zfz193071/meditrace/tree/3588c027ba06358501879cd1613bf806ebb16a61)
 
-**Status:** the English landing page, three fixed demos and offline evaluation are implemented. This V1 is not fully accepted or deployed. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual offline UI, not live model inference. A verified public V1 demo URL will be added after the release gates pass; an older deployment is not evidence of the current build.
+**Status:** the standalone synthetic demo was published and verified on 2026-10-27. The English landing page, three fixed demos and offline evaluation are public. Full V1 backend/private-workspace acceptance remains incomplete. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual offline UI, not live model inference; its final review remains pending. [Public deployment evidence](docs/portfolio/STATIC-DEMO.md#public-release--2026-10-27).
 
-**Current delivery target:** a small portfolio MVP for sharing in Discord job-search conversations: an independently published, no-login synthetic demo, a verified review/export walkthrough, concise English project material, and the existing captioned video after review. Public uploads, payments, real-model evaluation and full SaaS operations are deferred. The public demo URL is still awaiting deployment and verification. See the [current scope](docs/referral-review/README.md).
+**Current delivery target:** a small portfolio MVP for sharing in Discord job-search conversations. The independently published demo and review/export walkthrough are verified; final English outreach material and video review remain. Public uploads, payments, real-model evaluation and full SaaS operations are deferred. See the [current scope](docs/referral-review/README.md).
 
 ## Try the demo
 

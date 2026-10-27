@@ -1,6 +1,6 @@
 # Unsent outreach drafts
 
-Do not post until the owner verifies personal claims and replaces every bracketed field. No public V1 demo URL is currently verified. The code repository may not yet include the current worktree, so confirm the shared revision first. This file does not authorize sending messages.
+Do not post until the owner verifies personal claims and replaces every bracketed field. The independent synthetic MVP demo was verified on 2026-10-27; full V1 remains incomplete. Links below identify the deployed source revision. This file does not authorize sending messages.
 
 ## Discord project / job-interest draft
 
@@ -11,9 +11,9 @@ Do not post until the owner verifies personal claims and replaces every brackete
 > The fixed demo needs no model call. The repository also includes development-only baseline/Fake/replay evaluation, including a case where a valid quote comes from a historical template and is misleading without its context. Real-model evaluation and full release acceptance are still pending; this is not a clinical system.
 >
 > Short walkthrough: [verified video link]
-> Demo: [verified HTTPS demo link, or omit until available]
-> Code: https://github.com/zfz193071/meditrace [verify shared commit]
-> Evaluation: [verified evaluation link, or link to the committed evaluation README]
+> Demo: https://meditrace-portfolio-mvp.vercel.app/demo/
+> Code: https://github.com/zfz193071/meditrace/tree/3588c027ba06358501879cd1613bf806ebb16a61
+> Evaluation: https://meditrace-portfolio-mvp.vercel.app/evaluation/
 >
 > I'd welcome feedback on [specific module you have personally reviewed] and conversations about relevant roles. [Add location / work-rights requirements only after confirmation.]
 

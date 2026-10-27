@@ -1,0 +1,142 @@
+{
+  "origin": "https://meditrace-portfolio-mvp.vercel.app",
+  "artifact": "build-ytay_jnk",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "sha256": "06736c1e8cee010c6d05076a4b4fd5dc8ffe6c3d77bc903eb098165e3bf007e6"
+    },
+    {
+      "path": "/demo/",
+      "status": 200,
+      "sha256": "c3637050a3002b83f6ef7816573b44698637b99c82f08c332dfcf26f8476f835"
+    },
+    {
+      "path": "/project/",
+      "status": 200,
+      "sha256": "2f99954253e955b209f7be23f0f8aa91bdded4f463b3ede64408ce669e6d3337"
+    },
+    {
+      "path": "/evaluation/",
+      "status": 200,
+      "sha256": "0f59c9041c6eb6ecc8a67dff8947901dbaa27f21b0a75ab72699827eefd7b56d"
+    },
+    {
+      "path": "/_next/static/chunks/126-c852637402e7ebd7.js",
+      "status": 200,
+      "sha256": "4be9e6f0920eaa15564fcde2bd570e7cd588016ceca1673ff174397e42be1df0"
+    },
+    {
+      "path": "/_next/static/chunks/4f8f038e-a811333015dae2f6.js",
+      "status": 200,
+      "sha256": "86886785723aa6566ebf33d121bd09bd144551b99fb43b031b22088b907d9d5e"
+    },
+    {
+      "path": "/_next/static/chunks/709-5ee92cc078cd74fb.js",
+      "status": 200,
+      "sha256": "9563e0095fe71430cbba7656450b4e50c26c6acb851a10632367d9482e88b16f"
+    },
+    {
+      "path": "/_next/static/chunks/app/demo/page-3f2d712f49fbe124.js",
+      "status": 200,
+      "sha256": "6e33e7595bb6d9cca310fce5a07aaec103029cb312c934726acdeeecdec9617c"
+    },
+    {
+      "path": "/_next/static/chunks/app/evaluation/page-6a8e864074556aa3.js",
+      "status": 200,
+      "sha256": "bacfb9b1a579e1ef14a3ad41e6ed26afe8fa4e9ebffb153326b12ece4fb0aa4b"
+    },
+    {
+      "path": "/_next/static/chunks/app/page-d4f50ee1e1765de2.js",
+      "status": 200,
+      "sha256": "07e918bc6c7f8d9b3bb475030ed0c8e628ecdd2bf34c8611134bab7cbb9fbde0"
+    },
+    {
+      "path": "/_next/static/chunks/app/project/page-d4f50ee1e1765de2.js",
+      "status": 200,
+      "sha256": "07e918bc6c7f8d9b3bb475030ed0c8e628ecdd2bf34c8611134bab7cbb9fbde0"
+    },
+    {
+      "path": "/_next/static/chunks/main-app-334166a88b642320.js",
+      "status": 200,
+      "sha256": "fe50613da6ace7de4a912a56637818e0c41476a8e5b5c71124b8363a2c559ccc"
+    },
+    {
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+      "status": 200,
+      "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+    },
+    {
+      "path": "/_next/static/chunks/webpack-40db35a1c5931957.js",
+      "status": 200,
+      "sha256": "b47baf2bb11bc15d1241dddc66c73996bbc01a9c5383fd4db8230a019cac686d"
+    },
+    {
+      "path": "/_next/static/css/31d83bd86c0d0c0f.css",
+      "status": 200,
+      "sha256": "8ce8950ea166b51c4fc0b38265f7f134a731cb97d9286af1ec96efdc070297ac"
+    },
+    {
+      "path": "/_next/static/css/f1e538874fd4e2fd.css",
+      "status": 200,
+      "sha256": "2bd95bfd7446dc9c4fe54eec08852bcff2fb6ba0c4644e9a0f6ed4e7f68672fe"
+    },
+    {
+      "path": "/_next/static/css/f7544d23b15c4e6d.css",
+      "status": 200,
+      "sha256": "0ff127db7003f0ca8ad609a7c3ccb9cbe7c10d7e560b90ab8f1dd803a33c3896"
+    },
+    {
+      "path": "/evaluation/offline-summary.json",
+      "status": 200,
+      "sha256": "35801396394d824efab2d214620b1d54e5039bb8840c6f6c9e6b4753c5093c83"
+    },
+    {
+      "path": "/demo",
+      "status": 200,
+      "sha256": "c3637050a3002b83f6ef7816573b44698637b99c82f08c332dfcf26f8476f835"
+    },
+    {
+      "path": "/project",
+      "status": 200,
+      "sha256": "2f99954253e955b209f7be23f0f8aa91bdded4f463b3ede64408ce669e6d3337"
+    },
+    {
+      "path": "/evaluation",
+      "status": 200,
+      "sha256": "0f59c9041c6eb6ecc8a67dff8947901dbaa27f21b0a75ab72699827eefd7b56d"
+    },
+    {
+      "path": "/workspace/",
+      "status": 404,
+      "sha256": "6699ad79dca4bbdddbbdde08d3097fbae2478d98191a353331e34016ad529ecc"
+    },
+    {
+      "path": "/login/",
+      "status": 404,
+      "sha256": "6699ad79dca4bbdddbbdde08d3097fbae2478d98191a353331e34016ad529ecc"
+    },
+    {
+      "path": "/account/",
+      "status": 404,
+      "sha256": "6699ad79dca4bbdddbbdde08d3097fbae2478d98191a353331e34016ad529ecc"
+    },
+    {
+      "path": "/api/v1/readiness",
+      "status": 404,
+      "sha256": "6699ad79dca4bbdddbbdde08d3097fbae2478d98191a353331e34016ad529ecc"
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 404,
+      "sha256": "6699ad79dca4bbdddbbdde08d3097fbae2478d98191a353331e34016ad529ecc"
+    },
+    {
+      "path": "/not-a-portfolio-page",
+      "status": 404,
+      "sha256": "6699ad79dca4bbdddbbdde08d3097fbae2478d98191a353331e34016ad529ecc"
+    }
+  ],
+  "limits": "Unauthenticated HTTPS GET and artifact-byte verification; no model calls or private workspace acceptance"
+}
