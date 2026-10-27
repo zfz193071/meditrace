@@ -198,3 +198,22 @@ test("editing the manual note preserves other saved reviewer fields", async () =
   await screen.findByText(/Manual note saved/);
   expect(mock.saveManual).toHaveBeenCalledWith(pid, expect.objectContaining({ fields: { "handoff.notes": "Updated note", "patient.name": "Synthetic patient" } }), "test-csrf");
 });
+
+test("manual note edits survive a history-only reload without reloading packet material", async () => {
+  await editor();
+  await waitFor(() => expect(screen.getByLabelText("Reviewer supplied note")).toBeEnabled());
+  fireEvent.change(screen.getByLabelText("Reviewer supplied note"), { target: { value: "Unsaved manual comparison" } });
+  const packetReads = mock.packet.mock.calls.length;
+  const draftReads = mock.handoffDraft.mock.calls.length;
+  mock.history.mockResolvedValue({ items: [{ id: did, packet_id: pid, revision_id: revision.id, run_id: null,
+    actor_id: did, review_version: 3, kind: "confirmation", created_at: packet.created_at,
+    content: { snapshot_id: did } }], next_cursor: null });
+  fireEvent.click(screen.getByText("Review history and confirmed handoffs"));
+  fireEvent.click(screen.getByRole("button", { name: "Reload history" }));
+  await screen.findByRole("button", { name: "View confirmed handoff" });
+  expect(screen.getByDisplayValue("Unsaved manual comparison")).toBeInTheDocument();
+  expect(mock.packet).toHaveBeenCalledTimes(packetReads);
+  expect(mock.handoffDraft).toHaveBeenCalledTimes(draftReads);
+  expect(mock.saveManual).not.toHaveBeenCalled(); expect(mock.confirm).not.toHaveBeenCalled();
+  expect(mock.execute).not.toHaveBeenCalled();
+});

@@ -1,29 +1,45 @@
 "use client";
 import { useReviewTransport } from "./ReviewTransport";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { errorMessage, type ReviewEvent } from "../../lib/referral-api/workspace";
 
 export function ReviewHistory({ packetId, refresh, onRun, onSnapshot, onError }: { packetId: string; refresh: number; onRun: (id: string) => void; onSnapshot: (id: string) => void; onError: (e: unknown) => void }) {
   const api = useReviewTransport();
   const [items, setItems] = useState<ReviewEvent[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
-  const [busy, setBusy] = useState(true);
+  const [loading, setLoading] = useState<"initial" | "more" | null>("initial");
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  const generation = useRef(0);
+  const paging = useRef(false);
+  const busy = loading !== null;
   useEffect(() => {
-    let alive = true; setBusy(true); setError("");
-    api.history(packetId).then(next => { if (alive) { setItems(next.items); setCursor(next.next_cursor ?? null); } }).catch(e => { if (alive) { setError(errorMessage(e)); onError(e); } }).finally(() => { if (alive) setBusy(false); });
-    return () => { alive = false; };
+    const current = ++generation.current;
+    paging.current = false; setLoading("initial"); setError(""); setItems([]); setCursor(null);
+    api.history(packetId).then(next => { if (current === generation.current) { setItems(next.items); setCursor(next.next_cursor ?? null); } }).catch(e => { if (current === generation.current) { setError(errorMessage(e)); onError(e); } }).finally(() => { if (current === generation.current) setLoading(null); });
+    return () => { generation.current += 1; };
   }, [api, packetId, refresh, retry, onError]);
+  function reload() {
+    // Invalidate pagination immediately, before the reload effect runs.
+    generation.current += 1;
+    setRetry(n => n + 1);
+  }
   async function more() {
-    if (!cursor || busy) return;
-    setBusy(true); setError("");
-    try { const next = await api.history(packetId, cursor); setItems(old => [...old, ...next.items.filter(item => !old.some(existing => existing.id === item.id))]); setCursor(next.next_cursor ?? null); }
-    catch (e) { setError(errorMessage(e)); onError(e); } finally { setBusy(false); }
+    if (!cursor || busy || paging.current) return;
+    const current = generation.current;
+    paging.current = true; setLoading("more"); setError("");
+    try {
+      const next = await api.history(packetId, cursor);
+      if (current !== generation.current) return;
+      setItems(old => [...old, ...next.items.filter(item => !old.some(existing => existing.id === item.id))]); setCursor(next.next_cursor ?? null);
+    }
+    catch (e) { if (current === generation.current) { setError(errorMessage(e)); onError(e); } }
+    finally { if (current === generation.current) { paging.current = false; setLoading(null); } }
   }
   return <details className="rr-card"><summary>Review history and confirmed handoffs</summary>
     <p>Previous decisions remain historical references. They are never automatically applied to a different run.</p>
-    {error && <p role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Reload history</button></p>}
+    <button disabled={loading === "initial"} onClick={reload}>Reload history</button>
+    {error && <p role="alert">{error}</p>}
     {busy && <p role="status">Loading review history…</p>}
     {!busy && !error && items.length === 0 && <p>No saved review events yet.</p>}
     <ol className="rr-history">{items.map(event => <li key={event.id}>

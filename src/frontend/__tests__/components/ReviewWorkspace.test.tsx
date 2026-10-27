@@ -102,3 +102,18 @@ test("history paginates and loads an authorized historical snapshot", async () =
   await screen.findByText(/Historical — not the current review/);
   expect(mock.history).toHaveBeenLastCalledWith(pid, "next");
 });
+
+test("reloading history discovers saved snapshots without discarding or submitting review edits", async () => {
+  await ready();
+  fireEvent.change(screen.getByLabelText("Reviewer supplied correction (optional)"), { target: { value: "Keep this local correction" } });
+  mock.history.mockResolvedValue({ items: [{ id: snapshot.id, packet_id: pid, revision_id: snapshot.revision_id,
+    run_id: reviewRun.id, actor_id: did, review_version: 3, kind: "confirmation", created_at: packet.created_at,
+    content: { snapshot_id: snapshot.id } }], next_cursor: null });
+  fireEvent.click(screen.getByText("Review history and confirmed handoffs"));
+  fireEvent.click(screen.getByRole("button", { name: "Reload history" }));
+  await screen.findByRole("button", { name: "View confirmed handoff" });
+  expect(screen.getByDisplayValue("Keep this local correction")).toBeInTheDocument();
+  expect(mock.resolve).not.toHaveBeenCalled(); expect(mock.confirm).not.toHaveBeenCalled();
+  expect(mock.execute).not.toHaveBeenCalled(); expect(mock.handoff).not.toHaveBeenCalled();
+  expect(mock.reviewState).toHaveBeenCalledTimes(1);
+});
