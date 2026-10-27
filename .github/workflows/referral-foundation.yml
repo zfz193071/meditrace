@@ -12,6 +12,7 @@ jobs:
       DATABASE_URL: "sqlite:///:memory:"
       RR_ENVIRONMENT: test
       REAL_AI_ENABLED: "false"
+      DEEPSEEK_API_KEY: ""
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +31,13 @@ jobs:
       - run: python3 scripts/check_backend_lock.py
       - run: pnpm --dir src/frontend install --frozen-lockfile
       - run: python3 scripts/referral_contracts.py --check
+        env:
+          RR_TEST_NETWORK_GUARD: "1"
+          PYTHONPATH: ${{ github.workspace }}/src/backend/tests/offline
       - run: src/backend/.venv/bin/python scripts/referral_fixtures.py --check
+        env:
+          RR_TEST_NETWORK_GUARD: "1"
+          PYTHONPATH: ${{ github.workspace }}/src/backend/tests/offline
       - run: src/backend/.venv/bin/python -m pytest -q src/backend/tests/referral_review
       - run: python3 scripts/test_deploy_workflow.py
       - run: pnpm --dir src/frontend lint
@@ -59,6 +66,7 @@ jobs:
       TEST_DATABASE_URL: postgresql://referral_test:disposable_ci_only@127.0.0.1:5432/referral_test
       PYTHON_DOTENV_DISABLED: "1"
       REAL_AI_ENABLED: "false"
+      DEEPSEEK_API_KEY: ""
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -70,6 +78,7 @@ jobs:
       - name: Verify PostgreSQL migrations, storage, ledger, reviews and lifecycle races
         run: >-
           src/backend/.venv/bin/python -m pytest -q
+          src/backend/tests/referral_review/test_offline_network.py
           src/backend/tests/referral_review/test_persistence.py
           src/backend/tests/referral_review/test_pg_concurrency.py
           src/backend/tests/referral_review/test_document_pg.py
