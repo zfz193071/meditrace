@@ -1,10 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { webcrypto } from "node:crypto";
 import { TextEncoder } from "node:util";
 import { ReviewWorkspace } from "../../components/referral/ReviewWorkspace";
-import { workspaceApi as api, WorkspaceError } from "../../lib/referral-api/workspace";
+import { workspaceApi as api, WorkspaceError, type ReviewEvent, type Snapshot } from "../../lib/referral-api/workspace";
 import { packet, did, pid } from "../../test-support/workspace";
-import { reviewRun, reviewState, pageOne, pageTwo, findingId, snapshot, handoffView } from "../../test-support/review";
+import { reviewRun, reviewState, pageOne, pageTwo, findingId, missingId, snapshot, handoffView } from "../../test-support/review";
 jest.mock("../../lib/referral-api/workspace", () => {
   const original = jest.requireActual("../../lib/referral-api/workspace");
   return { ...original, workspaceApi: Object.fromEntries(Object.keys(original.workspaceApi).map(key => [key, jest.fn()])) };
@@ -20,6 +20,102 @@ beforeEach(() => {
   mock.confirm.mockResolvedValue(snapshot); mock.handoff.mockResolvedValue(handoffView);
 });
 async function ready() { render(<ReviewWorkspace {...props} />); await screen.findByText(/Saved decisions loaded/); }
+
+function pending<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (error: Error) => void;
+  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+}
+function savedHistory() {
+  mock.history.mockResolvedValue({ items: [{ id: snapshot.id, packet_id: pid, revision_id: snapshot.revision_id,
+    run_id: reviewRun.id, actor_id: did, review_version: 3, kind: "confirmation", created_at: packet.created_at,
+    content: { snapshot_id: snapshot.id } }], next_cursor: null });
+  mock.run.mockResolvedValue(reviewRun);
+}
+
+test.each(["success", "failure"])("pending decision prevents context changes until %s settles", async outcome => {
+  savedHistory(); await ready();
+  fireEvent.click(screen.getByText("Review history and confirmed handoffs"));
+  fireEvent.click(screen.getByRole("button", { name: "View this run" }));
+  await screen.findByRole("button", { name: "Return to latest run" });
+  const save = pending<ReviewEvent>(); mock.resolve.mockReturnValueOnce(save.promise);
+  fireEvent.change(screen.getByLabelText("Reviewer supplied correction (optional)"), { target: { value: "Pending synthetic correction" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save decision" }));
+  for (const name of ["Discard review edits", "Return to latest run", "View this run", "View confirmed handoff"]) {
+    expect(screen.getByRole("button", { name })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name }));
+  }
+  const anotherItem = screen.getByRole("button", { name: /Missing information.*referrer.contact/ });
+  expect(anotherItem).toBeDisabled(); fireEvent.click(anotherItem);
+  expect(screen.getByDisplayValue("Pending synthetic correction")).toBeInTheDocument();
+  expect(mock.run).toHaveBeenCalledTimes(1); expect(mock.handoff).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Reload history" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Reload history" })).toBeEnabled());
+  expect(screen.getByRole("button", { name: "View this run" })).toBeDisabled();
+  expect(mock.resolve).toHaveBeenCalledTimes(1);
+  await act(async () => {
+    if (outcome === "failure") save.reject(new WorkspaceError("REVIEW_CONFLICT", 409));
+    else save.resolve({ id: did, packet_id: pid, revision_id: reviewRun.revision_id, run_id: reviewRun.id,
+      actor_id: did, review_version: 1, kind: "resolution", created_at: packet.created_at, content: {} });
+  });
+  expect(screen.getByRole("button", { name: "View this run" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Return to latest run" })).toBeEnabled();
+  if (outcome === "failure") {
+    expect(screen.getByDisplayValue("Pending synthetic correction")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save decision" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Discard review edits" })).toBeEnabled();
+  } else {
+    expect(screen.getByText("Reviewer supplied: Pending synthetic correction")).toBeInTheDocument();
+    fireEvent.click(anotherItem);
+    expect(anotherItem).toHaveAttribute("aria-pressed", "true");
+  }
+});
+
+test("a history click in the same update as saving cannot bypass the pending write guard", async () => {
+  savedHistory(); await ready(); fireEvent.click(screen.getByText("Review history and confirmed handoffs"));
+  const save = pending<ReviewEvent>(); mock.resolve.mockReturnValueOnce(save.promise);
+  fireEvent.change(screen.getByLabelText("Reviewer supplied correction (optional)"), { target: { value: "Synthetic correction" } });
+  const saveButton = screen.getByRole("button", { name: "Save decision" });
+  const historyButton = screen.getByRole("button", { name: "View this run" });
+  const confirmDiscard = jest.spyOn(window, "confirm").mockReturnValue(true);
+  try {
+    act(() => { fireEvent.click(saveButton); fireEvent.click(historyButton); });
+    expect(mock.resolve).toHaveBeenCalledTimes(1);
+    expect(mock.run).not.toHaveBeenCalled(); expect(confirmDiscard).not.toHaveBeenCalled();
+    await act(async () => { save.reject(new WorkspaceError("REVIEW_CONFLICT", 409)); });
+    expect(screen.getByDisplayValue("Synthetic correction")).toBeInTheDocument();
+  } finally { confirmDiscard.mockRestore(); }
+});
+
+test.each(["success", "failure"])("pending confirmation blocks history and restores it after %s", async outcome => {
+  savedHistory();
+  mock.reviewState.mockResolvedValue({ ...reviewState, decisions: [findingId, missingId].map(id => ({ finding_id: id,
+    status: "resolved", action: "resolve", reason: "Synthetic reviewed decision", corrected_value: null,
+    linked_evidence_ids: [], review_version: 0 })) });
+  await ready(); fireEvent.click(screen.getByText("Review history and confirmed handoffs"));
+  const confirmation = pending<Snapshot>(); mock.confirm.mockReturnValueOnce(confirmation.promise);
+  fireEvent.click(screen.getByRole("button", { name: "Confirm reviewed handoff" }));
+  fireEvent.click(screen.getByRole("button", { name: "Create confirmed snapshot" }));
+  expect(screen.getByRole("button", { name: "View this run" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "View confirmed handoff" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Keep reviewing" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "View confirmed handoff" }));
+  expect(mock.handoff).not.toHaveBeenCalled();
+  await act(async () => {
+    if (outcome === "failure") confirmation.reject(new Error("response lost"));
+    else confirmation.resolve(snapshot);
+  });
+  if (outcome === "success") {
+    await screen.findByRole("article", { name: "Confirmed handoff" });
+    expect(mock.handoff).toHaveBeenCalledWith(pid, snapshot.id);
+  } else {
+    expect(screen.queryByRole("article", { name: "Confirmed handoff" })).not.toBeInTheDocument();
+    expect(mock.handoff).not.toHaveBeenCalled();
+  }
+  expect(screen.getByRole("button", { name: "View this run" })).toBeEnabled();
+  expect(mock.confirm).toHaveBeenCalledTimes(1); expect(mock.execute).not.toHaveBeenCalled();
+});
 
 test("DOB shows both verified citations; source HTML remains inert", async () => {
   await ready();

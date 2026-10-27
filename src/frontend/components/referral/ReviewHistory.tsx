@@ -3,7 +3,7 @@ import { useReviewTransport } from "./ReviewTransport";
 import { useEffect, useRef, useState } from "react";
 import { errorMessage, type ReviewEvent } from "../../lib/referral-api/workspace";
 
-export function ReviewHistory({ packetId, refresh, onRun, onSnapshot, onError }: { packetId: string; refresh: number; onRun: (id: string) => void; onSnapshot: (id: string) => void; onError: (e: unknown) => void }) {
+export function ReviewHistory({ packetId, refresh, navigationDisabled = false, onRun, onSnapshot, onError }: { packetId: string; refresh: number; navigationDisabled?: boolean; onRun: (id: string) => void; onSnapshot: (id: string) => void; onError: (e: unknown) => void }) {
   const api = useReviewTransport();
   const [items, setItems] = useState<ReviewEvent[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -49,8 +49,8 @@ export function ReviewHistory({ packetId, refresh, onRun, onSnapshot, onError }:
         <p>{typeof event.content.action === "string" ? event.content.action : "Saved decision"}: {typeof event.content.reason === "string" ? event.content.reason : ""}</p>
         {typeof event.content.corrected_value === "string" && <p>Reviewer supplied: {event.content.corrected_value}</p>}
       </>}
-      <div className="rr-actions">{event.run_id && <button onClick={() => onRun(event.run_id!)}>View this run</button>}
-        {event.kind === "confirmation" && typeof event.content.snapshot_id === "string" && <button onClick={() => onSnapshot(String(event.content.snapshot_id))}>View confirmed handoff</button>}
+      <div className="rr-actions">{event.run_id && <button disabled={navigationDisabled} onClick={() => onRun(event.run_id!)}>View this run</button>}
+        {event.kind === "confirmation" && typeof event.content.snapshot_id === "string" && <button disabled={navigationDisabled} onClick={() => onSnapshot(String(event.content.snapshot_id))}>View confirmed handoff</button>}
       </div>
     </li>)}</ol>
     {cursor && <button disabled={busy} onClick={more}>Load older history</button>}
