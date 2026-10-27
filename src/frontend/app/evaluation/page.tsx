@@ -12,7 +12,7 @@ export default function EvaluationPage() {
   return <main className="rr-workspace"><div className="rr-shell">
     <header className="rr-topbar"><Link prefetch={false} href="/">MediTrace<span>Evaluation evidence</span></Link><Link prefetch={false} href="/demo">Try demo</Link></header>
     <section><p className="demo-eyebrow">Development split · Offline measurements</p><h1>What we measured. What remains unknown.</h1><p>Ten synthetic development packets: nine readable packets and one deliberately unsupported scan. These are provisional annotations awaiting operator review.</p>
-      <p className="rr-alert"><strong>Release evaluation is blocked.</strong> No real model was called. These numbers are not model accuracy, clinical validation or evidence of time saved.</p>
+      <p className="rr-alert"><strong>Real-model quality is not measured.</strong> No real model was called. These numbers are not model accuracy, clinical validation or evidence of time saved.</p>
       <p>The 20-packet frozen test split was not evaluated in this run. Human-verified citation support, real input/output tokens, cost and model latency are <strong>not measured</strong>.</p>
     </section>
     <section aria-label="Offline comparison" className="eval-comparison">{data.reports.map(report => <article className="rr-card" key={report.provider}>
@@ -36,7 +36,7 @@ export default function EvaluationPage() {
     <section className="rr-card"><h2>Reproduce and inspect</h2><p>Run the offline runner under <code>evals/referral-review</code> in the repository. The reports include per-case differences, raw synthetic recordings, parser/prompt/checklist versions, source hashes and local timing. Local execution timing is not provider latency; Fake token counters are not billing measurements.</p>
       <p><a href="/evaluation/offline-summary.json" download>Download aggregate report and evidence index (JSON)</a></p>
       <details><summary>Version manifest</summary>{data.reports.map(report => <div key={report.provider} className="rr-fact"><h3>{report.provider}</h3><p>Recorded: {report.created_at}</p><p>Base commit: <code>{report.commit}</code>{report.working_tree_dirty ? " + working changes" : ""}</p><p>Implementation SHA-256: <code>{report.versions.implementation_sha256}</code></p><p>Corpus SHA-256: <code>{report.corpus_sha256}</code></p><p>{report.versions.prompt} · {report.versions.checklist} · {report.versions.parser}</p></div>)}</details>
-      <p>Still required: operator annotation review, a separately authorized real evaluation with an independent ledger using global spending reservations, frozen-set quality gates, and at least 20 real latency measurements. The CLI refuses real calls, including when a cost cap is supplied, until that accounting path exists.</p>
+      <p>This portfolio MVP demonstrates the review workflow with precomputed synthetic examples. Operator annotation review, authorized real-model evaluation, frozen-set quality gates and real latency measurements remain deferred. The real-call CLI is disabled; this demo makes no model-quality claim.</p>
       <Link prefetch={false} href="/project#architecture">Read the architecture</Link>
     </section>
   </div></main>;

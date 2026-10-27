@@ -1,5 +1,7 @@
 # Portfolio draft pack — MT-23
 
+Current execution scope: [Discord job-search MVP](../referral-review/README.md), adjusted 2026-10-27. [Build the standalone static demo](STATIC-DEMO.md) without private workspace, payment or backend deployment. The original draft history below is not the current development order.
+
 Prepared 2026-10-22 against MT-20 commit `33e2bb7` plus this draft worktree. This is the early packaging phase, not a completed release or final recruiting campaign.
 
 - [80-second English-captioned rough cut](media/referral-demo-rough-cut.mp4): edited still frames captured from real offline UI. Silent; no inference animation, voice-over or private desktop footage. [Script and shot list](VIDEO.md), [subtitle file](media/referral-demo-en.srt), [capture evidence](media/capture-audit.json).
@@ -13,4 +15,4 @@ No messages were sent, applications submitted, public posts published, or deploy
 
 Before external use, the owner should rehearse the technical explanation, confirm the individual contributions they can defend, fill in employment/location/work-rights information, and review the chosen repository license. No years of experience, English proficiency, New Zealand work rights or employer sponsorship are assumed.
 
-Final video and claims must be revisited after MT-16/20/22 acceptance. Next implementation work follows MT-17; outstanding evaluation, personal review and final-media work remain explicitly tracked.
+For the current MVP, revisit the video and claims against the independently published synthetic demo. Full V1 evaluation and integration acceptance remain tracked separately; they are not prerequisites for packaging this MVP.

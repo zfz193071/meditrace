@@ -43,6 +43,7 @@ jobs:
       - run: pnpm --dir src/frontend lint
       - run: pnpm --dir src/frontend test --runInBand
       - run: pnpm --dir src/frontend build
+      - run: pnpm --dir src/frontend build:portfolio
       - run: pnpm --dir src/frontend typecheck
       - run: pnpm --dir src/frontend audit --prod --audit-level=high --registry=https://registry.npmjs.org
       - run: src/backend/.venv/bin/pip-audit -r src/backend/requirements.txt --no-deps --disable-pip

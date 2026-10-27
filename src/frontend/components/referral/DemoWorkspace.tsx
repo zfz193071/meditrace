@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { portfolioOnly } from "../../lib/portfolio-mode";
 import { useCallback, useState } from "react";
 import { createDemoSession, type DemoCase } from "../../lib/referral-api/demo";
 import { ReviewTransportProvider } from "./ReviewTransport";
@@ -21,7 +22,7 @@ export function DemoWorkspace() {
     setDirty(false); setChoice(next); setGeneration(n => n + 1);
   }
   return <div className="rr-shell">
-    <header className="rr-topbar"><Link prefetch={false} href="/">MediTrace<span>Referral Review Copilot</span></Link><Link prefetch={false} href="/workspace">Open workspace</Link></header>
+    <header className="rr-topbar"><Link prefetch={false} href="/">MediTrace<span>Referral Review Copilot</span></Link><Link prefetch={false} href={portfolioOnly ? "/project" : "/workspace"}>{portfolioOnly ? "Explore architecture" : "Open workspace"}</Link></header>
     <section><p className="demo-eyebrow">Interactive portfolio · Synthetic / precomputed</p><h1>Follow the evidence. Make the human decision.</h1><p>No account, payment or model key needed. These fixed examples run locally. Your edits disappear when you reset, switch cases or refresh.</p></section>
     <nav className="demo-cases" aria-label="Choose a demo case">{cases.map(c => <button key={c.key} aria-pressed={choice === c.key} onClick={() => reset(c.key)}>{c.title}</button>)}</nav>
     <section className="rr-card"><div className="rr-heading"><h2>{cases.find(c => c.key === choice)!.title}</h2><button onClick={() => reset(choice)}>Reset demo</button></div><p>{cases.find(c => c.key === choice)!.description}</p>
