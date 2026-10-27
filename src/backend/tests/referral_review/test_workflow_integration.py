@@ -1,6 +1,8 @@
 """Exercise the MT-22 packet-to-handoff lifecycle through the HTTP API with Fake only."""
 
 from datetime import timedelta
+import hashlib
+from pathlib import Path
 from uuid import UUID, uuid4
 
 import pytest
@@ -21,6 +23,8 @@ from test_lifecycle import drain, remove
 from test_packets import workspace, create, upload, save
 from test_reviews import resolve, draft, confirm
 from test_runs import review as running_review, new_run, post
+
+FIXTURES = Path(__file__).resolve().parents[4] / "fixtures/referral-review"
 
 
 @pytest.fixture
@@ -348,3 +352,146 @@ def test_workflow_resources_cannot_be_mixed_between_owned_packets(running_review
 
 def test_postgres_workflow_resources_cannot_be_mixed_between_owned_packets(postgres_running_review):
     exercise_packet_resource_binding(postgres_running_review)
+
+
+def upload_pdf(r, body, key, wire_format="multipart", consumed=None):
+    headers = r["headers"] | {"Idempotency-Key": key}
+    path = f"/packets/{r['pid']}/documents"
+    if wire_format == "multipart":
+        return r["client"].post(path, headers=headers,
+            files={"file": ("Synthetic.pdf", body, "application/pdf")})
+    assert wire_format == "chunked"
+    boundary = "synthetic-workflow-boundary"
+    payload = (f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="Synthetic.pdf"\r\n'
+        'Content-Type: application/pdf\r\n\r\n').encode() + body + f"\r\n--{boundary}--\r\n".encode()
+
+    def chunks():
+        for chunk in (payload[:50], payload[50:173], payload[173:]):
+            if consumed is not None:
+                consumed.append(len(chunk))
+            yield chunk
+
+    return r["client"].post(path, content=chunks(), headers=headers | {
+        "Content-Type": f"multipart/form-data; boundary={boundary}"})
+
+
+def exercise_pdf_replay(r, wire_format):
+    body = (FIXTURES / "public/dev-01/sources/document-1.pdf").read_bytes()
+    key = uuid4().hex
+    consumed = []
+    first = upload_pdf(r, body, key, wire_format, consumed)
+    assert first.status_code == 201, first.text
+    document = first.json()
+    assert document["parse_status"] == "ready"
+    assert document["sha256"] == hashlib.sha256(body).hexdigest()
+    if wire_format == "chunked":
+        assert len(consumed) == 3
+        assert "content-length" not in first.request.headers
+        assert first.request.headers["transfer-encoding"] == "chunked"
+    before = business_state(r)
+    replay = upload_pdf(r, body, key, wire_format)
+    assert replay.status_code == 201 and replay.json() == document
+    changed = upload_pdf(r, body + b"\n% Synthetic changed payload\n", key, wire_format)
+    assert changed.status_code == 409 and changed.json()["error"]["code"] == "IDEMPOTENCY_CONFLICT"
+    assert business_state(r) == before
+    downloaded = r["client"].get(f"/packets/{r['pid']}/documents/{document['id']}/original")
+    assert downloaded.status_code == 200 and downloaded.content == body
+    assert downloaded.headers["content-type"] == "application/pdf"
+    assert downloaded.headers["cache-control"] == "private, no-store"
+    assert downloaded.headers["content-security-policy"] == "sandbox"
+    assert downloaded.headers["x-content-type-options"] == "nosniff"
+    assert downloaded.headers["content-disposition"].startswith("attachment;")
+    assert r["adapter"].calls == 0
+
+
+@pytest.mark.parametrize("wire_format", ["multipart", "chunked"])
+def test_pdf_workflow_replay_preserves_one_original(running_review, wire_format):
+    exercise_pdf_replay(running_review, wire_format)
+
+
+@pytest.mark.parametrize("wire_format", ["multipart", "chunked"])
+def test_postgres_pdf_workflow_replay_preserves_one_original(postgres_running_review, wire_format):
+    exercise_pdf_replay(postgres_running_review, wire_format)
+
+
+def exercise_pdf_upload_denied(r, reason):
+    body = (FIXTURES / "public/dev-01/sources/document-1.pdf").read_bytes()
+    key = uuid4().hex
+    uploaded = upload_pdf(r, body, key)
+    assert uploaded.status_code == 201 and uploaded.json()["parse_status"] == "ready", uploaded.text
+    did = uploaded.json()["id"]
+    if reason == "foreign":
+        r["client"].cookies.clear()
+        r["workspace"][3].subject = 67890
+        sign_in(r["client"])
+    elif reason == "deleted":
+        remove(r)
+    else:
+        r["clock"][0] += timedelta(days=7)
+        sign_in(r["client"])
+    r["headers"]["X-CSRF-Token"] = r["client"].get("/auth/session").json()["csrf_token"]
+    before = business_state(r)
+    for wire_format in ("multipart", "chunked"):
+        for request_key in (key, uuid4().hex):
+            consumed = []
+            denied = upload_pdf(r, body, request_key, wire_format, consumed)
+            assert_hidden(denied)
+            assert consumed == [], "An inaccessible packet must be rejected before reading upload bytes"
+            assert business_state(r) == before
+    for suffix in ("", "/pages/1", "/original"):
+        assert_hidden(r["client"].get(f"/packets/{r['pid']}/documents/{did}{suffix}"))
+    assert r["adapter"].calls == 0
+
+
+@pytest.mark.parametrize("reason", ["foreign", "deleted", "expired"])
+def test_pdf_workflow_blocks_new_and_replayed_uploads(running_review, reason):
+    exercise_pdf_upload_denied(running_review, reason)
+
+
+@pytest.mark.parametrize("reason", ["foreign", "deleted", "expired"])
+def test_postgres_pdf_workflow_blocks_new_and_replayed_uploads(postgres_running_review, reason):
+    exercise_pdf_upload_denied(postgres_running_review, reason)
+
+
+def exercise_rejected_pdf_preserves_review(r):
+    snapshot = prepare_reviewed_workflow(r)
+    snapshot_url = f"/packets/{r['pid']}/snapshots/{snapshot['id']}"
+    original = r["client"].get(f"/packets/{r['pid']}/documents/{r['did']}/original").content
+    key = uuid4().hex
+    scan = (FIXTURES / "dev/dev-10/sources/document-2.pdf").read_bytes()
+    rejected = upload_pdf(r, scan, key, "chunked")
+    assert rejected.status_code == 201, rejected.text
+    document = rejected.json()
+    assert document["parse_status"] == "rejected"
+    assert document["parse_error_code"] == "PDF_UNREADABLE_PAGE" and document["parse_error_page"] == 1
+    before = business_state(r)
+    replay = upload_pdf(r, scan, key)
+    assert replay.status_code == 201 and replay.json() == document
+    invalid_revision = save(r["workspace"], r["pid"], 1, [r["did"], document["id"]])
+    assert invalid_revision.status_code == 422, invalid_revision.text
+    assert invalid_revision.json()["error"]["code"] == "SCHEMA_INVALID"
+    assert business_state(r) == before
+    assert r["client"].get(snapshot_url).json() == snapshot
+    assert export(r, snapshot["id"]).status_code == 200
+    assert r["client"].get(f"/packets/{r['pid']}/documents/{r['did']}/original").content == original
+
+    # A replacement is a new document; a successful reimport cannot silently
+    # replace either the rejected original or a previously confirmed source.
+    body = (FIXTURES / "public/dev-01/sources/document-1.pdf").read_bytes()
+    replacement = upload_pdf(r, body, uuid4().hex)
+    assert replacement.status_code == 201 and replacement.json()["parse_status"] == "ready", replacement.text
+    assert replacement.json()["id"] != document["id"]
+    revision = save(r["workspace"], r["pid"], 1, [r["did"], replacement.json()["id"]])
+    assert revision.status_code == 201, revision.text
+    historical = r["client"].get(snapshot_url).json()
+    assert historical["historical"] and historical["payload_hash"] == snapshot["payload_hash"]
+    assert historical["payload"] == snapshot["payload"]
+    assert r["adapter"].calls == 1
+
+
+def test_rejected_pdf_preserves_confirmed_review_and_can_be_replaced(running_review):
+    exercise_rejected_pdf_preserves_review(running_review)
+
+
+def test_postgres_rejected_pdf_preserves_confirmed_review_and_can_be_replaced(postgres_running_review):
+    exercise_rejected_pdf_preserves_review(postgres_running_review)
