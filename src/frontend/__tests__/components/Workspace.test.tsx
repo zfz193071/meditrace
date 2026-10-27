@@ -141,6 +141,24 @@ test("unsaved source text registers a navigation warning", async () => {
   const event = new Event("beforeunload", { cancelable: true }); window.dispatchEvent(event); expect(event.defaultPrevented).toBe(true);
 });
 
+test("a transient focus check preserves unsaved source text through session recovery", async () => {
+  render(<Workspace packetId={pid} />);
+  await screen.findByRole("heading", { name: packet.title });
+  fireEvent.change(screen.getByLabelText("Or paste synthetic referral text"), { target: { value: "Synthetic unsaved source" } });
+  const revisionReads = mock.revision.mock.calls.length;
+  mock.session.mockRejectedValueOnce(new Error("offline"));
+  mock.packet.mockRejectedValueOnce(new Error("offline"));
+  fireEvent(window, new Event("focus"));
+  await screen.findByText(/Connection interrupted/);
+  expect(screen.getByLabelText("Or paste synthetic referral text")).toHaveValue("Synthetic unsaved source");
+  fireEvent.click(screen.getByRole("button", { name: "Retry session check" }));
+  await waitFor(() => expect(screen.queryByText(/Connection interrupted/)).not.toBeInTheDocument());
+  expect(screen.getByLabelText("Or paste synthetic referral text")).toHaveValue("Synthetic unsaved source");
+  expect(mock.revision).toHaveBeenCalledTimes(revisionReads);
+  expect(mock.execute).not.toHaveBeenCalled();
+  expect(mock.uploadText).not.toHaveBeenCalled();
+});
+
 test("packet creation retains its key on an uncertain response; deletion is confirmed", async () => {
   mock.create.mockRejectedValueOnce(new Error("offline")).mockResolvedValue(packet);
   render(<PacketList {...access} />); await screen.findByText("No packets yet");
