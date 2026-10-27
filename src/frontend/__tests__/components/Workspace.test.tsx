@@ -5,6 +5,21 @@ import { PacketList } from "../../components/referral/PacketList";
 import { RunPanel } from "../../components/referral/RunPanel";
 import Workspace from "../../components/referral/Workspace";
 import { caps, session, packet, revision, membership, unknownRun, pid, did } from "../../test-support/workspace";
+import { webcrypto } from "node:crypto";
+
+// JSDOM lacks these browser APIs. Read the actual File bytes and use Node's
+// Web Crypto implementation so equal-size, equal-name content is not conflated.
+beforeAll(() => {
+  Object.defineProperty(crypto, "subtle", { configurable: true, value: webcrypto.subtle });
+  Object.defineProperty(File.prototype, "arrayBuffer", { configurable: true, value() {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(this);
+    });
+  } });
+});
 
 jest.mock("../../lib/referral-api/workspace", () => {
   const original = jest.requireActual("../../lib/referral-api/workspace");
@@ -72,6 +87,42 @@ test("PDFs upload sequentially, reject oversized files, and never generate", asy
   const huge = new File([new Uint8Array(2 * 1024 * 1024 + 1)], "huge.pdf", { type: "application/pdf" });
   fireEvent.change(screen.getByLabelText("Choose PDF files"), { target: { files: [huge] } });
   await screen.findByText(/huge.pdf: choose a PDF/); expect(mock.uploadPdf).toHaveBeenCalledTimes(2); expect(mock.execute).not.toHaveBeenCalled();
+});
+
+test("reselecting an identical PDF after a lost response retains its upload key", async () => {
+  mock.uploadPdf.mockRejectedValueOnce(new Error("offline")).mockResolvedValue(packet.documents[0]);
+  const store = jest.spyOn(Storage.prototype, "setItem");
+  await editor();
+  fireEvent.change(screen.getByLabelText("Choose PDF files"), { target: {
+    files: [new File(["Synthetic PDF"], "referral.pdf", { type: "application/pdf", lastModified: 1 })],
+  } });
+  await screen.findByText(/referral.pdf: Connection interrupted/);
+  await waitFor(() => expect(screen.getByLabelText("Choose PDF files")).not.toBeDisabled());
+  expect(mock.uploadPdf).toHaveBeenCalledTimes(1);
+  fireEvent.change(screen.getByLabelText("Choose PDF files"), { target: {
+    files: [new File(["Synthetic PDF"], "referral.pdf", { type: "application/pdf", lastModified: 2 })],
+  } });
+  await waitFor(() => expect(mock.uploadPdf).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(screen.getByLabelText("Choose PDF files")).not.toBeDisabled());
+  expect(mock.uploadPdf.mock.calls[0][3]).toBe(mock.uploadPdf.mock.calls[1][3]);
+  expect(store).not.toHaveBeenCalled();
+  expect(mock.execute).not.toHaveBeenCalled();
+  store.mockRestore();
+});
+
+test("same-name same-size PDFs with different bytes receive distinct upload keys", async () => {
+  mock.uploadPdf.mockResolvedValue(packet.documents[0]);
+  await editor();
+  for (const content of ["first", "other", "first"]) {
+    fireEvent.change(screen.getByLabelText("Choose PDF files"), { target: {
+      files: [new File([content], "referral.pdf", { type: "application/pdf", lastModified: 1 })],
+    } });
+    await waitFor(() => expect(screen.getByLabelText("Choose PDF files")).not.toBeDisabled());
+  }
+  expect(mock.uploadPdf).toHaveBeenCalledTimes(3);
+  const keys = mock.uploadPdf.mock.calls.map(call => call[3]);
+  expect(keys[0]).not.toBe(keys[1]);
+  expect(keys[0]).toBe(keys[2]);
 });
 
 test("manual editing remains available without membership and requires explicit confirmation", async () => {

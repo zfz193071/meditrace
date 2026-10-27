@@ -32,6 +32,7 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
   const alive = useRef(true);
   const lock = useRef(false);
   const textKey = useRef<string | null>(null);
+  const pdfKeys = useRef(new Map<string, string>());
   const loadVersion = useRef(0);
   const dirty = Boolean(reviewDirty || manualDirty || text || (packet && title !== packet.title) || !same(selected, savedSelection));
   useUnsavedChanges(dirty);
@@ -96,7 +97,19 @@ export function PacketWorkspace({ packetId, ...access }: Access & { packetId: st
           setUploadErrors(errors => [...errors, `${file.name}: choose a PDF no larger than 2 MiB.`]); continue;
         }
         setUploading(file.name);
-        try { const doc = await api.uploadPdf(packetId, file, csrf, operationKey()); if (alive.current) showResult(doc); }
+        try {
+          // File objects change when reselected, and name/size/mtime alone do
+          // not identify content. Keep one key per packet/name/bytes in memory
+          // so a lost response cannot turn an explicit retry into a new upload.
+          const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+          const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+          const fingerprint = JSON.stringify([packetId, file.name.normalize("NFC"), hash]);
+          if (!alive.current) break;
+          let key = pdfKeys.current.get(fingerprint);
+          if (!key) { key = operationKey(); pdfKeys.current.set(fingerprint, key); }
+          const doc = await api.uploadPdf(packetId, file, csrf, key);
+          if (alive.current) showResult(doc);
+        }
         catch (e) { if (alive.current) { setUploadErrors(errors => [...errors, `${file.name}: ${errorMessage(e)}`]); onError(e); } break; }
       }
       await load(true);
