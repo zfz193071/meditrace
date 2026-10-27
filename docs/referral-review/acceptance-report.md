@@ -4,10 +4,11 @@
 
 ## 被测版本与环境
 
-- 最新被测代码：`08aba8ebb07084ed49a02e09ce37d70777b05766`；[完整 CI 40433418902](https://github.com/zfz193071/meditrace/actions/runs/40433418902) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **913 passed／179 skipped**；独立 PostgreSQL 17 job **384 passed／0 skipped**，通过零跳过断言；前端 **15 suites／71 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
+- 最新被测代码：`3789672c9b2e6025a1473524082dd616ab605104`；[完整 CI 40437026849](https://github.com/zfz193071/meditrace/actions/runs/40437026849) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **15 suites／71 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
 - 初版闭环代码为 `2b967eda50a8d33b5586a38f934508fbc9d729f6`，证据文档提交 `ed9973e`；[历史 CI 40310916116](https://github.com/zfz193071/meditrace/actions/runs/40310916116) 的两个 job 均成功。
 - CI 环境由仓库 workflow 固定：Python 3.12、Node.js 22、PostgreSQL 17。后端普通 job 使用 SQLite；独立数据库 job 使用临时 PostgreSQL 和随机隔离 schema。
 - 自动测试仅使用合成资料、Fake／replay 或模拟供应商；不配置付费模型密钥，不访问生产数据库，不发起浏览器 AI 对话。
+- Python 测试现已默认阻断 DNS／IPv4／IPv6 socket 联网，普通 Python 子进程继承启动保护；吞掉联网异常也会使当前测试失败。21 项探针包含无 Mock 的真实 adapter（仅合成假密钥），未发出真实请求。原生 libpq、Node／外部程序和清除环境的进程不在该测试层保护范围；详见 [边界说明](../../src/backend/tests/offline/README.md)。首版开关命名冲突已修复，本地受影响回归 **139 passed**，首轮失败及最终 CI 证据见 [MT-22](tickets/MT-22.md#python-离线测试网络保护2026-10-27)。
 - MT-22 新增 API 闭环见 [`test_workflow_integration.py`](../../src/backend/tests/referral_review/test_workflow_integration.py)：本地 SQLite HTTP／HTTPS 两种配置 2 passed；无本地 `TEST_DATABASE_URL`，PostgreSQL 两个参数化用例本地跳过；远端 PostgreSQL job 已成功执行并通过零跳过检查。
 - 随后新增同一工作流的双账号资源隔离矩阵，见同一测试文件：另一账号的 packet、draft、revision、run、review、document metadata/page/original、snapshot、history、handoff 和 export 读取均返回 404；执行他人 run 和删除他人 packet 也均返回 404，且没有二次 Fake 派发。CI [run 40312565916](https://github.com/zfz193071/meditrace/actions/runs/40312565916) 的 `foundation` 与 `postgres-persistence` 均通过，PostgreSQL job 的零跳过门槛通过；本机没有 `TEST_DATABASE_URL`，本地 PG 参数仍跳过。
 - 2026-10-27 增补：同一文件将跨账号矩阵扩至 15 个读取／12 个写入变体，增加同账号跨包 ID 混用和删除／到期在维护前后的读写拒绝，并逐次核对业务数据库、私有文件及 Fake 调用次数不变。对应 Q09／Q16／Q17；本地 HTTP／HTTPS SQLite 合计 **10 passed**，PostgreSQL **10 skipped**（未配置测试连接）；该轮 [CI 40431376009](https://github.com/zfz193071/meditrace/actions/runs/40431376009) 的独立数据库 job 已执行当时该文件全部 20 个参数化用例。详细边界见 [MT-22](tickets/MT-22.md#权限与生命周期矩阵增补2026-10-27)。

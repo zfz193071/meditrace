@@ -11,6 +11,8 @@
 子进程 bootstrap、CI 独立命令和文档。产品配置校验、网络阻断以及真实 AI
 授权条件保持原样；没有把测试开关加入生产 Settings。
 
-回归覆盖 `test_offline_network.py`、`test_foundation.py` 和 `test_retired_api.py`；
-完整 CI 及实际通过数记录在 [MT-22](docs/referral-review/tickets/MT-22.md)。
+回归覆盖 `test_offline_network.py`、`test_foundation.py` 和 `test_retired_api.py`，
+本地 **139 passed**。修复 `3789672` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40437026849)
+通过：普通后端 **934 passed／179 skipped**，独立 PostgreSQL **405 passed／0 skipped**；
+前端 71 tests、构建和其他检查通过。详细证据记录在 [MT-22](docs/referral-review/tickets/MT-22.md)。
 首轮失败不计为验收通过，未执行生产部署或真实模型请求。

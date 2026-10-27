@@ -36,6 +36,8 @@ MT-22 已新增[部分验收报告](acceptance-report.md)，逐项列出 Q01—Q
 
 同日继续完成 PDF 表单／分块上传的幂等、跨账号、删除／到期及解析失败后替换闭环，并修复前端响应丢失后重选同一 PDF 会生成新 key 的重复上传问题。最终代码 `08aba8e` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40433418902) 全通过：普通后端 913 passed／179 skipped，独立 PostgreSQL 384 passed／0 skipped（集成文件 44 个参数化用例），前端 71 tests 及构建／类型检查／lint／审计通过。见 [修复记录](../../BUGFIX-PDF-UPLOAD-RETRY-KEY.md)及 [MT-22](tickets/MT-22.md)。未更新外部或线上状态，前置及真实／人工验收条件仍不变。
 
+同日 MT-22 增加 Python 离线测试网络保护，防止漏配 Mock 时访问真实模型；普通 Python 子进程继承保护，CI 测试 job 显式清空模型密钥。首版测试开关与产品 `RR_` 配置前缀冲突，已修正且保留失败记录。最终 `3789672` 的[完整 CI 40437026849](https://github.com/zfz193071/meditrace/actions/runs/40437026849) 通过：普通后端 **934 passed／179 skipped**、独立 PostgreSQL **405 passed／0 skipped**、前端 **71 tests** 及构建／类型检查／lint／审计、契约／fixture 和部署脚本检查通过。此为 Python socket 层保护，不覆盖原生 libpq／Node 等；边界见 [说明](../../src/backend/tests/offline/README.md)。只更新工程证据，不更新生产配置或探测快照，不解除外部／人工验收及部署门槛。
+
 实现 `5aa9a03`、预算补充 `e568b9e`、PostgreSQL 汇总类型修复 `ad48bf2` 的[最终完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40290077756) 全通过：后端 891 passed／154 skipped；独立数据库 job 337 passed／0 skipped（含两种数据库参数化），前端 69 项测试、构建／类型检查／审计通过。先前 CI 暴露的 JSON 类型问题及预算重用保护已记录，不能据此将 MT-20 或完整 V1 记为已验收。
 
 事务调度与持久录制恢复现已接通隔离 Fake 演练：操作者检查、费用预留及派发标记同事务，录制先于结算，恢复不重复调用；无数据库／Key 回放保留缺失及失败样本。仅 test 环境和内置 Fake，未开启真实供应商入口，也未记录实际预算授权。此轮无迁移或线上操作。实现 `bdc160d`／测试修正 `90cb281` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40282732849) 全通过：后端 870 passed／136 skipped，独立数据库 job 298 passed／0 skipped（含 SQLite／PostgreSQL 参数化），前端 69 项及构建／审计通过；首轮查询顺序断言误判的原因和修复保留在 [MT-20 证据](MT-20-EVIDENCE.md)。
