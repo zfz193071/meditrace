@@ -13,6 +13,24 @@ beforeAll(() => {
 beforeEach(() => { jest.clearAllMocks(); jest.mocked(fetch).mockRejectedValue(new Error("Demo network forbidden")); });
 afterEach(() => { expect(fetch).not.toHaveBeenCalled(); expect(localStorage.length).toBe(0); expect(sessionStorage.length).toBe(0); });
 
+test("selecting an item moves keyboard focus to evidence without waiting for an animation frame", async () => {
+  const frame = jest.spyOn(window, "requestAnimationFrame").mockImplementation(() => 1);
+  try {
+    render(<DemoWorkspace />);
+    await screen.findByText(/Saved decisions loaded/);
+    const item = document.querySelector<HTMLButtonElement>(".rr-findings button")!;
+    item.focus();
+    fireEvent.click(item);
+    await waitFor(() => expect(screen.getByRole("region", { name: "Evidence and decision" })).toHaveFocus());
+    // Re-selecting the same item must transfer focus too, even if its ID is unchanged.
+    item.focus();
+    fireEvent.click(item);
+    await waitFor(() => expect(screen.getByRole("region", { name: "Evidence and decision" })).toHaveFocus());
+  } finally {
+    frame.mockRestore();
+  }
+});
+
 async function deferAll(s: ReturnType<typeof createDemoSession>) {
   const run = s.initialRun();
   for (const f of run.result!.findings) {

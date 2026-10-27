@@ -64,6 +64,7 @@ function ReviewSurface({ packet, run, csrf, sourceDirty, onError, onDirty, onPen
   const [status, setStatus] = useState("all");
   const [showFacts, setShowFacts] = useState(false);
   const [pane, setPane] = useState<"items" | "evidence">("items");
+  const [focusRequest, setFocusRequest] = useState(0);
   const [action, setAction] = useState<DecisionInput["action"]>("resolve");
   const [reason, setReason] = useState("");
   const [correction, setCorrection] = useState("");
@@ -75,6 +76,11 @@ function ReviewSurface({ packet, run, csrf, sourceDirty, onError, onDirty, onPen
   const [message, setMessage] = useState("");
   const [confirming, setConfirming] = useState(false);
   const detail = useRef<HTMLElement>(null);
+  useEffect(() => {
+    // The evidence panel must be visible before focusing it, including when
+    // animation frames are paused in a background tab or the item is unchanged.
+    if (focusRequest > 0) detail.current?.focus();
+  }, [focusRequest]);
   const lock = useRef(false);
   const alive = useRef(true);
   const operation = useRef<{ input: string; key: string } | null>(null);
@@ -111,7 +117,7 @@ function ReviewSurface({ packet, run, csrf, sourceDirty, onError, onDirty, onPen
     if (busy || lock.current) return;
     if (edited && !window.confirm("Discard unsaved edits to select another item?")) return;
     setSelected(id); resetEdit(); setPane("evidence");
-    requestAnimationFrame(() => detail.current?.focus());
+    setFocusRequest(value => value + 1);
   }
   function edit() { setEdited(true); setConfirming(false); }
   async function save() {
