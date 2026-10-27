@@ -18,27 +18,38 @@ export function RunPanel({ packetId, revision, initialRun, membership, caps, csr
   const executing = useRef(false);
   const startedHere = useRef(new Set<string>());
   const newRunKey = useRef<string | null>(null);
+  const pollVersion = useRef(0);
+  const activeRun = Boolean(run && ["pending", "running"].includes(run.state));
   const stale = Boolean(run && (!revision || run.revision_id !== revision.id || run.stale));
   const memberActive = Boolean(membership?.valid_until && Date.parse(membership.valid_until) > Date.now() && membership.remaining > 0);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   // Only GET may be retried. Stop polling after 5 minutes or the first read failure.
   useEffect(() => {
-    if (!run || !polling || !["pending", "running"].includes(run.state)) return;
+    if (!run || !polling || !activeRun) return;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
     const deadline = Date.now() + 300_000;
+    function schedule() {
+      if (Date.now() >= deadline) { setPolling(false); setError("Automatic status checks paused. Query status or recover the saved run; do not restart it."); }
+      else timer = setTimeout(tick, 4000);
+    }
     async function tick() {
+      const version = pollVersion.current;
       try {
         const current = await api.run(run!.id);
         if (cancelled) return;
+        if (version !== pollVersion.current) { schedule(); return; }
         setRun(current);
-        if (Date.now() >= deadline) { setPolling(false); setError("Automatic status checks paused. Query status or recover the saved run; do not restart it."); }
-        else if (["pending", "running"].includes(current.state)) timer = setTimeout(tick, 4000);
-      } catch (e) { if (!cancelled) { setError(errorMessage(e)); setPolling(false); onError(e); } }
+        if (["pending", "running"].includes(current.state)) schedule();
+      } catch (e) {
+        if (cancelled) return;
+        if (version !== pollVersion.current) { schedule(); return; }
+        setError(errorMessage(e)); setPolling(false); onError(e);
+      }
     }
     timer = setTimeout(tick, 4000);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [run?.id, polling, onError]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [run?.id, activeRun, polling, onError]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!run) return;
     const update = () => setElapsed(Math.max(0, Math.floor(((run.finished_at ? Date.parse(run.finished_at) : Date.now()) - Date.parse(run.created_at)) / 1000)));
@@ -47,6 +58,8 @@ export function RunPanel({ packetId, revision, initialRun, membership, caps, csr
   async function act(action: "prepare" | "execute" | "query" | "reconcile" | "cancel") {
     if (locked.current) return;
     if (action === "execute" && (!run || startedHere.current.has(run.id))) return;
+    // Reads started before this action, or still pending when it ends, are obsolete.
+    ++pollVersion.current;
     locked.current = true; setBusy(true); setError("");
     try {
       let next: Run | null = run;
@@ -72,7 +85,7 @@ export function RunPanel({ packetId, revision, initialRun, membership, caps, csr
           catch (readError) { if (alive.current) { setPolling(false); onError(readError); } }
         }
       }
-    } finally { locked.current = false; executing.current = false; if (alive.current) setBusy(false); }
+    } finally { ++pollVersion.current; locked.current = false; executing.current = false; if (alive.current) setBusy(false); }
   }
   const available = (caps.sandbox_execution_available || caps.real_ai_execution_available) && caps.mode !== "bundled_demo";
   return <section className="rr-card" aria-labelledby="run-title"><h2 id="run-title">Optional automated check</h2>
