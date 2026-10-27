@@ -4,7 +4,7 @@
 
 ## 被测版本与环境
 
-- 最新被测代码：`6fcdecfcfb497ea1936c365751a8f1d0a8e705fa`；[完整 CI 40439750785](https://github.com/zfz193071/meditrace/actions/runs/40439750785) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **17 suites／88 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
+- 最新被测代码：`4d19aec719c87ef165a956b69ef9a29390ae2fdb`；[完整 CI 40441851253](https://github.com/zfz193071/meditrace/actions/runs/40441851253) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **17 suites／93 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
 - 初版闭环代码为 `2b967eda50a8d33b5586a38f934508fbc9d729f6`，证据文档提交 `ed9973e`；[历史 CI 40310916116](https://github.com/zfz193071/meditrace/actions/runs/40310916116) 的两个 job 均成功。
 - CI 环境由仓库 workflow 固定：Python 3.12、Node.js 22、PostgreSQL 17。后端普通 job 使用 SQLite；独立数据库 job 使用临时 PostgreSQL 和随机隔离 schema。
 - 自动测试仅使用合成资料、Fake／replay 或模拟供应商；不配置付费模型密钥，不访问生产数据库，不发起浏览器 AI 对话。
@@ -25,7 +25,7 @@
 | Q06 药物时间差异 | `test_checklist.py`、`test_evaluation.py` | 规则／固定集回归有离线证据；最终质量评估未完成 |
 | Q07 引用边界与 Unicode | `test_parser.py`、`test_extraction.py`、`test_documents.py` | offsets、hash 与证据验证有离线测试；真实扫描材料不在自动验收范围 |
 | Q08 受限 PDF | `test_parser.py`、`test_documents.py`、`test_document_pg.py` | 解析失败和 PostgreSQL 存储路径有测试；托管 Blob 往返与浏览器错误呈现未验收 |
-| Q09 上传／版本／审核竞争 | `test_document_pg.py`、`test_runs_pg.py`、`test_reviews_persistence.py`、`test_workflow_integration.py` | 隔离 PostgreSQL 并发及一条完整流程通过；完整双账号矩阵未验收 |
+| Q09 上传／版本／审核竞争 | `test_document_pg.py`、`test_runs_pg.py`、`test_reviews_persistence.py`、`test_workflow_integration.py`、`ReviewWorkspace.test.tsx` | 隔离 PostgreSQL 并发及一条完整流程通过；补充审核写入期间保持当前上下文、成功／失败后恢复操作的组件回归。完整外部／人工验收未完成 |
 | Q10 重复执行与预算竞争 | `test_runs.py`、`test_runs_pg.py`、`test_usage_pg.py`、`test_evaluation_slots.py` | Fake 多进程和账本竞争已通过；真实供应商派发未开放 |
 | Q11 断网、超时与未知费用 | `test_runs.py`、`test_operations.py`、`test_evaluation_recovery.py`、`test_evaluation_adjustments.py`、`Workspace.test.tsx`、`ManualDraft.test.tsx` | 离线故障／恢复证据存在；PDF 重选复用 key，以及手工备注冲突／断网后保留输入、读取一致版本并明确重试均已修复并通过回归。真实供应商超时与线上告警未验收 |
 | Q12 无效输出及越权证据 | `test_extraction.py`、`test_documents.py`、`test_runs.py` | Fake 无效输出与归属验证有离线覆盖；真实模型防护与人工审查未验收 |
@@ -45,6 +45,8 @@
 2026-10-27 历史列表增量对应 Q09／Q11／Q13：独立刷新历史后忽略旧分页的结果、错误、游标和加载状态；资料包切换时清空旧列表。常驻刷新入口可以在保留手工备注／人工修正的情况下发现新确认记录，不自动写入或打开快照。新增 6 项组件和 2 项工作区回归，本地前端 **17 suites／88 tests passed**；边界与远端证据见 [修复记录](../../BUGFIX-REVIEW-HISTORY-REQUESTS.md)。不是实际断网、浏览器或外部供应商验收。
 
 2026-10-27 手工备注增量对应 Q09／Q11／Q18：在不丢弃本地输入的情况下读取已保存备注及其他人工字段，读取前后资料／审核版本一致才允许再次保存；可明确采用服务器备注并确认。新增 9 项回归包含写入已成功但响应丢失、确认失败不显示导出成功、初次／恢复读取失败、并发变化和卸载后迟到错误；本地与上述完整 CI 通过。没有浏览器 AI 操作、自动写入或本地持久化。刷新及资料版本变化的边界见 [修复记录](../../BUGFIX-MANUAL-NOTE-RECOVERY.md)；不作为三视口、真实断网或人工验收证据。
+
+2026-10-27 审核写入增量对应 Q09／Q11／Q13：保存／确认未结束时禁用事项切换、丢弃编辑和历史导航；同步标记拦截同一次更新中的连续点击。只读历史刷新保持可用，失败保留输入，确认成功正常展示快照。新增 5 项回归，本地前端 **17 suites／93 tests passed**；命令、远端证据和页面关闭等边界见 [修复记录](../../BUGFIX-REVIEW-PENDING-NAVIGATION.md)。未执行浏览器 AI 操作或真实模型调用。
 
 ## 外部验收与阻碍
 

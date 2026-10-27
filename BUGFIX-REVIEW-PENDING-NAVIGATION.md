@@ -29,7 +29,10 @@
 正常且只发起一次确认。
 
 本地前端 **17 suites／93 tests passed**，typecheck 和修改文件 ESLint
-均通过（无警告）。完整 CI 证据见 [MT-22](docs/referral-review/tickets/MT-22.md)。
+均通过（无警告）。代码 `4d19aec` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40441851253)
+通过：前端 **93 tests**、普通后端 **934 passed／179 skipped**、独立 PostgreSQL
+**405 passed／0 skipped**，构建／类型检查／lint、契约／fixture、18 项部署脚本测试
+和依赖审计通过。证据汇总见 [MT-22](docs/referral-review/tickets/MT-22.md)。
 
 改动只限制审核面板内会改变当前上下文的操作，不增加保存、确认或模型请求，
 不修改后端 CAS、幂等、权限或快照。关闭页面、刷新、会话失效等仍可能中断
