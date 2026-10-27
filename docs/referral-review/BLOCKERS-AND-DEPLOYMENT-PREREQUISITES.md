@@ -58,6 +58,8 @@ MT-22 已新增[部分验收报告](acceptance-report.md)，逐项列出 Q01—Q
 
 2026-10-27 核对状态增量：旧轮询不再覆盖取消／恢复／执行／主动查询的新结果，终态清理定时读取。代码 `6c3a3bd` 的[完整 CI 40446782653](https://github.com/zfz193071/meditrace/actions/runs/40446782653) 两个 job 均通过：前端 **18 suites／107 tests**，普通后端 **934 passed／179 skipped**，独立 PostgreSQL **405 passed／0 skipped**，构建／类型检查／lint、契约／fixture、部署脚本及依赖审计通过。见 [修复记录](../../BUGFIX-RUN-STATUS-POLLING.md)。未执行浏览器 AI 操作、真实模型调用或生产部署，不更新外部配置快照；MT-22 保持 TODO。
 
+2026-10-27 资料包列表增量：删除已确认但刷新失败时不再显示旧入口，创建输入保留；同步锁与请求代次隔离连续提交和卸载后迟到响应。代码 `14b382e` 的[完整 CI 40454849223](https://github.com/zfz193071/meditrace/actions/runs/40454849223) 两个 job 均通过：前端 **19 suites／114 tests**，普通后端 **934 passed／179 skipped**，独立 PostgreSQL **405 passed／0 skipped**，构建／类型检查／lint、契约／fixture、部署脚本及依赖审计通过。见 [修复记录](../../BUGFIX-PACKET-LIST-RECOVERY.md)。无实际删除、模型调用或部署，不更新外部配置快照；MT-22 保持 TODO。
+
 ## 2026-10-23 已核实状态（历史快照，登录状态已由上方复核更新）
 
 - `MT-01` 为 `DONE`；`MT-02` 因真实 PostgreSQL 迁移／并发验收为 `BLOCKED`；`MT-03` 因操作者尚未逐包签核候选标注为 `BLOCKED`。`MT-04`—`MT-24` 的 front matter 仍为 `TODO`；其中 04—21 和 23 已有不同程度代码／离线证据，不能据此提前关闭。

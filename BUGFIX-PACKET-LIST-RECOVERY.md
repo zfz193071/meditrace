@@ -25,7 +25,11 @@
 删除响应不明后的显式重试、同一批更新的重复提交与刷新、创建／删除的迟到
 授权错误、卸载后的删除成功及 StrictMode 旧列表回填。
 
-本地全量前端 **19 suites／114 tests passed**。完整检查与远端 CI 证据见
+本地全量前端 **19 suites／114 tests passed**，typecheck 与定向 ESLint 通过。
+代码 `14b382e` 的[完整 CI 40454849223](https://github.com/zfz193071/meditrace/actions/runs/40454849223)
+两个 job 均成功：前端 **114 tests**、普通后端 **934 passed／179 skipped**、独立
+PostgreSQL **405 passed／0 skipped**，构建／类型检查／lint、契约／fixture、
+18 项部署脚本测试和前后端依赖审计通过。普通 job 的跳过不计验收通过。详见
 [MT-22](docs/referral-review/tickets/MT-22.md)。API 均为 Jest Mock，无真实删除、
 浏览器 AI 操作、模型调用、迁移或部署。服务端生命周期与权限逻辑保持不变；
 文件物理清理、真实 Blob 删除及人工验收仍需单独完成。
