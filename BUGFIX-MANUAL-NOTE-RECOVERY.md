@@ -30,10 +30,13 @@
 重读失败、卸载后迟到错误。
 
 本地前端全量 **16 suites／80 tests passed**；`pnpm --dir src/frontend typecheck`
-和修改文件的 ESLint 均通过（无警告）。完整 CI 结果见 [MT-22](docs/referral-review/tickets/MT-22.md)。
+和修改文件的 ESLint 均通过（无警告）。代码 `851e6a3` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40438487348)
+通过：前端 80 tests、普通后端 934 passed／179 skipped、独立 PostgreSQL 405 passed／0 skipped；
+构建／类型检查／lint、契约／fixture、18 项部署脚本测试及依赖审计通过。
+证据汇总见 [MT-22](docs/referral-review/tickets/MT-22.md)。
 
 备注仅保存在当前组件内存中，不写 localStorage 或 URL。刷新、关闭页面及
 切换资料版本仍可能丢失未保存输入，沿用离开提醒；资料版本确已变化时保留
 输入并提示先留副本，再加载新资料，不自动把旧备注套到新资料。确认响应丢失
-后的已有快照仍通过审核历史查询，本修复不自动重放确认。未执行浏览器 AI
+后的已有快照仍通过重载资料包后的审核历史查询，本修复不自动重放确认。未执行浏览器 AI
 操作、真实模型调用、数据库迁移或生产发布；三视口／实际断网人工验收仍待完成。

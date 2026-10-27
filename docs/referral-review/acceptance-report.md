@@ -4,7 +4,7 @@
 
 ## 被测版本与环境
 
-- 最新被测代码：`3789672c9b2e6025a1473524082dd616ab605104`；[完整 CI 40437026849](https://github.com/zfz193071/meditrace/actions/runs/40437026849) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **15 suites／71 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
+- 最新被测代码：`851e6a3d6a2f7745da76b4a8879bd1fec0b6405a`；[完整 CI 40438487348](https://github.com/zfz193071/meditrace/actions/runs/40438487348) 的 `foundation`、`postgres-persistence` 均成功。普通后端 **934 passed／179 skipped**；独立 PostgreSQL 17 job **405 passed／0 skipped**，通过零跳过断言；前端 **16 suites／80 tests**、build／typecheck／lint、前后端依赖审计、契约／fixture 检查及 18 项部署脚本测试通过。普通 job 的 skipped 不计验收通过。
 - 初版闭环代码为 `2b967eda50a8d33b5586a38f934508fbc9d729f6`，证据文档提交 `ed9973e`；[历史 CI 40310916116](https://github.com/zfz193071/meditrace/actions/runs/40310916116) 的两个 job 均成功。
 - CI 环境由仓库 workflow 固定：Python 3.12、Node.js 22、PostgreSQL 17。后端普通 job 使用 SQLite；独立数据库 job 使用临时 PostgreSQL 和随机隔离 schema。
 - 自动测试仅使用合成资料、Fake／replay 或模拟供应商；不配置付费模型密钥，不访问生产数据库，不发起浏览器 AI 对话。
@@ -27,7 +27,7 @@
 | Q08 受限 PDF | `test_parser.py`、`test_documents.py`、`test_document_pg.py` | 解析失败和 PostgreSQL 存储路径有测试；托管 Blob 往返与浏览器错误呈现未验收 |
 | Q09 上传／版本／审核竞争 | `test_document_pg.py`、`test_runs_pg.py`、`test_reviews_persistence.py`、`test_workflow_integration.py` | 隔离 PostgreSQL 并发及一条完整流程通过；完整双账号矩阵未验收 |
 | Q10 重复执行与预算竞争 | `test_runs.py`、`test_runs_pg.py`、`test_usage_pg.py`、`test_evaluation_slots.py` | Fake 多进程和账本竞争已通过；真实供应商派发未开放 |
-| Q11 断网、超时与未知费用 | `test_runs.py`、`test_operations.py`、`test_evaluation_recovery.py`、`test_evaluation_adjustments.py`、`Workspace.test.tsx` | 离线故障／恢复证据存在；补 PDF 响应丢失后重选复用 key 的修复及回归。真实供应商超时与线上告警未验收 |
+| Q11 断网、超时与未知费用 | `test_runs.py`、`test_operations.py`、`test_evaluation_recovery.py`、`test_evaluation_adjustments.py`、`Workspace.test.tsx`、`ManualDraft.test.tsx` | 离线故障／恢复证据存在；PDF 重选复用 key，以及手工备注冲突／断网后保留输入、读取一致版本并明确重试均已修复并通过回归。真实供应商超时与线上告警未验收 |
 | Q12 无效输出及越权证据 | `test_extraction.py`、`test_documents.py`、`test_runs.py` | Fake 无效输出与归属验证有离线覆盖；真实模型防护与人工审查未验收 |
 | Q13 改版后重跑 | `test_workflow_integration.py`、`test_runs.py`、`test_reviews.py` | 旧快照保留、新版本重跑通过；更广泛的历史 UI 检查未完成 |
 | Q14 会员／额度限制 | `test_usage.py`、`test_runs.py`、`test_handoff.py`、`test_billing.py` | Fake 权益和额度边界已测；真实 Stripe 测试购买与真实模型阻断未验收 |
@@ -43,6 +43,8 @@
 2026-10-27 后续增量补充 Q08／Q09／Q13／Q16：新增 PDF multipart／分块上传的重放和内容冲突、跨账号及删除／到期拒绝、扫描件解析失败后保留审核与新文档替换闭环。分块拒绝验证没有读取正文；私有原件字节和业务状态保持不变。定向本地 **12 passed／12 PostgreSQL skipped**；提交 `abdacc5` 的[完整 CI](https://github.com/zfz193071/meditrace/actions/runs/40432785865) 及最新修复提交的完整 CI 均通过，独立数据库 job 执行集成文件全部 **44 个参数化用例**。前端同时修复了重新选择 PDF 时丢失幂等 key 的问题，两个新增回归验证同内容复用／不同内容分离；记录见 [BUGFIX](../../BUGFIX-PDF-UPLOAD-RETRY-KEY.md)。详见 [MT-22](tickets/MT-22.md#pdf-上传重放和解析失败闭环2026-10-27)；仍不替代真实 Blob 往返和浏览器失败呈现验收。
 
 ## 外部验收与阻碍
+
+2026-10-27 手工备注增量对应 Q09／Q11／Q18：在不丢弃本地输入的情况下读取已保存备注及其他人工字段，读取前后资料／审核版本一致才允许再次保存；可明确采用服务器备注并确认。新增 9 项回归包含写入已成功但响应丢失、确认失败不显示导出成功、初次／恢复读取失败、并发变化和卸载后迟到错误；本地与上述完整 CI 通过。没有浏览器 AI 操作、自动写入或本地持久化。刷新及资料版本变化的边界见 [修复记录](../../BUGFIX-MANUAL-NOTE-RECOVERY.md)；不作为三视口、真实断网或人工验收证据。
 
 - MT-03：30 份合成资料的 gold 标注仍需人工逐包复核并签核。
 - MT-04：本地 OAuth 真实往返已完成；托管 Vercel 日志验收仍待执行。
