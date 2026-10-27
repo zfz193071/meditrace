@@ -6,6 +6,8 @@ A synthetic-data portfolio prototype for staff checking referral documents: find
 
 **Status:** the English landing page, three fixed demos and offline evaluation are implemented. This V1 is not fully accepted or deployed. No clinical validation, customer adoption or time-saving claim is made. The video is an edited still-frame walkthrough of actual offline UI, not live model inference. A verified public V1 demo URL will be added after the release gates pass; an older deployment is not evidence of the current build.
 
+**Current delivery target:** a small portfolio MVP for sharing in Discord job-search conversations: an independently published, no-login synthetic demo, a verified review/export walkthrough, concise English project material, and the existing captioned video after review. Public uploads, payments, real-model evaluation and full SaaS operations are deferred. The public demo URL is still awaiting deployment and verification. See the [current scope](docs/referral-review/README.md).
+
 ## Try the demo
 
 Prerequisites: Node.js 22 and pnpm 10.34.7. From a checkout, run these commands manually:
@@ -40,7 +42,7 @@ flowchart LR
 
 - **Evidence before summaries:** citations carry source document, page, Unicode code-point offsets and text hash. A matching quote proves location, not semantic correctness; the evaluation includes a historical-template failure.
 - **Versioned review:** source changes invalidate earlier runs for new decisions. Reviewer corrections are separate from the original extracted facts. Confirmed snapshots preserve the review context.
-- **Controlled execution:** backend code separates create, execute and read-only status. Dispatch markers, idempotency and cost reservations address retries and unknown outcomes. PostgreSQL concurrency and real-provider acceptance remain pending; this is not an exactly-once provider guarantee.
+- **Controlled execution:** backend code separates create, execute and read-only status. Dispatch markers, idempotency and cost reservations address retries and unknown outcomes. PostgreSQL concurrency has CI coverage; real-provider acceptance remains pending. This is not an exactly-once provider guarantee.
 - **A shared interface:** the demo and workspace reuse evidence, review, history and handoff components. The demo adapter has no server writes and is not proof of backend authentication or persistence.
 - **A bounded scope:** no diagnosis, triage, clinical completeness judgment, OCR, HealthLink or hospital-system integration. The prototype has not been validated against New Zealand clinical workflows.
 
@@ -87,7 +89,7 @@ PYTHON_DOTENV_DISABLED=1 DATABASE_URL=sqlite:///:memory: src/backend/.venv/bin/p
 src/backend/.venv/bin/python evals/referral-review/run.py --provider fake --output /tmp/meditrace-fake-evaluation
 ```
 
-Choose a new evaluation output directory for each run. The evaluation CLI currently rejects real execution even with a cap: independent evaluation accounting and global reservation integration remain unfinished. Never automate browser AI generation, including fake generation buttons; fixed-result navigation, review and export are allowed.
+Choose a new evaluation output directory for each run. The evaluation CLI currently rejects real execution even with a cap: real-provider integration and explicit budget authorization remain pending. Never automate browser AI generation, including fake generation buttons; fixed-result navigation, review and export are allowed.
 
 ## Delivery limits and contribution provenance
 
